@@ -31,7 +31,7 @@ desktop.ini
 # Slide decks shipped with the Arcane docs — binaries unrelated to the game.
 .claude/docs/presentations/*.pptx
 # Append-only session log; noise in diffs. active.md IS versioned.
-production/session-state/sessions.log
+production/session-state/*.log
 
 # ── Explicitly versioned ────────────────────────────────────────
 # Listed for the next person reading this file, not because git needs it:
