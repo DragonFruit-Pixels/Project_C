@@ -66,3 +66,15 @@
 *.sh       text eol=lf
 *.uproject text
 *.uplugin  text
+
+# ── Meshy-generated 3D assets → LFS ─────────────────────────────
+# meshy.json and thumb.png stay OUT of LFS on purpose: they are small,
+# and they are what makes the asset catalogue greppable.
+*.glb     filter=lfs diff=lfs merge=lfs -text
+*.stl     filter=lfs diff=lfs merge=lfs -text
+*.3mf     filter=lfs diff=lfs merge=lfs -text
+
+# ── Reference documents → LFS ───────────────────────────────────
+# Rulebooks and design PDFs are large binaries; keeping them out of the
+# regular object store keeps clones fast and history small.
+*.pdf     filter=lfs diff=lfs merge=lfs -text
