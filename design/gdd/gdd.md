@@ -5,6 +5,11 @@ de este documento es neutro y funciona igual para cualquiera de las variantes.
 
 Base mecánica: *Cthulhu: Death May Die* Season 3. Transcripción 1:1 en `docs/rulebook/`.
 
+> **Este archivo es la fuente de verdad.** Existe una copia legible para el equipo en el doc
+> `GDD — Project_C` de ClickUp (`2ky4j7vt-8099`), y las dos tienen que estar **1:1**: mismas
+> secciones, mismas reglas, mismos números. Si se cambia una, se cambia la otra en el mismo
+> turno. La de ClickUp puede estar mejor redactada; no puede decir algo distinto.
+
 ---
 
 ## 1. Qué es el juego
