@@ -33,6 +33,11 @@ desktop.ini
 # Append-only session log; noise in diffs. active.md IS versioned.
 production/session-state/*.log
 
+# ── Secrets ─────────────────────────────────────────────────────
+# API keys and local-only config. This repo is public — never commit these.
+.env
+.env.local
+
 # ── Explicitly versioned ────────────────────────────────────────
 # Listed for the next person reading this file, not because git needs it:
 #   *.uproject, Config/, Content/, Source/, Plugins/*/Source/, docs/

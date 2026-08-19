@@ -17,7 +17,14 @@
       "Bash(*GenerateProjectFiles*)",
       "Glob(Source/**)",
       "Glob(Plugins/**)",
-      "Grep(Source/**)"
+      "Grep(Source/**)",
+      "Bash(npx --yes @gltf-transform/cli*)",
+      "Bash(npx @gltf-transform/cli*)",
+      "Bash(npx gltf-transform*)",
+      "Bash(git check-attr*)",
+      "Bash(git lfs version)",
+      "Glob(assets/3d/**)",
+      "Grep(assets/3d/**)"
     ],
     "deny": [
       "Bash(rm -rf *)",
@@ -38,7 +45,9 @@
       "Edit(Content/**)",
       "Write(Binaries/**)",
       "Write(Intermediate/**)",
-      "Write(DerivedDataCache/**)"
+      "Write(DerivedDataCache/**)",
+      "Write(assets/3d/*/master.glb)",
+      "Edit(assets/3d/*/master.glb)"
     ]
   },
   "hooks": {
