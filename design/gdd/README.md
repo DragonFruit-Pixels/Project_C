@@ -56,6 +56,12 @@ presentación 3D. Reimplementa las mecánicas del juego de mesa *Cthulhu: Death 
 | 🏁 [`05-partida/victoria-y-derrota.md`](05-partida/victoria-y-derrota.md) | Condiciones de fin y las dos fases de riesgo |
 | 📦 [`05-partida/contenido-de-una-mision.md`](05-partida/contenido-de-una-mision.md) | Inventario de contenido a producir |
 
+### 🎛️ 07 — Balance
+
+| Archivo | Qué contiene |
+|---|---|
+| 🎛️ [`07-balance/perillas-y-constantes.md`](07-balance/perillas-y-constantes.md) | **Dueño único de todos los números**: constantes, perillas con rango seguro, la distribución provisional de dados, y lo que el manual no contiene |
+
 ### 🧭 06 — Decisiones
 
 | Archivo | Qué contiene |
@@ -91,8 +97,10 @@ distinto. Si se cambia una, se cambia la otra.
 Reglas para editar:
 
 - **Un tema, un archivo.** Si un archivo empieza a cubrir dos cosas, se parte.
-- **Los números viven en un solo lugar.** No repitas una cifra en dos archivos: linkeá al
-  que la define. Si aparece duplicada, en algún momento van a divergir.
+- **Los números viven en un solo lugar**, y ese lugar es
+  [`07-balance/perillas-y-constantes.md`](07-balance/perillas-y-constantes.md). Ningún otro
+  archivo declara un default ni un rango seguro: linkean a ese. Esta regla se agregó porque el
+  problema ya pasó — la misma perilla estaba definida en tres archivos con rangos distintos.
 - **Nada de vocabulario temático.** Ni Cthulhu, ni Elder One, ni Mythos, ni nombres de
   ninguna de las dos variantes. Si necesitás nombrar algo nuevo, agregalo al vocabulario.
 - **Las decisiones se registran.** Toda decisión de diseño va a `06-decisiones/registro.md`
