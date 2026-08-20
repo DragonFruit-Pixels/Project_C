@@ -234,9 +234,10 @@ posible, sin importar el lenguaje. Y Blueprint-only tenía tres techos concretos
 Y el momento es el mínimo costo posible: `Content/` está vacío, así que no hay ni un Blueprint
 que reparentar.
 
-**Estado:** el toolchain de C++ se instaló y se verificó el mismo día (MSVC 14.44.35207, Windows
-SDK 10.0.26100.0, probado compilando y corriendo un programa con `<windows.h>`). Falta crear
-`Source/`.
+**Estado:** implementada el mismo día. Toolchain instalado (MSVC 14.44.35207, Windows SDK
+10.0.26100.0), módulo `ProjectC` creado con las 5 clases base del framework, `URatchetComponent` y
+`FRatchetRules`. `Project_CEditor` compila y linkea, y los 2 tests de automatización del track de
+`Ratchet` pasan — verificados por mutación, no solo por estar verdes.
 
 **Descarta:** "todo en C++", que en Unreal es un anti-patrón conocido —deja al contenido afuera y
 obliga a recompilar para cada ajuste de balance. También descarta **GAS**: está construido

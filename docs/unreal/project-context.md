@@ -40,8 +40,10 @@ Also installed alongside the engine: QuixelBridge 5.8, Fab plugin 5.8.
 
 ## 2. Module Structure
 
-**No C++ module exists yet, but one is decided.** D-13 (2026-08-20) moved the project to a
-hybrid C++ + Blueprint architecture. The module below is the target, not the current state.
+**The `ProjectC` module exists and builds.** D-13 (2026-08-20) moved the project to a hybrid
+C++ + Blueprint architecture, and the module was created the same day: `Project_CEditor` compiles
+and links, and two automation tests pass. Layout is `Public/` + `Private/` — required, not
+stylistic, see `design/architecture/06-limite-cpp-blueprint.md`.
 
 | Module | Type | Primary? | Public deps | Private deps |
 |--------|------|----------|-------------|--------------|

@@ -76,12 +76,23 @@ forma de verificar ninguno.
 
 Los cuatro primeros tests, que se escriben antes que la UI:
 
-| Test | Verifica | Fuente |
+| Test | Verifica | Estado |
 |---|---|---|
-| Distribución del dado | `p(Hit)=0,50`, `p(Toll)=0,33`, y que el dado bonus **no** tenga `Toll` | [`perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md) |
-| Costo esperado de una tirada | `E[ΔRatchet] = 3 × 0,33 = 1,0` sobre N tiradas | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
-| Umbrales del trinquete | que se disparen en 4, 8, 12, 15, 18, 19 y que la casilla 20 mate | idem |
-| BFS con aristas bloqueadas | que romper una pared cambie las distancias, y que un pasaje bloqueado no se cruce | [`mapa-y-espacios.md`](../gdd/01-fundamentos/mapa-y-espacios.md) |
+| `ProjectC.Rules.Ratchet.Thresholds` | los 6 umbrales en 4/8/12/15/18/19, el espaciado 4-4-4-3-3-1, que el último esté a 1 de la muerte, y que un umbral no se cruce dos veces | ✅ **pasa** |
+| `ProjectC.Rules.Ratchet.AdvanceAndLoss` | el clamp al final del track, que la casilla 19 no mate y la 20 sí, y que el trinquete **solo suba** | ✅ **pasa** |
+| Distribución del dado | `p(Hit)=0,50`, `p(Toll)=0,33`, y que el dado bonus **no** tenga `Toll` | pendiente, falta el sistema |
+| Costo esperado de una tirada | `E[ΔRatchet] = 3 × 0,33 = 1,0` | pendiente |
+| BFS con aristas bloqueadas | que romper una pared cambie las distancias | pendiente, falta `UGraphSubsystem` |
+
+Los números salen de
+[`perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md) y
+[`trinquete.md`](../gdd/02-personaje/trinquete.md).
+
+**Y los dos tests que existen se verificaron rompiéndolos a propósito.** Se cambió `IsLost` de
+`Position >= TrackLength` a `>`, se recompiló, y el test falló con el mensaje y la línea exactos
+(`Expected 'la casilla 20 mata' to be true`) y exit code 255; después se revirtió y volvió a
+verde. Un test que pasa pero no puede fallar no prueba nada, así que la mutación es parte de
+escribirlo, no un extra.
 
 Eso convierte los criterios de aceptación del GDD de párrafos en un semáforo. Es la diferencia
 más grande entre "un proyecto de materia" y "un proyecto profesional", y no cuesta arte ni
@@ -148,26 +159,101 @@ compila al abrirse. El comando de arriba es reproducible y no requiere clickear 
 que va a tener en toda la vida del proyecto, y sube con cada Blueprint que se cree antes de que
 el módulo exista.
 
-## La estructura del módulo
+## La estructura del módulo · **existe y compila**
 
 ```
 Source/
-  Project_C.Target.cs
-  Project_CEditor.Target.cs
+  Project_C.Target.cs          TargetType.Game
+  Project_CEditor.Target.cs    TargetType.Editor
   ProjectC/
     ProjectC.Build.cs
-    ProjectC.h / ProjectC.cpp
-    Core/         GameInstance, GameMode, GameState, PlayerController
-    Characters/   ProjectCCharacter, componentes de barras
-    Map/          Space, GraphSubsystem
-    Rules/        DiceResolver, EffectExecutor, TurnDirector
-    Data/         USTRUCTs de fila y Data Assets
-    Tests/        tests de automatización
+    Public/
+      ProjectC.h
+      Core/         ProjectCGameInstance, MissionGameMode, MissionGameState, MissionPlayerController
+      Characters/   ProjectCCharacter, RatchetComponent
+      Rules/        RatchetRules
+    Private/
+      ProjectC.cpp
+      Core/ Characters/ Rules/
+      Tests/        RatchetRulesTest.cpp
 ```
 
 Nombre del módulo **`ProjectC`** sin guión bajo (macro `PROJECTC_API`), aunque el proyecto se
 llame `Project_C`: los nombres de módulo de Epic son alfanuméricos y el guión bajo trae fricción
-en las macros generadas. Y el `.uproject` gana un array `Modules`.
+en las macros generadas. El `.uproject` ganó su array `Modules`.
+
+### Por qué `Public/` y `Private/` y no todo plano
+
+Esto no es preferencia estética, es un requisito, y lo aprendí rompiéndolo. El primer intento usó
+el layout plano del template (`Source/ProjectC/Core/MissionGameMode.h`) y **falló a compilar**:
+
+```
+fatal error C1083: Cannot open include file: 'Core/MissionGameMode.h'
+```
+
+La causa, leída del response file que generó UBT y no adivinada: **el único include path del
+módulo era el de UHT.**
+
+```
+/I "…/Intermediate/Build/Win64/UnrealEditor/Inc/ProjectC/UHT"
+```
+
+Con `bLegacyPublicIncludePaths = false` —el default desde `BuildSettingsVersion.V2`— UBT agrega
+como include path **solo** `Public/`, `Internal/` y `Private/`. Con layout plano no agrega el
+directorio del módulo, así que un `#include "Core/X.h"` no tiene desde dónde resolver.
+
+Y explica por qué el template en blanco *parece* funcionar plano: sus `.cpp` incluyen headers que
+están **al lado**, y un include con comillas resuelve primero relativo al archivo que incluye. En
+cuanto aparecen subcarpetas, se cae.
+
+Con `Public/` + `Private/`, `#include "Core/MissionGameMode.h"` resuelve desde `Public/`. Es
+además el layout canónico de cualquier módulo de Epic con macro `_API`.
+
+## Cómo se compila y cómo se corren los tests
+
+Comandos verificados en esta máquina, no copiados de un tutorial.
+
+**Compilar el editor:**
+
+```
+"…\UE_5.8\Engine\Build\BatchFiles\Build.bat" Project_CEditor Win64 Development ^
+  -Project="…\Project_C.uproject" -WaitMutex
+```
+
+**Correr los tests, headless, sin abrir el editor:**
+
+```
+"…\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "…\Project_C.uproject" ^
+  -ExecCmds="Automation RunTests ProjectC.Rules; Quit" ^
+  -unattended -nopause -nosplash -NullRHI -stdout
+```
+
+Devuelve **exit code 0** si pasan y **255** si alguno falla, así que sirve tal cual para CI.
+
+**Regenerar los project files de CLion:**
+
+```
+"…\Engine\Binaries\ThirdParty\DotNet\10.0\win-x64\dotnet.exe" ^
+  "…\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll" ^
+  -projectfiles -project="…\Project_C.uproject" -game -CLion -progress
+```
+
+> **Por qué el `dotnet.exe` del engine y no `UnrealBuildTool.exe` directo.** Llamar al `.exe`
+> falla: pide el runtime de .NET 10 y en esta máquina hay 8.0.13 y 8.0.21. El engine **trae** su
+> propio .NET 10 en `Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/`, y es lo que usa `Build.bat`
+> por dentro — por eso compilar funciona y llamar a UBT a mano no.
+
+### Un detalle de CLion que va a confundir
+
+El `CMakeLists.txt` generado declara `set(CMAKE_CXX_STANDARD 14)`, pero **el build real usa
+`/std:c++20`** (verificado en los `.obj.rsp`; es el default desde `BuildSettingsVersion.V4`).
+
+O sea que el parser de CLion va a marcar como error sintaxis de C++17/20 perfectamente válida que
+compila sin chistar. No es un problema del proyecto ni del código: es el generador de CMake que
+quedó viejo. Se arregla forzando el estándar en la configuración de CMake de CLion.
+
+También conviene saber que el `CMakeLists.txt` de la raíz es solo un cascarón: las listas reales
+de archivos viven en `Intermediate/ProjectFiles/cmake-*.cmake`, que ya está gitignoreado.
 
 ## El IDE: CLion
 
