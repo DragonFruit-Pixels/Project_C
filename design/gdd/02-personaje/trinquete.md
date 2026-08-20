@@ -92,8 +92,14 @@ subiste y en qué orden**. Cada umbral es una decisión de build, y las decision
 condicionan a las tardías porque algunos niveles de skill reemplazan al anterior en vez de
 sumarse.
 
-Con 4 personajes y 4-6 umbrales cada uno, una partida son entre 16 y 24 decisiones de build.
-Eso es lo que hace que la segunda partida no sea igual a la primera.
+El track tiene **6 umbrales**, en las casillas 4, 8, 12, 15, 18 y 19 de 20 — verificado, ver
+[`07-balance`](../07-balance/perillas-y-constantes.md). Con 4 personajes eso son **hasta 24
+decisiones de build por partida**, y ninguna se puede deshacer.
+
+Y el espaciado **acelera**: los saltos son 4-4-4-3-3-1. Los tres primeros umbrales cuestan 4
+puntos cada uno; el último cuesta **1**. O sea que el final del track entrega dos niveles de
+skill casi juntos y después mata. El sacrificio deliberado no es una pendiente pareja: es una
+rampa que se empina, y el tramo más rentable es también el que no tiene vuelta.
 
 ## Riesgo de diseño conocido
 
@@ -121,10 +127,15 @@ No está decidido. → [`06-decisiones/abiertas.md`](../06-decisiones/abiertas.m
 - Rango en una tirada base de 3 dados estándar: **0–3**. Con dados estándar extra por efecto,
   el techo sube en la misma proporción.
 
-El manual **no publica la distribución de caras del dado**, así que no hay forma honesta de
-calcular el avance esperado por tirada. Cuando esa distribución se decida, el valor esperado es
-`E[ΔRatchet] = dados_estándar × p(Toll)`, y hasta entonces cualquier número puesto ahí es
-inventado.
+El manual no publica la distribución de caras, pero está **verificada** en
+[`07-balance`](../07-balance/perillas-y-constantes.md): `p(Toll) = 2/6`. Entonces
+
+    E[ΔRatchet] = dados_estándar × p(Toll) = 3 × 0,33 = 1,0
+
+**Una tirada base cuesta, en promedio, exactamente 1 punto de `Ratchet`.** Ese número redondo
+es la escala de todo el juego: el primer umbral está a 4 puntos, o sea a unas **4 tiradas**, y
+el track completo son 20, o sea unas 20 tiradas antes de descontar lo que se descarta en cada
+umbral. Los dados bonus no mueven esta cuenta porque no tienen cara `Toll`.
 
 ### 2. El algoritmo del umbral
 
@@ -289,8 +300,9 @@ mida en el tablero real ese rango es provisional.
 
 > **El dueño de los defaults y los rangos seguros es**
 > [`07-balance/perillas-y-constantes.md`](../07-balance/perillas-y-constantes.md). Si algo de esta tabla difiere de ahí,
-> gana ese archivo. Las probabilidades usan la **distribución provisional** declarada
-> ahí mismo: `p(Hit) = 0,50`, `p(Toll) = 0,33`.
+> gana ese archivo. Las probabilidades usan la **distribución verificada** declarada
+> ahí mismo: dado estándar `p(Hit) = 0,50` y `p(Toll) = 0,33`; dado bonus
+> `p(Hit) = 0,50`, `p(Wild) = 0,33` y **sin cara `Toll`**.
 
 
 | Perilla | Default | Rango seguro | Qué afecta |

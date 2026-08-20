@@ -9,7 +9,7 @@ Cada `Character` tiene **tres barras** y **tres skills**. Las skills están en
 
 | Barra | Se cura | Qué hace | Al llegar al final |
 |---|---|---|---|
-| `Wounds` | Sí, con `Recover` | Es el daño físico | Muerte |
+| `Wounds` | Sí, con `Recover` | Es el daño físico. Capacidad **4** | La 5.a herida mata |
 | `Reserve` | Sí, con `Recover` | Se gasta para rerollear dados | No podés rerollear más |
 | `Ratchet` | **Nunca** | **Es la progresión** | El personaje se pierde |
 
@@ -232,8 +232,9 @@ de dejar que se gaste la acción en silencio.
 
 > **El dueño de los defaults y los rangos seguros es**
 > [`07-balance/perillas-y-constantes.md`](../07-balance/perillas-y-constantes.md). Si algo de esta tabla difiere de ahí,
-> gana ese archivo. Las probabilidades usan la **distribución provisional** declarada
-> ahí mismo: `p(Hit) = 0,50`, `p(Toll) = 0,33`.
+> gana ese archivo. Las probabilidades usan la **distribución verificada** declarada
+> ahí mismo: dado estándar `p(Hit) = 0,50` y `p(Toll) = 0,33`; dado bonus
+> `p(Hit) = 0,50`, `p(Wild) = 0,33` y **sin cara `Toll`**.
 
 
 | Perilla | Default | Rango seguro | Qué afecta |

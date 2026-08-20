@@ -34,6 +34,10 @@ balancearlo. El default es el valor original.
 | `Gate` por mapa | 3 | pág. 9 |
 | Pool máximo de `Servant` | 10 | pág. 20 |
 | Espacios por sala | 1 a 3 | pág. 9 |
+| Espacios del track de `Ratchet` | **20** | componente, ver abajo |
+| Umbrales del track de `Ratchet` | **6**, en las casillas 4, 8, 12, 15, 18 y 19 | componente, ver abajo |
+| Capacidad de `Wounds` | **4** — la 5.a es letal | componente, ver abajo |
+| Capacidad de `Reserve` | **4** | pág. 8 + componente |
 
 ---
 
@@ -52,9 +56,9 @@ explica el efecto en detalle.
 | Espacios del `Doom Track` | 8 | **8–15** | El largo total de la partida. Alternativa a subir `T` | [reloj](../04-oposicion/reloj-y-avance.md) |
 | Cartas con `Doom Symbol` (`q` de 16) | sin dato | **8–14 de 16** | La varianza del ritmo del reloj: menos cartas con símbolo = avances más impredecibles | [reloj](../04-oposicion/reloj-y-avance.md) |
 | Umbrales que dan dado bonus | 4 | **2–5** | Cuánto poder compra el trinquete | [trinquete](../02-personaje/trinquete.md) |
-| Largo del track de `Wounds` | sin dato | **5–8** | Cuántos golpes aguanta un personaje | [barras](../02-personaje/barras-y-recursos.md) |
-| Largo del track de `Ratchet` | sin dato | **8–12** | Cuántos umbrales entran, y por lo tanto cuánta build se construye | [trinquete](../02-personaje/trinquete.md) |
-| Umbrales totales del track | sin dato | **4–6** | Las decisiones de build por personaje | [trinquete](../02-personaje/trinquete.md) |
+| Capacidad de `Wounds` | **4** | **3–6** | Cuántos golpes aguanta un personaje. Es la perilla más directa sobre la fragilidad de la mitad 1 | [barras](../02-personaje/barras-y-recursos.md) |
+| Espacios del track de `Ratchet` | **20** | **16–24** | Cuánto `Toll` aguanta un personaje antes de perderse. Moverlo sin re-espaciar los umbrales cambia la progresión de rebote | [trinquete](../02-personaje/trinquete.md) |
+| Umbrales del track | **6** (4, 8, 12, 15, 18, 19) | **5–7**, y el **espaciado importa más que la cantidad** | Las decisiones de build por personaje. El espaciado original acelera: 4-4-4-3-3-1 | [trinquete](../02-personaje/trinquete.md) |
 | Pool de `Servant` | 10 | **6–14** | El techo de presión simultánea en el mapa | [enemigos](../04-oposicion/enemigos.md) |
 | Espacios totales del mapa | sin dato | **12–32** | Cuánto cuesta cruzar el mapa, y por lo tanto el valor de `Swiftness` | [mapa](../01-fundamentos/mapa-y-espacios.md) |
 
@@ -65,59 +69,108 @@ explica el efecto en detalle.
 
 ## La distribución de caras del dado
 
-**Esto es lo más importante de este archivo, y es un problema abierto.**
+**Verificada.** El manual **no la publica** —ni el de Season 3 ni el core original, comprobado
+extrayendo el texto de los dos: listan los cuatro resultados y avisan que algunas caras traen
+dos, pero nunca dan el reparto, porque está impreso en los dados y no en el reglamento.
 
-El manual **no dice cuántas caras del dado muestran cada resultado**. Lista los cuatro
-resultados posibles y avisa que algunas caras traen dos a la vez, pero nunca da el reparto.
-Esos valores están impresos en los dados, no en el reglamento.
+Se recuperó de fuentes de la comunidad, con dos coincidencias independientes, y **cuadra con las
+dos pistas que sí están en el manual**: que hay una cara con dos resultados, y el ejemplo de la
+pág. 14 donde una tirada saca *elder sign, blank, success + tentacle, tentacle*.
 
-**Consecuencia:** ninguna probabilidad, ningún daño esperado y ningún cálculo de ritmo del
-juego se puede fundamentar hasta tener este dato. Todas las fórmulas del GDD que usan
-probabilidad están construidas sobre la distribución provisional de abajo.
+### Dado estándar
 
-### Distribución provisional declarada
+| Cara | Cantidad |
+|---|---|
+| `Hit` | 2 |
+| `Hit` + `Toll` | 1 |
+| `Toll` | 1 |
+| `Wild` | 1 |
+| `Blank` | 1 |
 
-| Cara | Cantidad | Resultado |
-|---|---|---|
-| `Hit` | 2 | 1 éxito |
-| `Hit` + `Toll` | 1 | 1 éxito y +1 `Ratchet` |
-| `Toll` | 1 | +1 `Ratchet` |
-| `Wild` | 1 | inerte sin skill |
-| `Blank` | 1 | nada |
+    p(Hit)   = 3/6 = 0,50
+    p(Toll)  = 2/6 = 0,33
+    p(Wild)  = 1/6 = 0,17
+    p(Blank) = 1/6 = 0,17
 
-De ahí:
+### Dado bonus
 
-```
-p(Hit)  = 3/6 = 0,50
-p(Toll) = 2/6 ≈ 0,33
-p(Wild) = 1/6 ≈ 0,17
-```
+| Cara | Cantidad |
+|---|---|
+| `Hit` | 2 |
+| `Wild` + `Hit` | 1 |
+| `Wild` | 1 |
+| `Blank` | 2 |
 
-**Todos los documentos del GDD usan estos valores.** Si un ejemplo numérico usa otra
-distribución, es un error y hay que corregirlo — no una variante legítima.
+    p(Hit)   = 3/6 = 0,50
+    p(Wild)  = 2/6 = 0,33
+    p(Blank) = 2/6 = 0,33
+    p(Toll)  = 0      <- esto sí lo confirma el manual, pág. 11
 
-Del dado bonus el manual sí confirma una cosa: **no tiene cara `Toll`**. El reparto entre
-`Hit`, `Wild` y `Blank` también es provisional.
+**El dato que esto revela:** los dos dados tienen **la misma probabilidad de `Hit`**. El dado
+bonus no pega más fuerte — pega **igual, sin cobrar `Toll`**, y con el doble de chances de
+`Wild`. O sea que el premio del trinquete no es potencia: es **quitarle el costo a la tirada**, y
+además le sube el valor a la skill `Insight`, que es la que lee `Wild`.
 
----
+Eso reordena una prioridad de balanceo: `Insight` escala con la cantidad de dados bonus que
+tengas, así que un personaje quemado con `Insight` alto es una combinación bastante más fuerte de
+lo que las dos piezas sugieren por separado. Hay que vigilarla.
+
+### El espaciado de los umbrales
+
+Los 6 umbrales están en las casillas **4, 8, 12, 15, 18 y 19** de 20. Los saltos son
+**4, 4, 4, 3, 3, 1**.
+
+**El espaciado acelera.** La primera mitad del track cobra 4 puntos por umbral y la última cobra
+1. Consecuencias:
+
+- El 5.o y el 6.o umbral llegan **casi juntos**, y el 6.o está a **una sola casilla** de la muerte.
+- El último tramo entrega dos niveles de skill casi de golpe y después mata.
+- La estrategia de quemar un personaje tiene un **acelerón final**: llegado al 5.o umbral, el 6.o
+  sale con el primer `Toll` que aparezca. Pero el paso siguiente es perderlo.
+
+Nada de esto estaba en el GDD antes de verificar el componente, y cambia cómo se lee el
+sacrificio deliberado: no es una pendiente pareja, es una rampa que se empina al final.
 
 ## Valores que el manual no contiene
 
-Todos estos aparecen en las fórmulas del GDD como propuesta o como parámetro sin valor. La
-razón es la misma en casi todos los casos: **el manual es un reglamento, no una especificación
-de componentes.** Los largos de track están impresos en los tableros de personaje, las caras
-en los dados, y las vidas y dados de ataque en las fichas de enemigo.
+El manual es un **reglamento, no una especificación de componentes**: los largos de track están
+impresos en los tableros de personaje, las caras en los dados, y las vidas y dados de ataque en
+las fichas de enemigo. Comprobado extrayendo el texto del reglamento de Season 3 y del core
+original: ninguno de los dos los trae.
 
-| Qué falta | Dónde estaría en el original | Impacto |
+**Resueltos** con fuentes de la comunidad, dos coincidencias independientes cada uno:
+
+| Qué faltaba | Valor | Estado |
 |---|---|---|
-| Distribución de caras del dado | Impreso en los dados | **Alto.** Bloquea toda probabilidad |
-| Largo del track de `Ratchet` y cantidad de umbrales | Tablero de personaje | **Alto.** Define la progresión |
-| Largo del track de `Wounds` | Tablero de personaje | Medio |
-| Vida y dados de ataque por tipo de enemigo | Fichas de enemigo | Medio. Solo se ven ejemplos suel­tos: `Servant` con 2 de vida, una `Creature` con 3, una ficha de 1 estándar + 2 bonus |
+| Distribución de caras de los dos dados | ver arriba | verificado y coherente con el manual |
+| Espacios del track de `Ratchet` | 20 | verificado |
+| Umbrales y sus posiciones | 6, en 4/8/12/15/18/19 | verificado |
+| Capacidad de `Wounds` | 4, la 5.a es letal | verificado |
+| Capacidad de `Reserve` | 4 | verificado, coincide con el manual |
+
+**Todavía abiertos:**
+
+| Qué falta | Dónde estaría | Impacto |
+|---|---|---|
+| Cuáles 4 de los 6 umbrales dan dado bonus | Tablero de personaje | Medio. Cambia cuándo llega el poder, no cuánto |
+| Vida y dados de ataque por tipo de enemigo | Fichas de enemigo | Medio. Del manual solo se ven ejemplos sueltos: un `Servant` con 2 de vida, una `Creature` con 3, y una ficha de 1 estándar + 2 bonus |
 | Cuántas de las 16 cartas de presión traen `Doom Symbol` | Las cartas | Medio. Define la varianza del reloj |
-| Vida y dados por stage del `Adversary` | Stage cards | Medio |
+| Vida y dados por stage del `Adversary` | Stage cards | Bajo, es contenido propio de todos modos |
 | Capacidad de heridas de cada `Ally` y precio de cada recompensa | Las cartas | Bajo, es contenido propio |
 
-Para los de impacto alto hay dos caminos: leerlos del arte de los componentes, o **decidirlos
-nosotros y tratarlos como diseño propio**. La segunda es legítima —el juego es una adaptación,
-no un port— pero hay que hacerla a propósito y anotarla en el registro de decisiones.
+Los que quedan son de impacto medio o bajo, y los tres primeros son contenido que este proyecto
+diseña igual. **Ya no hay nada que bloquee un cálculo.**
+
+## Procedencia
+
+Los valores de componente no salen del reglamento. Se verificaron contra:
+
+- [Into the De(ath)pths, Part II — There Will Be Games](https://www.therewillbe.games/articles-analysis/9443-into-the-de-ath-pths-a-deep-dive-into-cthulhu-death-may-die-part-ii-basics-of-investigation) — caras de los dos dados, capacidad de `Wounds` y `Reserve`
+- [Dice Probabilities & Arcane Mastery — BoardGameGeek](https://boardgamegeek.com/thread/3099040/dice-probabilities-and-arcane-mastery) — probabilidades de los dos dados
+- [Dized Rules — Sanity](https://rules.dized.com/game/kp6yXekcT6agDFGangIB1Q/XXNB96tBSqWBcLGQXdDfYA/sanity) — mecánica del track y los 4 dados bonus
+- [Review — Co-op Board Games](https://coopboardgames.com/cooperative-board-game-reviews/cthulhu-death-may-die-review/) — track de 20 espacios y posiciones de los umbrales
+- [Reglamento del core original (PDF)](https://cdn.1j1ju.com/medias/e1/c4/90-cthulhu-death-may-die-rulebook.pdf) — usado para **confirmar la ausencia**: 20 páginas extraídas, ningún largo de track ni cara de dado
+
+**Son fuentes de terceros, no oficiales.** Se marcan como verificadas porque hay dos
+coincidencias independientes por dato y porque cuadran con las pistas del manual. Si algún día se
+puede leer el componente directo, conviene revalidar.

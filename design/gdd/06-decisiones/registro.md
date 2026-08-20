@@ -173,6 +173,35 @@ precisión. Y la copia en ClickUp existe porque el equipo no lee el repo.
 
 ---
 
+## D-12 - Los valores de componente se toman de fuentes de la comunidad
+
+**2026-08-19**
+
+El reglamento —de Season 3 y del core original, comprobado extrayendo el texto de los dos—
+**no publica los valores impresos en los componentes**: las caras de los dados, el largo del
+track de `Ratchet`, la cantidad y posicion de los umbrales, ni la capacidad de `Wounds`.
+
+Se recuperaron de fuentes de terceros, exigiendo **dos coincidencias independientes por dato**
+y que cuadraran con las pistas que si estan en el manual. Quedaron registrados con su
+procedencia en [`../07-balance/perillas-y-constantes.md`](../07-balance/perillas-y-constantes.md).
+
+**Por que:** sin la distribucion de caras no habia forma honesta de calcular una sola
+probabilidad, y todas las formulas del GDD quedaban colgadas de una suposicion.
+
+**Lo que se descubrio y no estaba en el diseno:**
+
+- El dado bonus tiene **la misma** probabilidad de `Hit` que el estandar. El premio del
+  trinquete no es potencia: es **sacarle el costo a la tirada**.
+- El espaciado de los umbrales **acelera** (4-4-4-3-3-1). El ultimo esta a una casilla de la
+  muerte.
+- Una tirada base cuesta **exactamente 1 punto de `Ratchet`** en promedio. Es la escala de
+  todo el juego.
+
+**Riesgo asumido:** no son fuentes oficiales. Si algun dia se puede leer el componente
+directo, hay que revalidar.
+
+---
+
 ## Plantilla para agregar
 
 ```markdown

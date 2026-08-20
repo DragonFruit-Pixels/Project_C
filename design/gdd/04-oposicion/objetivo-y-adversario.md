@@ -296,8 +296,9 @@ puede atacar**. Ese es el peor escenario de la mitad 1, y es completamente legal
 
 > **El dueño de los defaults y los rangos seguros es**
 > [`07-balance/perillas-y-constantes.md`](../07-balance/perillas-y-constantes.md). Si algo de esta tabla difiere de ahí,
-> gana ese archivo. Las probabilidades usan la **distribución provisional** declarada
-> ahí mismo: `p(Hit) = 0,50`, `p(Toll) = 0,33`.
+> gana ese archivo. Las probabilidades usan la **distribución verificada** declarada
+> ahí mismo: dado estándar `p(Hit) = 0,50` y `p(Toll) = 0,33`; dado bonus
+> `p(Hit) = 0,50`, `p(Wild) = 0,33` y **sin cara `Toll`**.
 
 
 | Perilla | Default | Rango seguro | Qué afecta |
