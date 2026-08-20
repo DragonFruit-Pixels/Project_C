@@ -32,6 +32,11 @@ los otros 2 se descartan. El marcador **para justo en el umbral**.
 partida, tomada de un mazo de 8. Es un efecto propio que se ejecuta cada vez que cruza un
 umbral, así que un personaje con muchos umbrales cruzados la dispara muchas veces.
 
+> **No es puro castigo.** Cada carta es un condicional de dos ramas: castiga o **recompensa**
+> según el estado en que estés al cruzar el umbral. Eso convierte el umbral en una decisión
+> posicional y no solo en un resultado de dados. Ver
+> [`03-resolucion/vocabulario-de-efectos.md`](../03-resolucion/vocabulario-de-efectos.md).
+
 **3. Sube 1 nivel de un skill, a elección del jugador.** Esta es la progresión.
 
 **4. En 4 de los umbrales, gana +1 dado bonus permanente.** Se suma a **todas** sus tiradas

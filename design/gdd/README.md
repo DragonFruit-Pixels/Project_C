@@ -40,6 +40,7 @@ presentación 3D. Reimplementa las mecánicas del juego de mesa *Cthulhu: Death 
 |---|---|
 | 🎲 [`03-resolucion/dados.md`](03-resolucion/dados.md) | Las 4 caras, rerolls y orden de resolución |
 | 🔄 [`03-resolucion/turno.md`](03-resolucion/turno.md) | La secuencia de turno completa |
+| 🧩 [`03-resolucion/vocabulario-de-efectos.md`](03-resolucion/vocabulario-de-efectos.md) | Las piezas componibles de las que están hechas las cartas |
 
 ### ⚔️ 04 — La oposición
 
