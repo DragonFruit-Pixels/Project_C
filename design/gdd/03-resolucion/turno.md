@@ -1,4 +1,4 @@
-# Secuencia de turno
+# 🔄 Secuencia de turno
 
 ← [Índice](../README.md)
 

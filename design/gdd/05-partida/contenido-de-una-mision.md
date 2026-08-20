@@ -1,4 +1,4 @@
-# Contenido de una misión
+# 📦 Contenido de una misión
 
 ← [Índice](../README.md)
 

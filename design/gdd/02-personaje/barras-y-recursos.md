@@ -1,4 +1,4 @@
-# Barras y recursos
+# 📊 Barras y recursos
 
 ← [Índice](../README.md)
 

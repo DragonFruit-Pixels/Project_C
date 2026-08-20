@@ -1,4 +1,4 @@
-# El trinquete (`Ratchet`)
+# ⚙️ El trinquete (`Ratchet`)
 
 ← [Índice](../README.md)
 

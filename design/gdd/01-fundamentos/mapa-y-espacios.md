@@ -1,4 +1,4 @@
-# El mapa y los espacios
+# 🗺️ El mapa y los espacios
 
 ← [Índice](../README.md)
 

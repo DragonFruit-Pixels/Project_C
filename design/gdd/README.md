@@ -1,4 +1,4 @@
-# GDD — Project_C
+# 📖 GDD — Project_C
 
 Documento de diseño del juego, partido por tema. **Esta carpeta es la fuente de verdad.**
 
@@ -12,56 +12,56 @@ presentación 3D. Reimplementa las mecánicas del juego de mesa *Cthulhu: Death 
 
 ## Índice
 
-### 00 — Visión
+### 🎯 00 — Visión
 
 | Archivo | Qué contiene |
 |---|---|
-| [`00-vision/concepto.md`](00-vision/concepto.md) | Qué es el juego y cuál es su decisión central |
-| [`00-vision/alcance.md`](00-vision/alcance.md) | 1 misión + 1 adversario, y qué implica ese recorte |
+| 🎯 [`00-vision/concepto.md`](00-vision/concepto.md) | Qué es el juego y cuál es su decisión central |
+| 📐 [`00-vision/alcance.md`](00-vision/alcance.md) | 1 misión + 1 adversario, y qué implica ese recorte |
 
-### 01 — Fundamentos
-
-| Archivo | Qué contiene |
-|---|---|
-| [`01-fundamentos/vocabulario.md`](01-fundamentos/vocabulario.md) | Los IDs neutros y por qué existen |
-| [`01-fundamentos/mapa-y-espacios.md`](01-fundamentos/mapa-y-espacios.md) | El mapa como grafo, salas, puertas, distancias |
-
-### 02 — El personaje
+### 🧱 01 — Fundamentos
 
 | Archivo | Qué contiene |
 |---|---|
-| [`02-personaje/barras-y-recursos.md`](02-personaje/barras-y-recursos.md) | Wounds, Reserve y Ratchet |
-| [`02-personaje/trinquete.md`](02-personaje/trinquete.md) | **La mecánica central del juego** |
-| [`02-personaje/skills.md`](02-personaje/skills.md) | 6 skills × 4 niveles |
+| 🔤 [`01-fundamentos/vocabulario.md`](01-fundamentos/vocabulario.md) | Los IDs neutros y por qué existen |
+| 🗺️ [`01-fundamentos/mapa-y-espacios.md`](01-fundamentos/mapa-y-espacios.md) | El mapa como grafo, salas, puertas, distancias |
 
-### 03 — Resolución
-
-| Archivo | Qué contiene |
-|---|---|
-| [`03-resolucion/dados.md`](03-resolucion/dados.md) | Las 4 caras, rerolls y orden de resolución |
-| [`03-resolucion/turno.md`](03-resolucion/turno.md) | La secuencia de turno completa |
-
-### 04 — La oposición
+### 🧍 02 — El personaje
 
 | Archivo | Qué contiene |
 |---|---|
-| [`04-oposicion/enemigos.md`](04-oposicion/enemigos.md) | Taxonomía, comportamiento y spawn |
-| [`04-oposicion/reloj-y-avance.md`](04-oposicion/reloj-y-avance.md) | El Doom Track y por qué es impredecible |
-| [`04-oposicion/objetivo-y-adversario.md`](04-oposicion/objetivo-y-adversario.md) | Las dos mitades de la partida |
+| 📊 [`02-personaje/barras-y-recursos.md`](02-personaje/barras-y-recursos.md) | Wounds, Reserve y Ratchet |
+| ⚙️ [`02-personaje/trinquete.md`](02-personaje/trinquete.md) | **La mecánica central del juego** |
+| 🎓 [`02-personaje/skills.md`](02-personaje/skills.md) | 6 skills × 4 niveles |
 
-### 05 — La partida
-
-| Archivo | Qué contiene |
-|---|---|
-| [`05-partida/victoria-y-derrota.md`](05-partida/victoria-y-derrota.md) | Condiciones de fin y las dos fases de riesgo |
-| [`05-partida/contenido-de-una-mision.md`](05-partida/contenido-de-una-mision.md) | Inventario de contenido a producir |
-
-### 06 — Decisiones
+### 🎲 03 — Resolución
 
 | Archivo | Qué contiene |
 |---|---|
-| [`06-decisiones/registro.md`](06-decisiones/registro.md) | Decisiones tomadas, con su razón y su fecha |
-| [`06-decisiones/abiertas.md`](06-decisiones/abiertas.md) | Lo que falta decidir y qué está en juego |
+| 🎲 [`03-resolucion/dados.md`](03-resolucion/dados.md) | Las 4 caras, rerolls y orden de resolución |
+| 🔄 [`03-resolucion/turno.md`](03-resolucion/turno.md) | La secuencia de turno completa |
+
+### ⚔️ 04 — La oposición
+
+| Archivo | Qué contiene |
+|---|---|
+| ⚔️ [`04-oposicion/enemigos.md`](04-oposicion/enemigos.md) | Taxonomía, comportamiento y spawn |
+| ⏳ [`04-oposicion/reloj-y-avance.md`](04-oposicion/reloj-y-avance.md) | El Doom Track y por qué es impredecible |
+| 👑 [`04-oposicion/objetivo-y-adversario.md`](04-oposicion/objetivo-y-adversario.md) | Las dos mitades de la partida |
+
+### 🏁 05 — La partida
+
+| Archivo | Qué contiene |
+|---|---|
+| 🏁 [`05-partida/victoria-y-derrota.md`](05-partida/victoria-y-derrota.md) | Condiciones de fin y las dos fases de riesgo |
+| 📦 [`05-partida/contenido-de-una-mision.md`](05-partida/contenido-de-una-mision.md) | Inventario de contenido a producir |
+
+### 🧭 06 — Decisiones
+
+| Archivo | Qué contiene |
+|---|---|
+| 📌 [`06-decisiones/registro.md`](06-decisiones/registro.md) | Decisiones tomadas, con su razón y su fecha |
+| ❓ [`06-decisiones/abiertas.md`](06-decisiones/abiertas.md) | Lo que falta decidir y qué está en juego |
 
 ## Cómo leer esto
 

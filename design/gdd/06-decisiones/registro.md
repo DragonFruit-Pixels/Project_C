@@ -1,4 +1,4 @@
-# Registro de decisiones
+# 📌 Registro de decisiones
 
 ← [Índice](../README.md)
 

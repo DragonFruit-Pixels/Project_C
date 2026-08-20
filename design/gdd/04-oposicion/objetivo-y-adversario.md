@@ -1,4 +1,4 @@
-# Objetivo y adversario
+# 👑 Objetivo y adversario
 
 ← [Índice](../README.md)
 

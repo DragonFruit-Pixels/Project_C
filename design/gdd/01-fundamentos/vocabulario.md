@@ -1,4 +1,4 @@
-# Vocabulario neutro
+# 🔤 Vocabulario neutro
 
 ← [Índice](../README.md)
 

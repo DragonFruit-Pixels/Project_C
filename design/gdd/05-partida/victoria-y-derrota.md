@@ -1,4 +1,4 @@
-# Victoria y derrota
+# 🏁 Victoria y derrota
 
 ← [Índice](../README.md)
 

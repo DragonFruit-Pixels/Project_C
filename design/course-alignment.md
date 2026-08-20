@@ -1,4 +1,4 @@
-# Alineación con el temario de la materia
+# 🎓 Alineación con el temario de la materia
 
 Cruce entre el temario de la cursada (Unreal, 2026) y el diseño de Project_C, para poder
 verificar cobertura contra una lista concreta en vez de a ojo.
