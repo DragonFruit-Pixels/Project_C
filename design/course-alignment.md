@@ -37,10 +37,16 @@ puede quedar sin un lugar propio en el juego.
 
 ## Restricciones duras que impone el temario
 
-1. **Blueprint-only.** C++ es la clase 14, después del 2do parcial. Cierra el pendiente
-   "C++ vs Blueprint-only" del backlog técnico: va Blueprint.
+1. ~~**Blueprint-only**~~ → **arquitectura híbrida C++ + Blueprint**
+   ([D-13](gdd/06-decisiones/registro.md), 2026-08-20). El temario pone C++ en la clase 14, pero
+   eso ordena *cuándo se enseña*, no qué se puede usar. Los temas de Blueprint se siguen
+   demostrando —subclases de contenido, Animation Blueprints, widgets, Behaviour Trees y actores
+   colocados son Blueprint por diseño— y además queda demostrado el tema de la clase 14. Ver
+   [`architecture/06-limite-cpp-blueprint.md`](architecture/06-limite-cpp-blueprint.md).
 2. **La capa de datos es de 2do parcial.** Data Assets, Data Tables, Gameplay Tags y Save
-   Game son clase 12 (22/10). El 1er parcial va con reglas en Blueprint, no en datos.
+   Game son clase 12 (22/10), o sea después del 1er parcial. El parcial 1 va con las reglas en
+   código y los números en un `DA_MissionConfig` cargado a mano — la costura desde el día 1 es lo
+   que convierte la clase 12 en una migración en vez de una reescritura.
 3. **Los personajes se mueven en 3D con locomoción animada.** Blendspace y State Machine
    (clase 6) lo exigen. Descarta la representación de ficha que teletransporta de casilla
    a casilla.
@@ -58,7 +64,7 @@ puede quedar sin un lugar propio en el juego.
 | Clase | Tema | Dónde vive en el juego | Fase |
 |---|---|---|---|
 | 1 | Estructura de proyecto, Source Control | Ya hecho: repo, LFS, .gitignore, convenciones | listo |
-| 1 | Templates, Editor | Ya hecho: proyecto Blueprint-only creado | listo |
+| 1 | Templates, Editor | Hecho: proyecto creado. Pendiente el módulo de C++ de [D-13](gdd/06-decisiones/registro.md) | casi |
 | 2 | Actor, Blueprint, Componentes | Personaje, enemigo, dado, token, espacio del grafo | P1 |
 | 2 | Ciclo de vida del Actor | Spawn de enemigos en las 3 puertas; muerte y retorno al pool | P1 |
 | 2 | Depuración de Blueprints | Visualización del grafo de espacios y del cálculo de distancias | P1 |
@@ -113,7 +119,7 @@ puede quedar sin un lugar propio en el juego.
 | 13 | Assets Streaming | Carga y descarga de sublevels de sala | P2 |
 | 13 | Optimización | Presupuestos de performance | P2 |
 | 13 | Packaging | Build jugable entregable | P2 |
-| 14 | C++ | Fuera del alcance de las entregas. Opcional | — |
+| 14 | C++ | **Adelantado**: el módulo, los servicios como Subsystems, los tipos de datos y los tests de reglas | P1 |
 
 ## Los dos temas que no tenían lugar natural
 

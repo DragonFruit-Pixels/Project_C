@@ -24,20 +24,37 @@ dónde salen los números y cuánto cuesta todo.
 
 Consecuencia práctica: **seguir el temario en orden no es una concesión a la materia, es la
 forma correcta de construir.** No hace falta pelear entre "hacer lo que pide la cursada" y
-"hacer el juego bien". Con una excepción, que es la de abajo.
+"hacer el juego bien". Con dos excepciones, que son las dos de abajo.
 
-## La única inversión del temario, y cuesta plata
+## Excepción 1: C++ se adelanta del final al principio
+
+El temario pone C++ en la **clase 14**, después del 2do parcial. Eso es correcto como orden de
+*enseñanza* y equivocado como orden de *construcción*: el módulo de C++ es lo primero que se
+crea, porque su costo sube con cada Blueprint que exista antes
+([D-13](../gdd/06-decisiones/registro.md),
+[`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md)).
+
+**Esto no le quita nada a la cobertura del temario, al contrario.** Los temas de Blueprint se
+siguen demostrando, y en su forma profesional: las subclases de contenido, los Animation
+Blueprints, los widgets, los Behaviour Trees y los actores colocados en el nivel **son**
+Blueprint por diseño. Lo que cambia es que dejan de ser el único lugar posible, y el tema de la
+clase 14 pasa de ser un apéndice opcional a estar demostrado en todo el proyecto.
+
+## Excepción 2: la capa de datos llega tarde, y eso cuesta plata
 
 **La capa de datos es clase 12 (22/10), o sea después del 1er parcial (24/9).**
 
-Eso significa que el parcial 1 se entrega con las reglas en Blueprint y los números… en algún
-lado. Y ahí está la trampa: si los números están tipeados dentro de los grafos, la clase 12 no
+Eso significa que el parcial 1 se entrega con las reglas escritas y los números… en algún lado. Y ahí está la trampa: si los números están tipeados dentro de los grafos, la clase 12 no
 es "migrar a Data Tables", es **volver a escribir todo lo que ya funcionaba**, con el juego
 entero encima.
 
 La defensa cuesta casi nada y es la regla 3 del [índice](README.md): las reglas **leen**
 `DA_MissionConfig` desde el día 1, aunque ese Data Asset tenga los valores a mano y una sola
 fila. La clase 12 pasa a ser cambiar de dónde sale el valor.
+
+Con C++ la defensa es todavía más barata: el `USTRUCT` de configuración se declara una vez, en
+veinte líneas, y el Data Asset se autorea en el editor. La costura deja de depender de la
+disciplina y pasa a ser un tipo que el compilador chequea.
 
 Lo mismo con dos temas más chicos:
 
@@ -58,8 +75,8 @@ Lo mismo con dos temas más chicos:
 |---|---|---|---|---|
 | 1 | Estructura de proyecto, Source Control | convenciones, LFS, layout de `Content/` | ✅ hecho | mover assets después genera los conflictos binarios más caros |
 | 2 | Actor, Blueprint, Componentes, ciclo de vida | `BP_Space`, `BP_Gate`, los componentes de barras | [mapa de clases](04-mapa-de-clases.md) | si las barras nacen dentro del `Character`, sacarlas después toca todo |
-| 2 | Depuración de Blueprints | visualización del grafo y del BFS | `BPFL_GraphMath` | un BFS sin debug visual se depura a ciegas |
-| 3 | **Gameplay Framework** | **los 5 Blueprints del esqueleto** | [paso 2](01-por-donde-se-empieza.md) | **es el tema que no se puede hacer tarde.** Todo lo demás se cuelga de acá |
+| 2 | Depuración de Blueprints | visualización del grafo y del BFS | `UGraphSubsystem` + su test | un BFS sin debug visual se depura a ciegas. Y con test, se depura una sola vez |
+| 3 | **Gameplay Framework** | **las 5 clases del esqueleto, con su subclase Blueprint cada una** | [paso 2](01-por-donde-se-empieza.md) | **es el tema que no se puede hacer tarde.** Todo lo demás se cuelga de acá |
 | 3 | Static Mesh, Materiales | salas, figuras, caras de dado, feedback de estado | `Characters/`, `MaterialLibrary/` | nada grave |
 | 3 | **Físicas y Colisiones** | los dados, y **el resolvedor que aísla la física del estado** | [la costura del dado](04-mapa-de-clases.md) | si el actor del dado declara el resultado, el save y los rerolls se complican después |
 
@@ -69,11 +86,11 @@ Lo mismo con dos temas más chicos:
 |---|---|---|---|---|
 | 4 | Inputs | `IMC_`/`IA_` + Enhanced Input (ya viene habilitado) | `Input/` | — |
 | 4 | **Posesión** | alternar entre los 4 `Character` desde un `PlayerController` | [framework](04-mapa-de-clases.md) | encaje directo con el diseño: **el jugador controla los 4** |
-| 4 | Raycast | `BPI_Selectable` | interfaces | si la selección se resuelve casteando, la UI empieza a arrastrar arte |
+| 4 | Raycast | `ISelectable` | interfaces | si la selección se resuelve casteando, la UI empieza a arrastrar arte |
 | 5 | **Diseño de clases** | la jerarquía y **qué es componente y qué es herencia** | [mapa de clases](04-mapa-de-clases.md) | la clase base que sabe todo es irreversible en la práctica |
-| 5 | **Comunicación entre Blueprints** | las 4 interfaces y los dispatchers | [comunicación](03-comunicacion-y-referencias.md) | **el tema con más deuda técnica potencial de todo el temario** |
+| 5 | **Comunicación entre Blueprints** | las 4 interfaces y los delegates | [comunicación](03-comunicacion-y-referencias.md) | **el tema con más deuda técnica potencial de todo el temario** |
 | 5 | **Levels y SubLevels** | una sala por sublevel | `Maps/` | es la **condición para trabajar en paralelo**, no un tema más |
-| 12 | Data Assets y Data Tables | `DA_MissionConfig` y las `DT_` | [datos](04-mapa-de-clases.md) | ver la inversión de arriba |
+| 12 | Data Assets y Data Tables | `DA_MissionConfig` y las `DT_`, sobre `USTRUCT` de C++ | [datos](04-mapa-de-clases.md) | ver la excepción 2 |
 | 12 | Gameplay Tags | vocabulario de tipos y efectos | transversal | reemplazar enums por tags toca todos los comparadores |
 | 12 | Save Game | serialización de `GameState` + componentes | — | depende del mapa de autoridad, no de la clase |
 
@@ -87,7 +104,7 @@ Lo mismo con dos temas más chicos:
 | 7 | Sonidos | dados, umbral de `Ratchet`, avance del reloj | — | — |
 | 11 | Lights | día arriba / oscuridad abajo; cambia con el reloj | `Maps/` | — |
 | 11 | **Sequencer** | los 4 reveals de stage del `Adversary` | `DA_AdversaryStage` | encaje directo |
-| 11 | **Chaos Destruction** | paredes que **agregan aristas al grafo** en runtime | servicio de grafo | si el grafo se construye inmutable, la destrucción no puede ser mecánica |
+| 11 | **Chaos Destruction** | paredes que **agregan aristas al grafo** en runtime | `UGraphSubsystem` | si el grafo se construye inmutable, la destrucción no puede ser mecánica |
 | 11 | **Landscape** | la sección de superficie del mapa | `Maps/` | — |
 
 ### IA, optimización y cierre
@@ -95,13 +112,13 @@ Lo mismo con dos temas más chicos:
 | Clase | Tema | Artefacto de arquitectura | Dónde cae | Si llega tarde |
 |---|---|---|---|---|
 | 9 | Navegación y Pathfinding | NavMesh en las salas | `Maps/` | — |
-| 9 | **Percepción** | el skill `Stealth`: "1 enemigo no te sigue" | `AIC_Enemy` | encaje directo |
-| 10 | Behaviour Tree | la decisión de activación del enemigo | `AIC_Enemy` | **reemplaza** el scripting de fase 1; por eso ese scripting va en el `GameMode` y no adentro del enemigo |
+| 9 | **Percepción** | el skill `Stealth`: "1 enemigo no te sigue" | `AEnemyAIController` | encaje directo |
+| 10 | Behaviour Tree | la decisión de activación del enemigo | `AEnemyAIController` + BT asset | **reemplaza** el scripting de fase 1; por eso ese scripting va en el `GameMode` y no adentro del enemigo |
 | 10 | **EQS** | "el enemigo más cercano por camino más corto" y elección de destino | consulta al servicio de grafo | el EQS tiene que poder preguntarle al grafo: la distancia del juego **no es** la distancia del NavMesh |
 | 13 | Profiler | medición con el mapa completo | — | medir en clase 13 lo que se armó mal en clase 5 solo dice cuánto hay que rehacer |
 | 13 | Assets Streaming | sublevels de sala con referencias **blandas** | `Maps/`, `Data/` | con todo hard-referenciado no hay nada que streamear |
 | 13 | Packaging | build jugable, y arreglar el `Game Default Map` | — | — |
-| 14 | C++ | migrar los servicios a Subsystems de verdad | [managers](02-managers-y-subsystems.md) | opcional, y **mecánico si se respetaron las interfaces** |
+| 14 | C++ | **adelantado al paso 0.5**: el módulo, los servicios, los tipos de datos y los tests | [límite C++/BP](06-limite-cpp-blueprint.md) | no llega tarde: es lo primero |
 
 ### La distancia del juego no es la distancia del NavMesh
 

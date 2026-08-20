@@ -1,6 +1,7 @@
 # 🏗️ Arquitectura
 
-Cómo se construye Project_C en Unreal Engine 5.8, Blueprint-only. **Esta carpeta responde
+Cómo se construye Project_C en Unreal Engine 5.8, con **arquitectura híbrida C++ + Blueprint**
+([D-13](../gdd/06-decisiones/registro.md)). **Esta carpeta responde
 "con qué se hace", el [GDD](../gdd/README.md) responde "qué se hace".** Si un documento de acá
 contradice al GDD en una regla de juego, gana el GDD; si el GDD propone algo que rompe una de
 las reglas de acá, se discute, no se implementa.
@@ -14,6 +15,7 @@ las reglas de acá, se discute, no se implementa.
 | 🔌 [`03-comunicacion-y-referencias.md`](03-comunicacion-y-referencias.md) | Interfaces, dispatchers y por qué un `Cast` cuesta memoria |
 | 🗂️ [`04-mapa-de-clases.md`](04-mapa-de-clases.md) | El esqueleto concreto: qué Blueprint es dueño de qué |
 | 📚 [`05-temario-como-orden-de-construccion.md`](05-temario-como-orden-de-construccion.md) | El temario leído como plan de bring-up, clase por clase |
+| ⚙️ [`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md) | **Qué va en C++ y qué en Blueprint**, y qué habilita cada uno |
 
 ## Las tres reglas que gobiernan todo lo demás
 
@@ -48,6 +50,9 @@ Gameplay Tags— es clase 12, o sea *después* del 1er parcial. Si el parcial 1 
 los números tipeados adentro de los grafos, la clase 12 no es una migración: es reescribir
 todo lo que ya funcionaba. Con la costura puesta desde el día 1, es cambiar de dónde sale el
 valor. Ver [`05-temario-como-orden-de-construccion.md`](05-temario-como-orden-de-construccion.md).
+
+Con C++ esta regla se abarata: el `USTRUCT` de configuración se declara una vez y el Data Asset
+se autorea en el editor. La costura deja de ser disciplina y pasa a ser un tipo.
 
 Los números en sí siguen viviendo en un solo lugar:
 [`../gdd/07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md).

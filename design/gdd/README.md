@@ -2,7 +2,8 @@
 
 Documento de diseño del juego, partido por tema. **Esta carpeta es la fuente de verdad.**
 
-Videojuego en Unreal Engine 5.8, Blueprint-only. Single player, por turnos, con
+Videojuego en Unreal Engine 5.8, con arquitectura híbrida C++ + Blueprint. Single player, por
+turnos, con
 presentación 3D. Reimplementa las mecánicas del juego de mesa *Cthulhu: Death May Die*
 (Season 3) cambiando la temática.
 

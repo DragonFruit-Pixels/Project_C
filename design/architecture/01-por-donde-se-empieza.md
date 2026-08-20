@@ -26,6 +26,22 @@ Una sola cosa falta y es de una línea: **`Game Default Map` apunta a un mapa de
 build empaquetado en negro. Se arregla cuando exista el primer mapa del proyecto — antes de
 Packaging, que es clase 13.
 
+## Paso 0.5 — El módulo de C++ · **mientras `Content/` esté vacío**
+
+Es el paso más nuevo y el más urgente, porque su costo **sube con cada Blueprint que exista**.
+Reparentar un Blueprint ya creado a una base de C++ puede perder variables y referencias; hoy
+no hay ninguno que reparentar.
+
+Qué implica, en detalle, en
+[`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md). El resumen operativo:
+
+1. **Falta el toolchain.** Visual Studio 2022 está instalado pero **sin el compilador**: hay que
+   agregar el workload *Game development with C++* desde el Visual Studio Installer. Sin eso el
+   proyecto no compila, y lo necesita cada persona que abra el proyecto.
+2. Se crea el módulo `ProjectC` con sus `Target.cs` y su `Build.cs`.
+3. El `.gitignore` ya está bien: ignora `Binaries/`, `Intermediate/` y `Build/`, versiona
+   `Source/`. Verificado, no hay que tocarlo.
+
 ## Paso 1 — El mapa de autoridad
 
 **Este es el primer acto de arquitectura de verdad**, y se hace en una tabla antes de abrir el
@@ -49,9 +65,13 @@ llenarla:
 
 ## Paso 2 — El esqueleto del Gameplay Framework, vacío pero cableado
 
-Cinco Blueprints que no hacen nada todavía, más el `Project Settings → Maps & Modes` que los
-enchufa. Es clase 3 del temario y es el paso que más se saltea, porque no se ve nada al
-terminarlo.
+Cinco clases de C++ que no hacen nada todavía, cada una con su subclase Blueprint, más el
+`Project Settings → Maps & Modes` que enchufa **las subclases**. Es clase 3 del temario y es el
+paso que más se saltea, porque no se ve nada al terminarlo.
+
+> **Se enchufan las Blueprint, no las de C++.** Es lo que deja cambiar un default sin
+> recompilar, y es el patrón central de [D-13](../gdd/06-decisiones/registro.md): base en C++,
+> hijo en Blueprint.
 
 Unreal ya tiene una arquitectura, y **cada clase tiene un rol asignado por el engine**. Pelear
 contra eso es la fuente número uno de proyectos que no escalan:
@@ -60,7 +80,7 @@ contra eso es la fuente número uno de proyectos que no escalan:
 |---|---|---|---|---|
 | `GameInstance` | todo el proceso, sobrevive cambios de nivel | servicios de vida larga | RNG con semilla, save en vuelo, estado entre misiones | reglas de la misión |
 | `GameMode` | por nivel | **el árbitro**: reglas, spawn, victoria y derrota | director de turno, resolución de tiradas, chequeo de fin de partida | estado que otros necesiten leer |
-| `GameState` | por nivel | **estado compartido y legible por todos** | `Doom Track`, ronda, personaje activo, mazos, el grafo de espacios | decisiones; solo guarda |
+| `GameState` | por nivel | **estado compartido y legible por todos** | `Doom Track`, ronda, personaje activo, mazos, figuras vivas | decisiones; solo guarda |
 | `PlayerController` | por jugador | la voluntad del jugador: input, cámara, dueño de la UI | selección de personaje, posesión, widgets del HUD | reglas del juego |
 | `Pawn` / `Character` | mientras exista la figura | **el cuerpo**: mesh, colisión, locomoción | el `Character` y sus barras, como componentes | reglas globales |
 
@@ -107,8 +127,9 @@ padre. Con herencia habría que subir `Wounds` a una base común, y esa base ter
 clase que sabe todo. Es clase 5, diseño de clases.
 
 Beneficio lateral para el trabajo grupal: **un componente es un archivo chico**. Dos personas
-tocando `Ratchet` y `Skills` el mismo día no chocan; dos personas tocando `BP_Character_Base`
-sí, y en binario eso significa que una pierde el trabajo.
+tocando `Ratchet` y `Skills` el mismo día no chocan; dos personas tocando la misma clase madre
+sí. Y si esa clase madre es C++, al menos el conflicto se mergea; si es un `.uasset`, alguien
+pierde el trabajo.
 
 ## Paso 5 — Las costuras de datos, antes de tener datos
 
@@ -119,11 +140,15 @@ con el valor puesto a mano.
 Ver la regla 3 en el [índice](README.md), y el detalle en
 [`05-temario-como-orden-de-construccion.md`](05-temario-como-orden-de-construccion.md).
 
-Un caso que **sí se puede empezar hoy sin pagar nada**: los **Gameplay Tags** no son un plugin,
-son un módulo del engine y están disponibles ya —verificado en
-`Engine/Source/Runtime/GameplayTags`. Nombrar los tipos de enemigo y las fuentes de efecto con
-tags desde el primer día no adelanta la clase 12, pero evita el enum que después hay que
-reemplazar.
+Dos cosas se pueden empezar hoy sin pagar nada:
+
+- Los **Gameplay Tags** no son un plugin, son un módulo del engine y están disponibles ya
+  —verificado en `Engine/Source/Runtime/GameplayTags`. Nombrar los tipos de enemigo y las
+  fuentes de efecto con tags desde el primer día no adelanta la clase 12, pero evita el enum que
+  después hay que reemplazar. Con C++ además se declaran nativos, así que autocompletan y no se
+  escriben mal.
+- El `USTRUCT` de configuración y la clase de Data Asset. Declararlos cuesta veinte líneas y
+  hace que la clase 12 sea llenar filas en vez de migrar.
 
 ## Paso 6 — Recién acá, la primera rebanada jugable
 
@@ -135,6 +160,11 @@ máquina de fases; y todo lo que venga después se cuelga del mismo esqueleto.
 Lo que **no** conviene hacer primero, aunque sea lo más tentador: los dados. Es el sistema más
 vistoso y el que más decisiones arrastra — ver la costura física/lógica en
 [`04-mapa-de-clases.md`](04-mapa-de-clases.md).
+
+Y lo que conviene hacer **junto** con esa primera rebanada: sus tests. El BFS del grafo y el
+conteo de acciones son las dos primeras cosas testeables del proyecto, y escribir el test
+mientras el sistema es chico es lo que hace que la costumbre exista después. Ver
+[`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md).
 
 ---
 

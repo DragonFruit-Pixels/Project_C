@@ -2,13 +2,16 @@
 
 ← [Índice](README.md)
 
-El esqueleto concreto de Project_C: qué Blueprint existe, de qué estado es **dueño**, qué lee, y
-a qué clase del temario corresponde. Es la tabla del paso 1 de
+El esqueleto concreto de Project_C: qué clase existe, de qué estado es **dueño**, y a qué clase
+del temario corresponde. Es la tabla del paso 1 de
 [`01-por-donde-se-empieza.md`](01-por-donde-se-empieza.md), llena.
 
-**Los nombres siguen las convenciones del proyecto** (`BP_`, `BPI_`, `WBP_`, `ABP_`, `DA_`,
-`DT_`, componentes con sufijo `Component`). Ver
-[`project-context.md`](../../docs/unreal/project-context.md).
+**Con arquitectura híbrida ([D-13](../gdd/06-decisiones/registro.md)) casi todo tiene dos
+nombres**: la clase de C++ que define el comportamiento y la subclase Blueprint que trae los
+datos. Los prefijos de asset siguen las convenciones del proyecto (`BP_`, `WBP_`, `ABP_`, `DA_`,
+`DT_`); las clases de C++ usan los de Epic (`U`, `A`, `F`, `I`). Ver
+[`project-context.md`](../../docs/unreal/project-context.md) y
+[`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md).
 
 > Todo el vocabulario de estado es el del GDD:
 > [`vocabulario.md`](../gdd/01-fundamentos/vocabulario.md). No hay nombres temáticos acá tampoco.
@@ -17,15 +20,18 @@ a qué clase del temario corresponde. Es la tabla del paso 1 de
 
 ## El framework
 
-| Asset | Padre | **Escribe** (es dueño) | Lee | Clase |
-|---|---|---|---|---|
-| `BP_GameInstance_ProjectC` | `GameInstance` | semilla del RNG, partida en vuelo, progresión entre misiones | — | 3, 12 |
-| `BP_GameMode_Mission` | `GameModeBase` | fase del turno, contador de acciones, resultado de tiradas, victoria y derrota | todo el `GameState` | 3 |
-| `BP_GameState_Mission` | `GameStateBase` | `Doom Track`, ronda, personaje activo, mazos, grafo de espacios, figuras vivas | — | 3 |
-| `BP_PlayerController_Mission` | `PlayerController` | selección de personaje, posesión, widgets, cámara | `GameState` por interfaz | 3, 4, 7 |
-| `BP_Character_Base` | `Character` | su posición y su presentación | sus componentes | 2, 6 |
-| `BP_Enemy_Base` | `Character` | su posición y su presentación | su `DA_EnemyType` | 2, 9, 10 |
-| `AIC_Enemy` | `AIController` | la decisión de esta activación | percepción, EQS | 9, 10 |
+| Clase C++ | Subclase Blueprint | **Escribe** (es dueño) | Clase |
+|---|---|---|---|
+| `UProjectCGameInstance` | `BP_GameInstance` | semilla del RNG, partida en vuelo, progresión entre misiones | 3, 12 |
+| `AMissionGameMode` | `BP_GameMode_Mission` | fase del turno, contador de acciones, resultado de tiradas, victoria y derrota | 3 |
+| `AMissionGameState` | `BP_GameState_Mission` | `Doom Track`, ronda, personaje activo, mazos, figuras vivas | 3 |
+| `AMissionPlayerController` | `BP_PlayerController_Mission` | selección de personaje, posesión, widgets, cámara | 3, 4, 7 |
+| `AProjectCCharacter` | `BP_Character_01` … `04` | su posición y su presentación | 2, 6 |
+| `AEnemyBase` | `BP_Enemy_*` | su posición y su presentación | 2, 9, 10 |
+| `AEnemyAIController` | `BP_AIC_Enemy` | la decisión de esta activación | 9, 10 |
+
+El grafo de espacios **ya no lo guarda el `GameState`**: es `UGraphSubsystem`, un
+`UWorldSubsystem`. Ver [`02-managers-y-subsystems.md`](02-managers-y-subsystems.md).
 
 **El reparto que importa**: el `GameMode` **decide** y el `GameState` **guarda**. Nadie castea
 al `GameMode` para leer un dato, porque el `GameMode` no tiene datos que otros necesiten. Es la
@@ -36,17 +42,23 @@ regla 1 del [índice](README.md) aplicada al caso más frecuente.
 Uno por sistema del GDD, y cada uno es un archivo chico —lo que además los hace repartibles
 entre personas sin colisionar.
 
+Todos en C++, con sus valores iniciales expuestos como `UPROPERTY(EditAnywhere)` para que la
+subclase Blueprint los tunee sin recompilar.
+
 | Componente | Dueño de | Sistema del GDD |
 |---|---|---|
-| `BP_WoundsComponent` | `Wounds` actuales y su capacidad | [`barras-y-recursos.md`](../gdd/02-personaje/barras-y-recursos.md) |
-| `BP_ReserveComponent` | `Reserve` disponible | idem |
-| `BP_RatchetComponent` | posición en el track, umbrales cruzados, `Ratchet Card` asignada | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
-| `BP_SkillsComponent` | nivel de cada skill y los dados bonus ganados | [`skills.md`](../gdd/02-personaje/skills.md) |
-| `BP_InventoryComponent` | `Trinket`, `Ally` y `Burden` en mano | [`contenido-de-una-mision.md`](../gdd/05-partida/contenido-de-una-mision.md) |
-| `BP_OccupancyComponent` | en qué `Space` está esta figura | [`mapa-y-espacios.md`](../gdd/01-fundamentos/mapa-y-espacios.md) |
+| `UWoundsComponent` | `Wounds` actuales y su capacidad | [`barras-y-recursos.md`](../gdd/02-personaje/barras-y-recursos.md) |
+| `UReserveComponent` | `Reserve` disponible | idem |
+| `URatchetComponent` | posición en el track, umbrales cruzados, `Ratchet Card` asignada | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
+| `USkillsComponent` | nivel de cada skill y los dados bonus ganados | [`skills.md`](../gdd/02-personaje/skills.md) |
+| `UInventoryComponent` | `Trinket`, `Ally` y `Burden` en mano | [`contenido-de-una-mision.md`](../gdd/05-partida/contenido-de-una-mision.md) |
+| `UOccupancyComponent` | en qué `Space` está esta figura | [`mapa-y-espacios.md`](../gdd/01-fundamentos/mapa-y-espacios.md) |
 
-`BP_WoundsComponent` va tanto en el `Character` como en el `Enemy` y en el `Ally`. Ese reuso
-entre clases que no comparten padre es la razón por la que esto son componentes y no herencia.
+`UWoundsComponent` va tanto en el `Character` como en el `Enemy` y en el `Ally`. Ese reuso entre
+clases que no comparten padre es la razón por la que esto son componentes y no herencia.
+
+`URatchetComponent` es el que más gana con estar en C++: los 6 umbrales, el espaciado que
+acelera y la muerte en la casilla 20 son **la primera cosa que hay que testear** del juego.
 
 ## El mapa: el grafo
 
@@ -58,10 +70,10 @@ implementación:
 
 | Pieza | Qué es | Nota |
 |---|---|---|
-| `BP_Space` | un Actor por nodo, colocado en el nivel | se **registra** en el servicio de grafo en `BeginPlay` |
-| `BP_Gate` | Actor de punto de spawn | 3 por mapa, uno por color |
-| Servicio de grafo | funciones en `BP_GameState_Mission` | adyacencias, BFS con aristas bloqueables, grado de un nodo |
-| Aristas | pares de `BP_Space` con un flag de bloqueo | una pared que se rompe **agrega** una arista en runtime |
+| `ASpace` / `BP_Space` | un Actor por nodo, colocado en el nivel | se **registra** en `UGraphSubsystem` en `BeginPlay` |
+| `AGate` / `BP_Gate` | Actor de punto de spawn | 3 por mapa, uno por color |
+| `UGraphSubsystem` | `UWorldSubsystem` en C++ | adyacencias, BFS con aristas bloqueables, grado de un nodo. **Testeable** |
+| Aristas | pares de `ASpace` con un flag de bloqueo | una pared que se rompe **agrega** una arista en runtime |
 | Sala | un **SubLevel** por sala | 1 a 3 `Space` por sala. Clase 5 |
 
 **Por qué `Space` es un Actor y no solo datos:** tiene que existir en el mundo para que el
@@ -71,15 +83,15 @@ distintas. El grafo *lógico* igual vive en el servicio, no repartido entre los 
 
 ## Los objetos que no son actores
 
-Blueprint también hereda de `Object`. Es el lugar correcto para lógica que no tiene cuerpo:
+Lógica que no tiene cuerpo. No es un Actor porque no está en ningún lado del mundo:
 
-| Asset | Padre | Para qué |
+| Clase | Padre | Para qué |
 |---|---|---|
-| `BP_Deck` | `Object` | mezclar, robar, descartar, rebarajar. **Una clase, dos instancias**: `Pressure Deck` y `Reward Deck` |
-| `BP_EffectExecutor` | `Object` | resuelve un efecto de carta paso a paso, con la semántica de "un paso que no se puede ejecutar se saltea" |
-| `BPFL_GraphMath` | `BlueprintFunctionLibrary` | BFS y distancias, funciones puras y testeables |
+| `UDeck` | `UObject` | mezclar, robar, descartar, rebarajar. **Una clase, dos instancias**: `Pressure Deck` y `Reward Deck` |
+| `UEffectSubsystem` | `UWorldSubsystem` | resuelve un efecto de carta paso a paso, con la semántica de "un paso que no se puede ejecutar se saltea" |
+| `FGraphMath` | struct de C++ | BFS y distancias, funciones puras y testeables. Vive adentro de `UGraphSubsystem` |
 
-`BP_EffectExecutor` es la contracara directa del
+`UEffectSubsystem` es la contracara directa del
 [vocabulario de efectos](../gdd/03-resolucion/vocabulario-de-efectos.md): selectores,
 condiciones y acciones. Mientras las cartas sean pocas, los efectos se escriben a mano; el
 ejecutor existe desde el principio para que la clase 12 tenga dónde enchufar las Data Tables
@@ -104,12 +116,15 @@ Existen desde el día 1 **con valores puestos a mano**, y se llenan de verdad en
 
 ## Las interfaces
 
+Declaradas en C++ como `UINTERFACE(BlueprintType)`, así las implementan tanto las clases de C++
+como los Blueprints.
+
 | Interfaz | La implementan | Para |
 |---|---|---|
-| `BPI_Damageable` | `Character`, `Servant`, `Creature`, `Adversary`, `Ally` | recibir `Hit` sin saber qué es el destino |
-| `BPI_Occupant` | todo lo que ocupa un `Space` | preguntar y mover ocupación |
-| `BPI_EffectTarget` | figuras, `Space`, mazos | ser apuntado por un efecto de carta |
-| `BPI_Selectable` | `Space`, figuras, dados | ser elegido por el mouse (clase 4) |
+| `IDamageable` | `Character`, `Servant`, `Creature`, `Adversary`, `Ally` | recibir `Hit` sin saber qué es el destino |
+| `IOccupant` | todo lo que ocupa un `Space` | preguntar y mover ocupación |
+| `IEffectTarget` | figuras, `Space`, mazos | ser apuntado por un efecto de carta |
+| `ISelectable` | `Space`, figuras, dados | ser elegido por el mouse (clase 4) |
 
 Cuatro interfaces cubren casi todo el tráfico lateral del juego. Es deliberado: cada interfaz
 extra es una decisión más al implementar una carta nueva.
@@ -144,8 +159,8 @@ abre una pregunta que es de arquitectura y de diseño a la vez, y **no está dec
 | **La lógica decide, la física presenta** | resultado determinista, save trivial, rerolls limpios | si el jugador nota que la animación está guionada, la tirada pierde credibilidad |
 | **Híbrido**: la física decide, con un resolvedor que detecta "asentado" y cae a lógica si no se asienta en N segundos | conserva la demostración y no se puede colgar | dos caminos que mantener |
 
-**Recomendación: híbrido**, y que el resolvedor —no el actor del dado— sea el único que declara
-el resultado. La física entra al proyecto como *fuente* de un valor, no como dueña del estado
+**Recomendación: híbrido**, y que un `UDiceResolver` en C++ —no el actor del dado— sea el único
+que declara el resultado. La física entra al proyecto como *fuente* de un valor, no como dueña del estado
 del juego; ese aislamiento es lo que hace que las otras dos opciones sigan disponibles después.
 
 Queda anotado como decisión abierta **A-09** en

@@ -3,8 +3,9 @@
 ← [Índice](README.md)
 
 **Sí, Unreal tiene una respuesta de primera clase para "servicios globales", y no se llama
-Manager: se llama Subsystem.** Y tiene una limitación concreta que decide toda la arquitectura
-de este proyecto, porque somos Blueprint-only.
+Manager: se llama Subsystem.** Tiene una limitación concreta —solo se declaran en C++— y esa
+limitación es una de las razones por las que este proyecto pasó a arquitectura híbrida
+([D-13](../gdd/06-decisiones/registro.md)).
 
 ---
 
@@ -45,45 +46,48 @@ class UGameInstanceSubsystem : public USubsystem
 puede crear un Subsystem propio. Desde Blueprint solo se **consumen** los que ya existen —los
 del engine y los que declare un módulo C++.
 
-Y C++ es **clase 14, después del 2do parcial**. O sea que las dos entregas de la materia se
-hacen sin poder escribir un Subsystem propio. Esto no es un detalle: es *la* restricción que
-define dónde vive nuestra capa de servicios.
+O sea: **tener servicios de primera clase obliga a tener un módulo de C++.** Un proyecto
+Blueprint-only no puede tenerlos, solo puede *hospedarlos* en una clase del framework que tenga
+el ciclo de vida parecido. Eso funciona, pero es un sustituto — y es uno de los argumentos de
+[`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md).
 
 > Los que **sí** se consumen desde Blueprint ya, sin escribir C++, incluyen
 > `EnhancedInputLocalPlayerSubsystem` (el `Add Mapping Context` de la clase 4). Enhanced Input
 > viene con `"EnabledByDefault": true` en UE 5.8 —verificado en su `.uplugin`—, así que no hay
 > nada que habilitar en el `.uproject`.
 
-## Dónde vive entonces cada servicio
+## Nuestros servicios
 
-La regla es: **el servicio se hospeda en la clase del framework que tiene el mismo ciclo de
-vida que tendría el Subsystem.** No es un workaround: es el mismo diseño, con otro contenedor.
+Con el módulo de C++ los servicios son Subsystems de verdad, no hospedados en otra clase. **El
+ámbito es la decisión**; el resto es consecuencia:
 
-| El servicio | Sería, en C++ | Hoy vive en | Migración en clase 14 |
-|---|---|---|---|
-| RNG con semilla | `GameInstanceSubsystem` | `BP_GameInstance` | mecánica |
-| Save / carga | `GameInstanceSubsystem` | `BP_GameInstance` | mecánica |
-| Registro del grafo de espacios | `WorldSubsystem` | `BP_GameState` | mecánica |
-| Pool de figuras de enemigo | `WorldSubsystem` | `BP_GameState` | mecánica |
-| Director de turno | ninguno — **es una regla** | `BP_GameMode` | no migra |
-| Ejecutor de efectos de carta | `WorldSubsystem` | objeto propiedad del `GameMode` | mecánica |
-| Ruteo de UI | `LocalPlayerSubsystem` | `BP_PlayerController` | mecánica |
+| Servicio | Clase base | Responde |
+|---|---|---|
+| `URandomSubsystem` | `UGameInstanceSubsystem` | tiradas con semilla reproducible |
+| `USaveSubsystem` | `UGameInstanceSubsystem` | guardar y cargar |
+| `UGraphSubsystem` | `UWorldSubsystem` | adyacencias, BFS con aristas bloqueables, grado de un nodo |
+| `UFigurePoolSubsystem` | `UWorldSubsystem` | qué figuras de enemigo quedan disponibles |
+| `UEffectSubsystem` | `UWorldSubsystem` | ejecutar un efecto de carta paso a paso |
+| `UUIRouterSubsystem` | `ULocalPlayerSubsystem` | qué pantalla está arriba y quién recibe el input |
 
-**Por qué la migración es mecánica y no una reescritura:** si todos los llamadores piden el
-servicio a través de una **Blueprint Interface** en lugar de castear al host, lo único que
-cambia al mover el servicio a un Subsystem es el nodo que lo obtiene. La lógica de adentro se
-copia tal cual. Es trabajo de una tarde, no de una semana — pero solo si la regla 2 del
-[índice](README.md) se respetó desde el principio.
+**La semilla reproducible merece su renglón.** Que el RNG sea un servicio con semilla —y no un
+`Random` suelto en cada grafo— es lo que permite repetir una partida para reproducir un bug, y
+lo que hace deterministas los tests de distribución del dado. Es gratis si se decide ahora y
+carísimo de retrofitear.
 
-**El director de turno no migra a ningún Subsystem**, y vale marcarlo: no es un servicio, es el
-árbitro. Los servicios responden preguntas; el `GameMode` decide. Meter reglas en un Subsystem
-es el error simétrico al de meter estado en el `GameMode`.
+**El director de turno no es un servicio, y por eso no está en la tabla.** Es el árbitro, y vive
+en el `GameMode`. Los servicios responden preguntas; el `GameMode` decide. Meter reglas en un
+Subsystem es el error simétrico al de meter estado en el `GameMode`.
+
+Y aunque ahora haya C++, **los llamadores siguen pidiendo sin castear**: un
+`UFUNCTION(BlueprintCallable)` sobre el subsystem alcanza para que cualquier Blueprint lo use, y
+el nodo `Get <Subsystem>` no crea la referencia dura que crea un `Cast`.
 
 ## Subsystem/servicio vs Component: la decisión
 
 Es la confusión más común, y se resuelve con una pregunta: **¿de quién es esto?**
 
-| | Servicio (Subsystem o host del framework) | Actor Component |
+| | Servicio (Subsystem) | Actor Component |
 |---|---|---|
 | Cuántos hay | **uno** por ámbito | **uno por Actor** |
 | Tiene transform | no | sí, si es `SceneComponent` |
@@ -100,7 +104,7 @@ esconde una dependencia global: nada en el grafo dice de quién depende ese nodo
 
 El patrón correcto es al revés — **los actores se anuncian**:
 
-1. En `BeginPlay`, cada `BP_Space` se registra en el servicio de grafo del `GameState`.
+1. En `BeginPlay`, cada `BP_Space` se registra en `UGraphSubsystem`.
 2. El servicio guarda la lista y el índice de adyacencias.
 3. Todo el resto le pregunta al servicio, nunca al mundo.
 
@@ -113,7 +117,7 @@ requisito: un BFS que empieza por escanear el mundo no es un BFS, es dos.
 
 | Anti-patrón | Por qué duele **acá** |
 |---|---|
-| **Un `BP_GameManager` que hace todo** | Es un `.uasset` binario que todo el equipo necesita el mismo día: el primer merge borra el trabajo de alguien. Y hard-referencia todo, así que abrirlo carga medio proyecto |
+| **Un `BP_GameManager` que hace todo** | Es un `.uasset` binario que todo el equipo necesita el mismo día: el primer merge borra el trabajo de alguien. Y hard-referencia todo, así que abrirlo carga medio proyecto. La versión en C++ del mismo error al menos mergea, pero sigue siendo el mismo error |
 | **`Cast To` para hablar** | Crea referencia dura → el asset destino y su cadena entran en memoria. Ver [`03-comunicacion-y-referencias.md`](03-comunicacion-y-referencias.md) |
 | **`Get All Actors Of Class`** | Búsqueda lineal + dependencia invisible. Ver arriba |
 | **Lógica en el Level Blueprint** | No se reusa, no se hereda, y es el archivo más disputado del repo |
@@ -123,8 +127,10 @@ requisito: un BFS que empieza por escanear el mundo no es un BFS, es dos.
 
 ## Dependencias
 
-- Consume: [`01-por-donde-se-empieza.md`](01-por-donde-se-empieza.md) (mapa de autoridad)
+- Consume: [`01-por-donde-se-empieza.md`](01-por-donde-se-empieza.md) (mapa de autoridad),
+  [`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md)
 - Alimenta: [`03-comunicacion-y-referencias.md`](03-comunicacion-y-referencias.md),
   [`04-mapa-de-clases.md`](04-mapa-de-clases.md)
 - Toca del temario: clase 3 (framework), clase 5 (diseño de clases y comunicación), clase 12
-  (datos), clase 13 (optimización), clase 14 (C++ — la migración)
+  (datos), clase 13 (optimización), clase 14 (C++ — que ahora se adelanta, ver
+  [`06`](06-limite-cpp-blueprint.md))

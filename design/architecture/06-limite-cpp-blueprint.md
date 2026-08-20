@@ -1,0 +1,195 @@
+# ⚙️ El límite C++ / Blueprint
+
+← [Índice](README.md)
+
+**Decisión: arquitectura híbrida.** C++ para el comportamiento y los sistemas, Blueprint para el
+contenido, el cableado y las perillas. Registrada como
+[D-13](../gdd/06-decisiones/registro.md).
+
+Y una aclaración que importa más que la decisión: **"todo en C++" no es la opción más
+profesional en Unreal, es un error conocido.** Un proyecto de UE con una capa de C++ que los
+Blueprints no pueden alcanzar es *menos* mantenible, no más: los artistas y diseñadores quedan
+afuera, cada ajuste de balance pasa por una recompilación, y se pierde exactamente la ventaja
+que hace que la gente elija Unreal.
+
+La práctica profesional real —la de Epic y la de los juegos que salieron con este engine— es un
+límite declarado. Este documento lo declara.
+
+---
+
+## El patrón central: base en C++, hijo en Blueprint
+
+> **Toda clase de C++ que el contenido toca tiene una subclase Blueprint. El C++ tiene el
+> comportamiento, el Blueprint tiene los datos y el cableado.**
+
+`AProjectCCharacter` en C++ define qué es un personaje y cómo funciona; `BP_Character_01` a
+`BP_Character_04` son hijos que traen su mesh, su `Ratchet Card`, sus valores iniciales y sus
+referencias de arte. Nadie edita C++ para agregar un personaje.
+
+De ahí sale la regla de exposición, que no es opcional:
+
+- Todo lo que el contenido configure va con `UPROPERTY(EditAnywhere, BlueprintReadWrite)`.
+- Todo lo que el Blueprint tenga que llamar va con `UFUNCTION(BlueprintCallable)`.
+- Todo lo que el Blueprint tenga que escuchar va como delegate asignable
+  (`BlueprintAssignable`), que es el Event Dispatcher visto desde C++.
+
+Si una clase de C++ no expone nada, o es un servicio interno, o está mal diseñada.
+
+## Dónde va cada cosa
+
+| Va en **C++** | Por qué |
+|---|---|
+| Las clases base del framework: `GameInstance`, `GameMode`, `GameState`, `PlayerController`, `Character` | son el contrato del proyecto. Reparentar un Blueprint es doloroso; agregar un campo a una clase de C++ es una línea |
+| **Subsystems** (servicios) | no hay alternativa: no se pueden crear en Blueprint. Verificado, ver [`02`](02-managers-y-subsystems.md) |
+| `USTRUCT` de filas de Data Table y clases de Data Asset | un struct definido en Blueprint es **frágil**: cambiarlo puede resetear las filas de las tablas que lo usan. En C++ es refactor normal |
+| Algoritmos: BFS del grafo, distancias, resolución de tiradas | están en un loop y tienen que ser testeables |
+| El **ejecutor de efectos** de cartas | es un intérprete. Un intérprete en nodos es ilegible a la tercera carta |
+| Interfaces (`UINTERFACE`) | así las implementan tanto C++ como Blueprint |
+| Gameplay Tags nativos | declarados en código, autocompletan y no se escriben mal |
+| **Tests de automatización** | ver abajo. Es lo más grande que se gana |
+
+| Va en **Blueprint** | Por qué |
+|---|---|
+| Subclases de contenido: `BP_Character_*`, `BP_Enemy_*`, `BP_Space`, `BP_Gate` | son datos y wiring, no comportamiento |
+| Animation Blueprints, state machines, blendspaces | clase 6 del temario, y son Blueprint por naturaleza |
+| Widgets UMG: layout y binding | sobre una base `UUserWidget` de C++ cuando tengan lógica |
+| Behaviour Trees y EQS | son assets de autor. Las tareas y servicios *custom* sí van en C++ |
+| Sequencer, Niagara, materiales, Landscape | no hay versión de código y no la queremos |
+| Actores colocados en el nivel y sus perillas | `UPROPERTY(EditAnywhere)` y se tunea sin compilar |
+| **Prototipos** | se prototipa en Blueprint y **se baja a C++ cuando la forma se estabilizó**. Ese camino de ida es la práctica normal, no una derrota |
+
+## Las tres cosas que C++ habilita y Blueprint no puede
+
+### 1. Los servicios reales
+
+La capa de servicios deja de ser "hospedada" en el `GameState` y pasa a ser lo que
+corresponde: `UGraphSubsystem` como `UWorldSubsystem`, `URandomSubsystem` y `USaveSubsystem`
+como `UGameInstanceSubsystem`. Sin workaround y sin migración pendiente para la clase 14.
+Detalle en [`02-managers-y-subsystems.md`](02-managers-y-subsystems.md).
+
+### 2. Tests automatizados de las reglas
+
+**Un grafo de Blueprint no se puede testear.** Con C++ sí, con el framework de automatización
+del propio engine, y esto tiene un valor concreto y medible en este proyecto: los documentos
+de sistema del GDD ya traen **fórmulas** y **criterios de aceptación** escritos, y hoy no hay
+forma de verificar ninguno.
+
+Los cuatro primeros tests, que se escriben antes que la UI:
+
+| Test | Verifica | Fuente |
+|---|---|---|
+| Distribución del dado | `p(Hit)=0,50`, `p(Toll)=0,33`, y que el dado bonus **no** tenga `Toll` | [`perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md) |
+| Costo esperado de una tirada | `E[ΔRatchet] = 3 × 0,33 = 1,0` sobre N tiradas | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
+| Umbrales del trinquete | que se disparen en 4, 8, 12, 15, 18, 19 y que la casilla 20 mate | idem |
+| BFS con aristas bloqueadas | que romper una pared cambie las distancias, y que un pasaje bloqueado no se cruce | [`mapa-y-espacios.md`](../gdd/01-fundamentos/mapa-y-espacios.md) |
+
+Eso convierte los criterios de aceptación del GDD de párrafos en un semáforo. Es la diferencia
+más grande entre "un proyecto de materia" y "un proyecto profesional", y no cuesta arte ni
+diseño.
+
+### 3. Merges que funcionan
+
+**El `.cpp` es texto: mergea.** El riesgo número uno registrado para el trabajo grupal es que
+los `.uasset` son binarios y un conflicto borra el trabajo de alguien
+([`course-alignment.md`](../course-alignment.md)).
+
+Mover el comportamiento de los grafos al código no lo mitiga: lo **elimina** para todo lo que
+se mueve. Dos personas tocando el mismo sistema en el mismo día pasan de "una pierde el
+trabajo" a "git resuelve el merge". Y de paso habilita code review, que sobre un grafo de
+Blueprint no existe.
+
+Este es, en la práctica, el argumento más fuerte de los tres.
+
+## Lo que cuesta
+
+### Bloqueante hoy: falta el toolchain
+
+Verificado en esta máquina:
+
+| Componente | Estado |
+|---|---|
+| Visual Studio 2022 Community (IDE) | ✅ instalado |
+| **Compilador MSVC v143** | ❌ **ausente** — `VC/` solo tiene `Auxiliary` y `Redist`, no hay `Tools/MSVC` |
+| **Windows 10/11 SDK** | ❌ **ausente** — en `Windows Kits` solo está el 8.1 |
+| UnrealBuildTool | ✅ viene con el engine |
+| `.gitignore` | ✅ ya correcto: ignora `Binaries/`, `Intermediate/`, `Build/`, versiona `Source/` |
+
+O sea: **el proyecto no compila todavía, y no por el código sino por la instalación.** El fix es
+agregar el workload de C++ en el Visual Studio Installer:
+
+```
+Visual Studio Installer -> Modify -> Game development with C++
+```
+
+Trae MSVC v143 y el Windows SDK. Son varios GB y es un instalador interactivo, así que lo tiene
+que correr el usuario. **Cada persona del equipo que vaya a abrir el proyecto necesita lo
+mismo**, porque un proyecto con módulo C++ compila al abrirse.
+
+### El resto del costo
+
+- **Tiempos de compilación.** El primer build de un módulo vacío son minutos; después, con Live
+  Coding, un cambio en un `.cpp` son segundos.
+- **La regla de Live Coding:** cambios en `.cpp`, en caliente. Cambios en headers, en
+  `UPROPERTY`, o clases nuevas → cerrar el editor y compilar. Ignorar esto es la causa número
+  uno de crashes "inexplicables" del editor.
+- **Reparentar después es peor que empezar así.** Cambiarle el padre a un Blueprint que ya
+  existe puede perder variables y referencias.
+
+### Por eso el momento es ahora
+
+`Content/` está vacío: **cero Blueprints que reparentar**. El costo de adoptar C++ es el mínimo
+que va a tener en toda la vida del proyecto, y sube con cada Blueprint que se cree antes de que
+el módulo exista.
+
+## La estructura del módulo
+
+```
+Source/
+  Project_C.Target.cs
+  Project_CEditor.Target.cs
+  ProjectC/
+    ProjectC.Build.cs
+    ProjectC.h / ProjectC.cpp
+    Core/         GameInstance, GameMode, GameState, PlayerController
+    Characters/   ProjectCCharacter, componentes de barras
+    Map/          Space, GraphSubsystem
+    Rules/        DiceResolver, EffectExecutor, TurnDirector
+    Data/         USTRUCTs de fila y Data Assets
+    Tests/        tests de automatización
+```
+
+Nombre del módulo **`ProjectC`** sin guión bajo (macro `PROJECTC_API`), aunque el proyecto se
+llame `Project_C`: los nombres de módulo de Epic son alfanuméricos y el guión bajo trae fricción
+en las macros generadas. Y el `.uproject` gana un array `Modules`.
+
+## Lo que **no** adoptamos, y por qué
+
+Ser profesional también es no traer framework que no hace falta.
+
+| Tecnología | Veredicto | Razón |
+|---|---|---|
+| **GAS** (Gameplay Ability System) | **no** | Está construido alrededor de predicción de cliente y ejecución en tiempo real. Este juego es por turnos, determinista y single player: la mitad de GAS no aplica, y la otra mitad —modificadores de atributos— son 200 líneas propias contra un framework enorme y opaco de debuggear. Las cartas de este juego son un intérprete de dos ramas con "un paso que no se puede ejecutar se saltea": eso pelea con la composición de `GameplayEffect`, no la aprovecha |
+| **Gameplay Tags** | **sí** | Ya viene con el engine, no es plugin, y es el vocabulario que hace el core agnóstico al tema |
+| **StateTree** | **no por ahora** | Las fases del turno son una máquina de estados chica y explícita. StateTree paga cuando hay muchas ramas de autor |
+| **MassEntity** | **no** | Es para miles de agentes. El pool de `Servant` tiene techo 10 |
+| **CommonUI** | **a evaluar** | Aporta ruteo de input y estilos consistentes. Decidir al empezar la clase 7, con el HUD ya especificado |
+
+La entrada de GAS es la más discutible de la tabla. Si aparece un argumento fuerte a favor,
+vale reabrirla — pero la carga de la prueba está del lado de sumarlo.
+
+## Qué cambia de lo ya escrito
+
+| Documento | Qué cambió |
+|---|---|
+| [`02-managers-y-subsystems.md`](02-managers-y-subsystems.md) | los servicios pasan a ser Subsystems reales; la sección de hospedaje queda como historia de por qué existe el límite |
+| [`01-por-donde-se-empieza.md`](01-por-donde-se-empieza.md) | se agrega el paso del módulo, **antes** del esqueleto |
+| [`04-mapa-de-clases.md`](04-mapa-de-clases.md) | cada fila dice si es clase de C++ o subclase de Blueprint |
+| [`05-temario-como-orden-de-construccion.md`](05-temario-como-orden-de-construccion.md) | C++ deja de ser el último tema opcional y pasa a ser el primero |
+| [`../course-alignment.md`](../course-alignment.md) | cae la restricción "Blueprint-only" |
+
+## Dependencias
+
+- Consume: [`02-managers-y-subsystems.md`](02-managers-y-subsystems.md),
+  [`../gdd/07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md)
+- Alimenta: todos los documentos de esta carpeta
+- Registro: [D-13](../gdd/06-decisiones/registro.md)

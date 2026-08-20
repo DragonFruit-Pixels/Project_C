@@ -101,9 +101,9 @@ compromete la forma final.
 
 ---
 
-## D-07 — Blueprint-only, sin módulo C++
+## D-07 — Blueprint-only, sin módulo C++ · **SUPERADA por [D-13](#d-13--arquitectura-híbrida-c--blueprint)**
 
-**2026-08-19**
+**2026-08-19**, revertida el **2026-08-20**
 
 **Por qué:** lo impone el temario de la materia. C++ es la última clase, después del segundo
 parcial, así que no puede ser un requisito de las entregas.
@@ -111,7 +111,13 @@ parcial, así que no puede ser un requisito de las entregas.
 **Revierte** una inclinación previa hacia un core de reglas en C++ testeable. La restricción
 externa gana.
 
-→ [`../../course-alignment.md`](../../course-alignment.md)
+> **Por qué se cayó, y qué se aprende de esto.** La premisa estaba mal leída: el temario ordena
+> *cuándo se enseña* cada tema, no qué está permitido usar. De ahí salió una restricción que no
+> existía, y esa restricción descartó explícitamente "un core de reglas en C++ testeable" — que
+> era la opción correcta. Queda como recordatorio de que conviene chequear si una restricción
+> externa es real antes de dejar que descarte un diseño mejor.
+
+→ [`../../course-alignment.md`](../../course-alignment.md) · [D-13](#d-13--arquitectura-híbrida-c--blueprint)
 
 ---
 
@@ -199,6 +205,41 @@ probabilidad, y todas las formulas del GDD quedaban colgadas de una suposicion.
 
 **Riesgo asumido:** no son fuentes oficiales. Si algun dia se puede leer el componente
 directo, hay que revalidar.
+
+---
+
+---
+
+## D-13 — Arquitectura híbrida C++ + Blueprint
+
+**2026-08-20**
+
+Cae la restricción **Blueprint-only**. El proyecto pasa a tener un módulo de C++: el
+comportamiento y los sistemas van en C++, el contenido y las perillas en Blueprint, con el patrón
+**base en C++ / hijo en Blueprint** para todo lo que el contenido toca.
+
+**Por qué:** el usuario pidió explícitamente que la implementación sea la más profesional
+posible, sin importar el lenguaje. Y Blueprint-only tenía tres techos concretos, no estéticos:
+
+- **No se pueden crear Subsystems.** Verificado en el engine instalado: las cinco clases base
+  son `UCLASS(Abstract)` sin `Blueprintable`. Un proyecto Blueprint-only no tiene servicios de
+  primera clase, solo puede hospedarlos en el framework.
+- **No se puede testear un grafo.** El GDD ya tiene fórmulas y criterios de aceptación escritos
+  —la distribución del dado, el costo esperado de una tirada, los 6 umbrales, el BFS con aristas
+  bloqueadas— y ninguno era verificable.
+- **Los `.uasset` no mergean.** Era el riesgo número uno registrado para el trabajo grupal.
+  Mover el comportamiento a `.cpp` no lo mitiga: lo elimina para todo lo que se mueve, y de paso
+  habilita code review.
+
+Y el momento es el mínimo costo posible: `Content/` está vacío, así que no hay ni un Blueprint
+que reparentar.
+
+**Descarta:** "todo en C++", que en Unreal es un anti-patrón conocido —deja al contenido afuera y
+obliga a recompilar para cada ajuste de balance. También descarta **GAS**: está construido
+alrededor de predicción de cliente y tiempo real, y este juego es por turnos, determinista y
+single player. Y descarta StateTree y MassEntity por ahora.
+
+→ [`../../architecture/06-limite-cpp-blueprint.md`](../../architecture/06-limite-cpp-blueprint.md)
 
 ---
 
