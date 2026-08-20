@@ -234,6 +234,10 @@ posible, sin importar el lenguaje. Y Blueprint-only tenía tres techos concretos
 Y el momento es el mínimo costo posible: `Content/` está vacío, así que no hay ni un Blueprint
 que reparentar.
 
+**Estado:** el toolchain de C++ se instaló y se verificó el mismo día (MSVC 14.44.35207, Windows
+SDK 10.0.26100.0, probado compilando y corriendo un programa con `<windows.h>`). Falta crear
+`Source/`.
+
 **Descarta:** "todo en C++", que en Unreal es un anti-patrón conocido —deja al contenido afuera y
 obliga a recompilar para cada ajuste de balance. También descarta **GAS**: está construido
 alrededor de predicción de cliente y tiempo real, y este juego es por turnos, determinista y

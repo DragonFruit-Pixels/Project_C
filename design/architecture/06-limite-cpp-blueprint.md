@@ -102,28 +102,35 @@ Este es, en la práctica, el argumento más fuerte de los tres.
 
 ## Lo que cuesta
 
-### Bloqueante hoy: falta el toolchain
+### El toolchain · **resuelto el 2026-08-20**
 
-Verificado en esta máquina:
+Faltaba el compilador: Visual Studio 2022 Community estaba instalado **sin** el workload de C++
+—`VC/` solo tenía `Auxiliary` y `Redist`, y de Windows SDK solo estaba el 8.1. Se agregó el
+workload *Game development with C++* con el instalador en modo comando:
+
+```
+setup.exe modify --installPath "...\2022\Community" \
+  --add Microsoft.VisualStudio.Workload.NativeGame --includeRecommended --passive --norestart
+```
+
+Estado verificado después de instalar:
 
 | Componente | Estado |
 |---|---|
-| Visual Studio 2022 Community (IDE) | ✅ instalado |
-| **Compilador MSVC v143** | ❌ **ausente** — `VC/` solo tiene `Auxiliary` y `Redist`, no hay `Tools/MSVC` |
-| **Windows 10/11 SDK** | ❌ **ausente** — en `Windows Kits` solo está el 8.1 |
+| Visual Studio 2022 Community | ✅ con workload `NativeGame` registrado |
+| Compilador MSVC | ✅ **14.44.35207** — `cl.exe` reporta `19.44.35227 for x64` |
+| Windows SDK | ✅ **10.0.26100.0** |
+| Detección por `vswhere` | ✅ `VC.Tools.x86.x64` resuelve al install path |
 | UnrealBuildTool | ✅ viene con el engine |
-| `.gitignore` | ✅ ya correcto: ignora `Binaries/`, `Intermediate/`, `Build/`, versiona `Source/` |
+| `.gitignore` | ✅ ignora `Binaries/`, `Intermediate/`, `Build/`; versiona `Source/` |
 
-O sea: **el proyecto no compila todavía, y no por el código sino por la instalación.** El fix es
-agregar el workload de C++ en el Visual Studio Installer:
+**Probado de punta a punta**, no solo por presencia de archivos: se compiló y corrió un programa
+mínimo que incluye `<windows.h>` y `<cstdio>` con `vcvars64` + `cl`. Compila, linkea y ejecuta.
+O sea que están el compilador, los headers del SDK y el linker — que es exactamente lo que UBT
+necesita.
 
-```
-Visual Studio Installer -> Modify -> Game development with C++
-```
-
-Trae MSVC v143 y el Windows SDK. Son varios GB y es un instalador interactivo, así que lo tiene
-que correr el usuario. **Cada persona del equipo que vaya a abrir el proyecto necesita lo
-mismo**, porque un proyecto con módulo C++ compila al abrirse.
+**Cada máquina que abra el proyecto necesita lo mismo**, porque un proyecto con módulo C++
+compila al abrirse. El comando de arriba es reproducible y no requiere clickear el instalador.
 
 ### El resto del costo
 
@@ -161,6 +168,33 @@ Source/
 Nombre del módulo **`ProjectC`** sin guión bajo (macro `PROJECTC_API`), aunque el proyecto se
 llame `Project_C`: los nombres de módulo de Epic son alfanuméricos y el guión bajo trae fricción
 en las macros generadas. Y el `.uproject` gana un array `Modules`.
+
+## El IDE: CLion
+
+**UBT tiene un generador de project files dedicado para CLion.** Verificado en el engine
+instalado: `Engine/Source/Programs/UnrealBuildTool/ProjectFiles/CLion/CLionGenerator.cs`, y el
+flag de línea de comandos es `-CLion` (declarado en `Modes/GenerateProjectFilesMode.cs`, junto a
+`-CMakefile`, `-Rider` y `-VisualStudio`).
+
+Leyendo el generador: `CLionGenerator` **hereda de `CMakefileGenerator` y no agrega nada** — el
+comentario del propio Epic dice que existe *"only here for UBT to match against"*. O sea que
+`-CLion` y `-CMakefile` producen lo mismo: un `CMakeLists.txt` en la raíz del proyecto.
+
+Consecuencias prácticas:
+
+- **`CMakeLists.txt` es generado, no fuente.** Hay que regenerarlo cada vez que se agrega un
+  archivo `.cpp`/`.h` o cambia un `.Build.cs`. Ya está en `.gitignore` junto con
+  `cmake-build-*/` y `compile_commands.json`.
+- **CLion no trae compilador.** En Windows usa el MSVC de Microsoft igual que Visual Studio, así
+  que el workload de C++ es igual de obligatorio. La elección de IDE no cambia nada de los
+  prerequisitos.
+- **El editor de Unreal compila por su cuenta**, con UBT y Live Coding. CLion es para escribir y
+  navegar el código; el botón de compilar que importa para iterar está en el editor.
+
+> **Sobre Rider.** Es el IDE de JetBrains que tiene el soporte de Unreal más completo —incluido
+> UnrealLink, la integración editor↔IDE que CLion no tiene— y hay licencia no comercial gratuita.
+> No es una recomendación de cambiar: CLion funciona y UBT lo soporta de fábrica. Queda anotado
+> por si en algún momento la integración con el editor empieza a molestar.
 
 ## Lo que **no** adoptamos, y por qué
 

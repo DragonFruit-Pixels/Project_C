@@ -49,11 +49,12 @@ hybrid C++ + Blueprint architecture. The module below is the target, not the cur
 
 - Module name is `ProjectC` (macro `PROJECTC_API`), without the underscore of the project name:
   Epic module names are alphanumeric and an underscore causes friction in generated macros.
-- ⚠️ **Blocker: the C++ toolchain is not installed.** Visual Studio 2022 Community is present
-  but `VC/` has only `Auxiliary` and `Redist` — **no `Tools/MSVC`** — and `Windows Kits` holds
-  only 8.1, with no Windows 10/11 SDK. Add the *Game development with C++* workload in the
-  Visual Studio Installer. Every person who opens the project needs it, because a project with a
-  C++ module compiles on open.
+- ✅ **C++ toolchain installed** (2026-08-20). The *Game development with C++* workload was added
+  to the existing VS 2022 Community: **MSVC 14.44.35207** (`cl.exe` 19.44.35227 x64) and
+  **Windows SDK 10.0.26100.0**, with `vswhere -requires VC.Tools.x86.x64` resolving. Verified by
+  compiling and running a program that includes `<windows.h>`, not just by checking paths. Every
+  machine that opens the project needs the same workload, because a project with a C++ module
+  compiles on open.
 - The boundary and the reasoning: `design/architecture/06-limite-cpp-blueprint.md`.
 
 ## 3. Plugin Dependencies
@@ -124,6 +125,9 @@ decided or does differently.
 - **C++ vs Blueprint boundary**: **decided** — C++ for framework bases, subsystems, data types,
   algorithms, interfaces and tests; Blueprint for content subclasses, AnimBPs, widgets, BT/EQS
   assets and placed actors. Full table in `design/architecture/06-limite-cpp-blueprint.md`
+- **IDE**: CLion. UBT has a first-class generator for it — `-CLion` (which is `-CMakefile` under
+  the hood, per `CLionGenerator.cs`), emitting a generated `CMakeLists.txt` at the project root.
+  Regenerate it after adding files or editing a `.Build.cs`
 - **Formatting / linting**: none configured
 - **Line endings**: `.gitattributes` sets `* text=auto`. Note the machine's global
   `core.autocrlf` is `input` (a Linux/Mac value); `.gitattributes` governs over it
@@ -202,8 +206,8 @@ rather than assume.
 1. ~~**What is the game?**~~ **Answered** — see `design/gdd/`. Theme is still open (A-01)
 2. ~~**Single-player or multiplayer?**~~ **Answered: single player.** `GameState` still owns the
    shared state, which keeps the door open at no cost
-3. ~~**C++ module, or Blueprint-only?**~~ **Answered: hybrid** (D-13). Open sub-item: install
-   the MSVC toolchain, which is the one thing blocking the module
+3. ~~**C++ module, or Blueprint-only?**~~ **Answered: hybrid** (D-13), and the MSVC toolchain is
+   now installed and verified. What remains is creating `Source/` itself
 4. **Target platforms?** Determines whether the inherited Maximum/ray-tracing baseline survives
 5. **Substrate: keep or disable?** Free to decide now, costly later
 6. **GAS?** Powerful and heavy. Worth it for deep ability systems, overkill otherwise
