@@ -87,6 +87,7 @@ una diferencia entre los dos, **gana el manual** y hay que corregir el GDD.
 | `docs/rulebook/glossary-biopunk.md` | Variante temática A, 66 términos |
 | `docs/rulebook/glossary-dnd.md` | Variante temática B, 67 términos |
 | `design/course-alignment.md` | Matriz de cobertura del temario de la materia y plan de dos fases |
+| [`../architecture/README.md`](../architecture/README.md) | **Cómo se implementa en UE5**: framework, servicios, comunicación y mapa de clases |
 
 ## Mantenimiento
 

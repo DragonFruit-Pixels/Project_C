@@ -10,7 +10,13 @@
 - **Maintainer**: Sebastián Luser (solo dev)
 - **Drafted from**: codebase scan (`.uproject`, `Config/*.ini`, launcher manifest)
 
-> **Read this first**: the game concept does not exist yet. Everything below describes the
+> **Outdated in one respect**: the concept **now exists**. It lives in
+> [`design/gdd/`](../../design/gdd/README.md), and how it maps onto the engine lives in
+> [`design/architecture/`](../../design/architecture/README.md). Several **TBD**s below are
+> already answered there: single player, Blueprint-only, turn-based with 3D presentation. This
+> file has not been regenerated since — refresh it with `/ue-project-context`.
+>
+> **Read this first**: the game concept did not exist when this was written. Everything below describes the
 > *technical* project as it stands. Anything that depends on what the game actually is
 > carries a **TBD** and will be settled after `/brainstorm`. Do not infer intent from the
 > template defaults recorded here — they were inherited, not chosen.
@@ -50,7 +56,13 @@ Also installed alongside the engine: QuixelBridge 5.8, Fab plugin 5.8.
 | ModelingToolsEditorMode | engine | no | Editor-only, enabled by the template |
 
 **Not yet enabled**, and deliberately so — each depends on the concept: GameplayAbilities (GAS),
-EnhancedInput, CommonUI, Niagara, PCG, MetaSounds, OnlineSubsystem, MassEntity, StateTree.
+CommonUI, Niagara, PCG, MetaSounds, OnlineSubsystem, MassEntity, StateTree. Verified against the
+installed engine: GAS, CommonUI and StateTree all ship `"EnabledByDefault": false`.
+
+> **Correction — Enhanced Input needs nothing enabled.** Its `.uplugin` in UE 5.8 carries
+> `"EnabledByDefault": true`, so `EnhancedInputLocalPlayerSubsystem` and the `IA_`/`IMC_` assets
+> are available as they are. Same for **Gameplay Tags**, which is not a plugin at all but a
+> runtime module (`Engine/Source/Runtime/GameplayTags`).
 
 > `Config/DefaultGame.ini` carries a `[/Script/CommonUI.CommonUISettings]` block, but the
 > **CommonUI plugin itself is not enabled** in `.uproject`. It is inert template residue, not
@@ -114,15 +126,16 @@ Nothing is in use — there is no gameplay code or content yet.
 | Subsystem | In use? | How it is used here |
 |-----------|---------|---------------------|
 | Gameplay Ability System | no | **TBD** — plugin not enabled |
-| Enhanced Input | no | **TBD** — plugin not enabled |
+| Enhanced Input | not yet | **Available now** — enabled by default in 5.8. Class 4 of the course |
 | CommonUI | no | **TBD** — settings block present but plugin disabled |
-| Replication / multiplayer | no | **TBD** — single biggest architectural fork; decide early |
+| Replication / multiplayer | no | **Decided: single player.** `GameState` is still used as the owner of shared state, which keeps the door open |
 | World Partition / level streaming | no | Editor settings exist by default; no maps yet |
 | Niagara | no | **TBD** |
 | Mass Entity / StateTree | no | **TBD** |
 | Save system | no | **TBD** |
 
-**Gameplay framework classes**: none. No custom GameMode, GameState, PlayerController or Pawn.
+**Gameplay framework classes**: none yet. The skeleton to create is specified in
+[`design/architecture/04-mapa-de-clases.md`](../../design/architecture/04-mapa-de-clases.md).
 
 ## 6. Build Configuration
 

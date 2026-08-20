@@ -6,6 +6,11 @@ verificar cobertura contra una lista concreta en vez de a ojo.
 **Objetivo declarado por el usuario: cumplir el temario en su totalidad.** Ningún tema
 puede quedar sin un lugar propio en el juego.
 
+> Este documento responde **"¿está cubierto?"**. El **orden de construcción** —qué artefacto
+> produce cada clase, en qué Blueprint cae y qué se rompe si el tema llega tarde— está en
+> [`architecture/05-temario-como-orden-de-construccion.md`](architecture/05-temario-como-orden-de-construccion.md),
+> y el esqueleto técnico en [`architecture/README.md`](architecture/README.md).
+
 ## Fechas
 
 | Hito | Fecha | Cubre hasta |
@@ -205,7 +210,14 @@ hito adentro del juego, no el juego.
 
 ## Pendiente de confirmar
 
-- **Tamaño del equipo y qué sabe hacer cada uno.** Define el alcance real de la fase 1 y el
-  ownership por área. Es lo único que bloquea planificar en serio.
-- ¿El repo es compartido por el grupo o cada uno trabaja aparte y se integra? Cambia la
-  urgencia del LFS locking.
+Huecos de **este registro**, no del temario:
+
+- **El temario no está en el repo.** Vive en el chat y en esta matriz derivada. Si la matriz
+  es el contrato, el original tiene que ser un archivo: es lo único que puede invalidar todo
+  lo de acá.
+- **La clase 8 no figura en la matriz.** Puede ser la entrega del parcial o un tema sin
+  registrar.
+- **Las clases 15 a 19 no están desglosadas.** Se conocen las fechas, no los temas.
+- **Ownership por área** — quién es dueño de qué Blueprints. No es una pregunta sobre el
+  equipo: es la lista de áreas, y se puede escribir ya. Los sublevels y los componentes
+  chicos son la parte técnica; esto es la parte acordada.

@@ -138,3 +138,27 @@ rompe el jugador, es una herramienta.
 No se decide hasta tener el concepto cerrado y la temática elegida. Los dos glosarios traen
 un título provisional cada uno, y **ninguno de los dos es una decisión** — están ahí solo
 para que el documento tenga algo que imprimir en la primera página.
+
+---
+
+## A-09 — Quién es la autoridad del resultado del dado
+
+**Arrastra:** el save game, los rerolls por skill, y cuánto le cree el jugador a la tirada.
+
+El temario pide **físicas y colisiones** (clase 3) y los dados son el candidato natural. Pero
+eso abre una pregunta que es de diseño antes que de implementación: **¿el resultado sale de la
+simulación física, o la física es una animación de un resultado ya decidido?**
+
+| Opción | A favor | En contra |
+|---|---|---|
+| **Decide la física** | demostración indiscutible; el jugador ve que no hay truco | el dado se cae de la mesa o queda de canto; guardar a mitad de tirada es un caso feo; cada reroll es una coreografía |
+| **Decide la lógica, la física presenta** | determinista, save trivial, rerolls limpios | si se nota que está guionado, la tirada pierde credibilidad |
+| **Híbrido** — decide la física, con un resolvedor que detecta "asentado" y cae a lógica si no se asienta | conserva la demostración y no se puede colgar | dos caminos que mantener |
+
+**Recomendación: híbrido**, con una condición de arquitectura — que el **resolvedor**, y no el
+actor del dado, sea lo único que declara el resultado. Así la física entra como *fuente* de un
+valor y no como dueña del estado del juego, y las otras dos opciones siguen disponibles
+después.
+
+→ [`../03-resolucion/dados.md`](../03-resolucion/dados.md) ·
+[`../../architecture/04-mapa-de-clases.md`](../../architecture/04-mapa-de-clases.md)
