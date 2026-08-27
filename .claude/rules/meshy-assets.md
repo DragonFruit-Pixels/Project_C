@@ -29,23 +29,6 @@ Reglas para produccion de assets 3D con Meshy. Aplican a cualquier operacion que
 
 Ante cualquier duda sobre si una operacion gasta, correr `meshy_check_balance` antes y despues y reportar el delta real.
 
-## Retencion: 3 dias, y no hay red de contencion
-
-Verificado en la doc de Meshy (help.meshy.ai, 2026-08-18):
-
-- **Los assets generados por API NO aparecen en el workspace web de meshy.ai.** Es por diseno:
-  API y workspace tienen ciclos de vida separados. No hay UI donde ir a buscar un modelo perdido.
-- **Retencion de 3 dias** desde que el task completa, para text-to-3d e image-to-3d: pasado ese
-  plazo se caen el task, los model files, las preview images y las texturas. Rigging dura 2 meses.
-
-Consecuencia operativa, no opcional:
-
-6. **Bajar en el mismo turno.** Apenas un task llega a `SUCCEEDED`, correr `download_model`
-   (0 creditos) y escribir `master.glb` + `thumb.png` a `assets/3d/<slug>/`. No dejarlo para
-   la sesion siguiente: **la copia local es la unica copia que existe**.
-7. **El ledger guarda task_ids que expiran.** `meshy.json` sirve para dedupe de prompts, no
-   como backup. Un task_id de mas de 3 dias no se puede volver a descargar.
-
 ## Master unico, derivados baratos
 
 El GLB refined es la fuente de verdad y es **inmutable**. Ningun target se genera desde el prompt: todos salen del master.

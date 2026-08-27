@@ -12,57 +12,25 @@ Skill que usa el MCP nativo de ClickUp para gestión completa de tasks, docs y t
 
 ## Tools MCP Disponibles
 
-El server es el conector de claude.ai, y **las tools vienen diferidas**: hay que cargarlas
-con **una sola** llamada a `ToolSearch` antes de usarlas. Ejemplo:
+- `mcp__clickup__searchSpaces` — listar spaces accesibles
+- `mcp__clickup__searchTasks` — buscar con filtros
+- `mcp__clickup__getTaskById` — detalle completo
+- `mcp__clickup__createTask` — crear
+- `mcp__clickup__updateTask` — actualizar (status, fields, assignees)
+- `mcp__clickup__addComment` — comentar
+- `mcp__clickup__createDocumentOrPage` — crear doc
+- `mcp__clickup__readDocument` — leer doc
+- `mcp__clickup__updateDocumentPage` — actualizar doc
+- `mcp__clickup__createTimeEntry`, `getTimeEntries` — time tracking
+- `mcp__clickup__getListInfo`, `updateListInfo` — gestionar listas
 
-```
-ToolSearch query "select:mcp__claude_ai_ClickUp__clickup_search,mcp__claude_ai_ClickUp__clickup_create_task"
-```
-
-Todas llevan el prefijo `mcp__claude_ai_ClickUp__`:
-
-| Tool | Para qué |
-|---|---|
-| `clickup_get_workspace_hierarchy` | spaces, folders y lists del workspace |
-| `clickup_search` | búsqueda por texto en todo el workspace (paginada, seguir `next_cursor`) |
-| `clickup_filter_tasks` | filtrar tasks por status, priority, tags o fechas |
-| `clickup_get_task` | detalle completo de una task |
-| `clickup_create_task` | crear (requiere `list_id`) |
-| `clickup_update_task` | status, campos, assignees |
-| `clickup_create_comment` | comentar |
-| `clickup_get_task_comments` | leer comentarios |
-| `clickup_create_document` | crear doc (`parent.type`: `4`=space, `5`=folder, `6`=list) |
-| `clickup_create_document_page` | crear página (`content_format: "text/md"`) |
-| `clickup_list_document_pages` | estructura del doc, sin contenido |
-| `clickup_get_document_pages` | contenido de las páginas |
-| `clickup_update_document_page` | actualizar una página |
-| `clickup_get_folder`, `clickup_get_list` | resolver nombres a IDs |
-| `clickup_create_list`, `clickup_create_list_in_folder` | crear listas |
-| `clickup_start_time_tracking`, `clickup_stop_time_tracking`, `clickup_get_time_entries` | time tracking |
-| `clickup_resolve_assignees`, `clickup_get_workspace_members` | resolver personas a user IDs |
-
-## Spaces conocidos
+## Spaces Conocidos (Educabot)
 
 | Space | ID |
 |-------|-----|
-| Project_C | 1000270000004350 |
 | Project_T | 90138713959 |
-
-### Project_C — estructura
-
-| Contenedor | ID |
-|---|---|
-| 🎮 Development (folder) | 1000270000007217 |
-| ↳ Fase 1 — 1er Parcial (24/9) | 1000270000008736 |
-| ↳ Fase 2 — 2do Parcial (12/11) | 1000270000008737 |
-| 🎨 Art (folder) | 1000270000007218 |
-| 📚 Narrative (folder) | 1000270000007219 |
-| 🔬 QA / Testing (folder) | 1000270000007220 |
-| Doc `GDD — Project_C` | 2ky4j7vt-8099 |
-
-> El GDD de ClickUp tiene que quedar **1:1 con `design/gdd/gdd.md` del repo**. El del repo
-> es la fuente de verdad; el de ClickUp es la versión legible para el equipo. Si cambia uno,
-> cambia el otro en el mismo turno.
+| VR Game | 901313710103 |
+| Scholar Duel | 901313710122 |
 
 ## Comandos
 
