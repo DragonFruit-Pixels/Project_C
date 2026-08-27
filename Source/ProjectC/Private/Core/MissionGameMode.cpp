@@ -3,6 +3,8 @@
 #include "Core/MissionGameMode.h"
 #include "Core/MissionGameState.h"
 #include "Core/MissionPlayerController.h"
+#include "Core/MissionPlayerState.h"
+#include "Map/GraphSubsystem.h"
 
 AMissionGameMode::AMissionGameMode()
 {
@@ -10,9 +12,25 @@ AMissionGameMode::AMissionGameMode()
 	// que el módulo sea coherente si alguien lo usa directo.
 	GameStateClass = AMissionGameState::StaticClass();
 	PlayerControllerClass = AMissionPlayerController::StaticClass();
+	PlayerStateClass = AMissionPlayerState::StaticClass();
 
 	bStartPlayersAsSpectators = false;
 	PrimaryActorTick.bCanEverTick = false;
+}
+
+void AMissionGameMode::StartPlay()
+{
+	// Super::StartPlay() es lo que dispara los BeginPlay de todos los actores, y ahi es donde
+	// cada ASpace se registra. Sellar antes daria un grafo incompleto, que es peor que ninguno.
+	Super::StartPlay();
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGraphSubsystem* Graph = World->GetSubsystem<UGraphSubsystem>())
+		{
+			Graph->SealGraph();
+		}
+	}
 }
 
 void AMissionGameMode::SetPhase(EMissionTurnPhase NewPhase)
