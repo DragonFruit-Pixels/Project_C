@@ -194,3 +194,5 @@ Reportar:
 > → Read references/manual-setup.md for el flujo manual de Unity (`Window → MCP for Unity`), troubleshooting (uv no encontrado, puerto 8080 ocupado, MCP no conecta) y la variante secundaria CoderGamester
 
 > → Read references/unreal-operations.md for los console commands de Unreal (`StartServer`, `StopServer`, `RefreshTools`, `GenerateClientConfig`), el modo tool-search y la matriz de troubleshooting (puerto ocupado, toolset faltante, tool calls que cuelgan)
+
+> → Read references/port-map.md for la convencion de puertos de MCPs locales (que puerto usa cada server, cuales estan tomados, por que meshy va por stdio, y como asignar puerto por instancia de editor UE)
