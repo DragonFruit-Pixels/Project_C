@@ -25,7 +25,8 @@ datos. Los prefijos de asset siguen las convenciones del proyecto (`BP_`, `WBP_`
 | `UProjectCGameInstance` | `BP_GameInstance` | semilla del RNG, partida en vuelo, progresión entre misiones | 3, 12 |
 | `AMissionGameMode` | `BP_GameMode_Mission` | fase del turno, contador de acciones, resultado de tiradas, victoria y derrota | 3 |
 | `AMissionGameState` | `BP_GameState_Mission` | `Doom Track`, ronda, personaje activo, mazos, figuras vivas | 3 |
-| `AMissionPlayerController` | `BP_PlayerController_Mission` | selección de personaje, posesión, widgets, cámara | 3, 4, 7 |
+| `AMissionPlayerController` | `BP_PlayerController_Mission` | selección de figura, cámara, widgets | 3, 4, 7 |
+| `AMissionPlayerState` | — | estadísticas de la partida: `TollTaken`, `RerollsSpent`, `EnemiesKilled`, `CharactersLost`, `SpacesMoved` | 3 |
 | `AProjectCCharacter` | `BP_Character_01` … `04` | su posición y su presentación | 2, 6 |
 | `AEnemyBase` | `BP_Enemy_*` | su posición y su presentación | 2, 9, 10 |
 | `AEnemyAIController` | `BP_AIC_Enemy` | la decisión de esta activación | 9, 10 |
@@ -36,6 +37,32 @@ El grafo de espacios **ya no lo guarda el `GameState`**: es `UGraphSubsystem`, u
 **El reparto que importa**: el `GameMode` **decide** y el `GameState` **guarda**. Nadie castea
 al `GameMode` para leer un dato, porque el `GameMode` no tiene datos que otros necesiten. Es la
 regla 1 del [índice](README.md) aplicada al caso más frecuente.
+
+## El jugador no tiene cuerpo
+
+**Decidido el 2026-08-26.** El jugador es la cámara y quien da las órdenes, no una figura del
+tablero. El `PlayerController` posee un **pawn-cámara** y **nunca** posee a los personajes.
+
+Antes este documento decía que la posesión rotaba entre los 4 `Character`. Era el patrón que
+Unreal espera para un juego de acción, y es el equivocado para un tablero: el input de este
+juego no es "mover mi pawn", es **clickear una casilla**. Con posesión rotativa había dos rutas
+de input —una para la figura poseída, otra por raycast para todo lo demás— y la primera casi no
+se usaba.
+
+Lo que se gana al sacarla:
+
+| | Con posesión rotativa | Con el jugador sin cuerpo |
+|---|---|---|
+| Rutas de input | 2 | **1** — todo entra por `ISelectable` |
+| Cámara | atada al personaje activo | libre, que es lo que querés en un tablero |
+| Movimiento de figuras | personajes de una forma, enemigos de otra | **igual para todas**, vía `AIController` |
+
+Ese último renglón es el que más rinde: si ninguna figura la mueve el jugador, **personajes y
+enemigos comparten el mismo camino de movimiento**. Un solo sistema que mantener, y el mismo que
+las clases 9-10 van a alimentar con NavMesh y Behaviour Trees.
+
+**La posesión sigue existiendo y sigue siendo demostrable** —el `PlayerController` posee el
+pawn-cámara— pero deja de ser el canal de gameplay.
 
 ## Los componentes: las capacidades del GDD
 

@@ -104,9 +104,14 @@ El juego es por turnos, así que **el corazón del proyecto no es el movimiento:
 de estados de fases**. Vive en el `GameMode` y las fases son datos, no comentarios:
 
 ```
-StartOfRound -> CharacterTurn(i) -> Actions(x3) -> PressureCard -> EndOfTurn
-             -> [siguiente personaje] -> EndOfRound -> ClockCheck -> ...
+StartOfRound -> CharacterTurn(i) -> Actions(x3) -> PressureCard -> Reckoning
+             -> EndOfTurnEffects -> Hazard -> ClockCheck -> ManifestationCheck
+             -> AdversaryEndOfTurn -> [siguiente personaje] -> EndOfRound -> ...
 ```
+
+Los últimos cinco son la fase 4 del GDD, abierta en sus pasos. Están explícitos porque dejarlos
+implícitos ya costó un bug: `ClockCheck` había quedado al nivel de ronda, y el GDD lo pone en
+**cada turno**.
 
 Dos razones para hacerlo explícito desde el principio, y las dos son del temario:
 

@@ -46,6 +46,9 @@ Si una clase de C++ no expone nada, o es un servicio interno, o está mal diseñ
 | El **ejecutor de efectos** de cartas | es un intérprete. Un intérprete en nodos es ilegible a la tercera carta |
 | Interfaces (`UINTERFACE`) | así las implementan tanto C++ como Blueprint |
 | Gameplay Tags nativos | declarados en código, autocompletan y no se escriben mal |
+| La **máquina de resolución** (`UResolutionSubsystem`) y sus structs (`FResolutionStep`, `FPendingChoice`) | es el ejecutor común de cartas, dados y acciones, y tiene que ser **serializable** para que el save funcione a mitad de una tirada. Ver [`07`](07-resolucion-y-pausa.md) |
+| La **evaluación** de los modificadores de reglas permanentes | un efecto permanente de stage no se ejecuta: **se consulta** al armar cada `FRollRequest`. Es donde los Gameplay Tags nativos empiezan a pagar |
+| El reproductor de presentación que **emite los eventos tipados** | lee el feed de pasos y dispara `OnFigureMoved`, `OnDiceSettled`, `OnStageRevealed`. Ver [`08`](08-presentacion-y-reglas.md) |
 | **Tests de automatización** | ver abajo. Es lo más grande que se gana |
 
 | Va en **Blueprint** | Por qué |
@@ -56,7 +59,51 @@ Si una clase de C++ no expone nada, o es un servicio interno, o está mal diseñ
 | Behaviour Trees y EQS | son assets de autor. Las tareas y servicios *custom* sí van en C++ |
 | Sequencer, Niagara, materiales, Landscape | no hay versión de código y no la queremos |
 | Actores colocados en el nivel y sus perillas | `UPROPERTY(EditAnywhere)` y se tunea sin compilar |
+| Las **2 acciones propias de cada misión** (`UMissionAction` hija) | el escenario las define. Si necesitaran C++, cada misión nueva sería una compilación y un programador |
+| Qué **se ve** al recibir un evento de presentación: animación, VFX, sonido, escalonado | es ritmo visual. Es justo lo que un diseñador tiene que poder tocar sin compilar |
 | **Prototipos** | se prototipa en Blueprint y **se baja a C++ cuando la forma se estabilizó**. Ese camino de ida es la práctica normal, no una derrota |
+
+## Los tres límites que hay que declarar
+
+Las tablas de arriba alcanzan para la mayoría de los casos. Estos tres no se deducen de ellas y
+son los que se rompen solos si no están escritos.
+
+### 1. Blueprint **compone** pasos; no **define** tipos de paso
+
+`UMissionAction` es `Blueprintable` para que un escenario pueda traer sus 2 acciones propias sin
+compilar. Las 4 base —`Move`, `Attack`, `Recover`, `Trade`— van en C++, porque son reglas
+centrales y necesitan tests.
+
+El límite que hace que eso no degenere:
+
+> Un Blueprint arma su resolución llamando **constructores de paso** expuestos como funciones
+> `BlueprintCallable` estáticas. Si una acción necesita algo que el vocabulario de pasos no
+> expresa, **eso es un tipo de paso nuevo y va en C++**.
+
+Sin esa frase, la primera acción de misión que necesite algo raro se lo escribe adentro del
+grafo, y la mitad de las reglas termina en Blueprints que no se testean, no se mergean y no se
+revisan. Es la misma disciplina que ya vale para el vocabulario de efectos, un nivel más abajo.
+
+Cada acción expone tres cosas: **costo** (0 para libres, 1 para normales y especiales),
+**condición de legalidad** y **resolución**. La legalidad va como `BlueprintNativeEvent` y la
+consulta el HUD para apagar el botón — así la regla "`Recover` solo en espacio `Clear`" se
+escribe una vez y no se desincroniza con la UI.
+
+### 2. El vocabulario de efectos es **cerrado**, así que es dato y no clase
+
+Los selectores, condiciones y acciones están catalogados desde evidencia de cartas reales en
+[`vocabulario-de-efectos.md`](../gdd/03-resolucion/vocabulario-de-efectos.md). Un vocabulario
+cerrado se modela como `USTRUCT` + enum en C++, con las cartas como **filas de Data Table**.
+
+La alternativa —una clase Blueprint por tipo de efecto— solo gana si el vocabulario fuera
+abierto, y no lo es. Y perdería lo que más rinde de todo el diseño: que una carta nueva sea una
+fila y no un asset.
+
+### 3. La presentación parte en el evento tipado
+
+El reproductor en C++ lee el feed de pasos y **emite eventos tipados**; el Blueprint decide qué
+se ve al recibirlos. Esa es la costura, y ponerla en otro lado tiene costos concretos: más
+arriba, el ritmo visual necesita recompilar; más abajo, las reglas empiezan a conocer widgets.
 
 ## Las tres cosas que C++ habilita y Blueprint no puede
 
@@ -297,6 +344,29 @@ Ser profesional también es no traer framework que no hace falta.
 La entrada de GAS es la más discutible de la tabla. Si aparece un argumento fuerte a favor,
 vale reabrirla — pero la carga de la prueba está del lado de sumarlo.
 
+### GAS, concepto por concepto · el mapeo
+
+**No usarlo no significa no conocerlo.** GAS resuelve problemas reales y este juego tiene varios
+de ellos — sólo que ya están resueltos a mano, y a propósito. El mapeo:
+
+| Concepto de GAS | Lo que hay acá | Por qué la versión propia |
+|---|---|---|
+| `UAttributeSet` | `UWoundsComponent`, `UReserveComponent`, `URatchetComponent` | son tres números con clamp. Un `AttributeSet` traería el `AbilitySystemComponent` entero detrás |
+| `GameplayEffect` infinito con modificadores | **`FRuleMod`** — los efectos permanentes de los stages ([D-19](../gdd/06-decisiones/registro.md)) | un tag + una operación + un valor. La consulta es una función, no una pila de agregación replicada |
+| `GameplayAbility` con costo y condición | `UMissionAction` — costo en acciones, condición de legalidad, resolución | la legalidad la consulta el HUD para apagar el botón; en GAS eso es `CanActivateAbility` más plomería de UI |
+| `GameplayTags` | **adoptados**, sin discusión | vienen con el engine y no arrastran el framework |
+| `AbilityTask` — una habilidad que dura y espera | la **pila de resolución** ([`07`](07-resolucion-y-pausa.md)) | acá es la pieza central, no un caso especial |
+
+**Dónde se rompería el mapeo si lo forzáramos.** El modelo de ejecución de GAS es
+instant / duration / periodic sobre atributos. No expresa *"una carta que se resuelve paso a
+paso, de arriba hacia abajo, donde un paso que no se puede ejecutar **se saltea** y la carta
+sigue"* — que es la semántica que vale para todo el juego y que hay que implementar una sola vez
+([`turno.md`](../gdd/03-resolucion/turno.md)). Esa regla pelea con la composición de
+`GameplayEffect` en vez de aprovecharla.
+
+Y la mitad del peso de GAS —predicción de cliente, replicación de atributos, reconciliación— es
+maquinaria para un problema que este juego no tiene: es por turnos, determinista y single player.
+
 ## Qué cambia de lo ya escrito
 
 | Documento | Qué cambió |
@@ -310,6 +380,8 @@ vale reabrirla — pero la carga de la prueba está del lado de sumarlo.
 ## Dependencias
 
 - Consume: [`02-managers-y-subsystems.md`](02-managers-y-subsystems.md),
+  [`07-resolucion-y-pausa.md`](07-resolucion-y-pausa.md),
+  [`08-presentacion-y-reglas.md`](08-presentacion-y-reglas.md),
   [`../gdd/07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md)
 - Alimenta: todos los documentos de esta carpeta
 - Registro: [D-13](../gdd/06-decisiones/registro.md)

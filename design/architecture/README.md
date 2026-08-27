@@ -16,6 +16,9 @@ las reglas de acá, se discute, no se implementa.
 | 🗂️ [`04-mapa-de-clases.md`](04-mapa-de-clases.md) | El esqueleto concreto: qué Blueprint es dueño de qué |
 | 📚 [`05-temario-como-orden-de-construccion.md`](05-temario-como-orden-de-construccion.md) | El temario leído como plan de bring-up, clase por clase |
 | ⚙️ [`06-limite-cpp-blueprint.md`](06-limite-cpp-blueprint.md) | **Qué va en C++ y qué en Blueprint**, y qué habilita cada uno |
+| ⏸️ [`07-resolucion-y-pausa.md`](07-resolucion-y-pausa.md) | Cartas, dados y acciones son el mismo mecanismo: una resolución que se pausa esperando al jugador |
+| 🎬 [`08-presentacion-y-reglas.md`](08-presentacion-y-reglas.md) | Las reglas resuelven instantáneamente y la presentación reproduce. Cierra A-09 |
+| 🚪 [`09-abrir-el-proyecto.md`](09-abrir-el-proyecto.md) | Cómo se abre el editor sin que se rompa, y por qué se rompía |
 
 ## Las tres reglas que gobiernan todo lo demás
 
