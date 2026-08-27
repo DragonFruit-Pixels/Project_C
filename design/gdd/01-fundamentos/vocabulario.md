@@ -52,6 +52,8 @@ En código, en Data Tables y en estos documentos se usa siempre el ID.
 | Objeto que acompaña y absorbe daño | `Ally` | Companion |
 | Carta negativa persistente | `Burden` | Condition |
 | Objeto con habilidad propia | `Trinket` | Relic |
+| La partida entera: 1 mapa, 1 objetivo, 1 adversario | `Mission` | Episode |
+| Fase 3: cobra el estado del espacio — recompensa o paliza | `Reckoning` | Investigate or Fight! |
 
 ## Los que se dejaron quietos
 

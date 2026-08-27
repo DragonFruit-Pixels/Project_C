@@ -12,7 +12,7 @@ Las cuatro fases van **siempre en este orden**, y ninguna se puede saltear:
 ```
 1. Tres acciones
 2. Carta de presión
-3. Referéndum
+3. Referéndum  (`Reckoning`)
 4. Fin de turno
 ```
 
@@ -103,7 +103,7 @@ Esta semántica vale para todo el juego y hay que implementarla una sola vez.
 
 ---
 
-## Fase 3 — Referéndum
+## Fase 3 — Referéndum · `Reckoning`
 
 La fase más corta y la que más define el juego. Depende de una sola pregunta: **¿tu espacio
 está `Clear`?**

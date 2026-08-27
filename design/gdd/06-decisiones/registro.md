@@ -248,6 +248,279 @@ single player. Y descarta StateTree y MassEntity por ahora.
 
 ---
 
+## D-14 — La temática es **biopunk**, provisionalmente
+
+**2026-08-26**
+
+Cierra [A-01](abiertas.md). Se elige la variante A —subciudad química, sumidero, el organismo
+que colonizó el desecho— sobre la variante D&D. **Provisional** quiere decir que la decisión se
+puede revisar sin costo, no que esté a medias.
+
+**Por qué se puede revisar sin costo:** por [D-02](#d-02--la-temática-queda-sin-declarar-y-el-core-es-neutro).
+El core habla en IDs neutros y la temática es data, así que elegir biopunk **no cambia una sola
+línea de código**: cambia qué theme pack se carga. Auditado el 2026-08-26 — cero términos
+temáticos en `Source/` y en `design/architecture/`.
+
+**Descarta:** nada, todavía. La variante D&D queda entera en `docs/rulebook/glossary-dnd.md` y
+sigue siendo aplicable mientras el core siga neutro.
+
+---
+
+## D-15 — Un adversario genérico: las stats son el diseño, la piel viene después
+
+**2026-08-26**
+
+Cierra [A-02](abiertas.md). Hay **1 adversario**, con stats y efectos **genéricos**. Qué criatura
+es, cómo se ve y cómo se llama se decide con el arte, no ahora.
+
+Su forma es data, cuatro veces:
+
+```
+DA_AdversaryStage  ×4
+  ├─ Health          vida propia del stage
+  ├─ BonusDice       se suman a TODOS sus ataques — acumulativo entre stages
+  ├─ RevealEffect    se ejecuta una vez al descubrirse
+  └─ PermanentMods   queda hasta el final de la partida — se CONSULTA, no se ejecuta
+```
+
+**Por qué:** el adversario nunca fue una decisión de código. Con el vocabulario neutro y los
+stages como Data Asset, elegir criatura es autoría de contenido. Postergarlo no bloquea nada y
+decidirlo temprano ata el arte a un diseño que todavía se está balanceando.
+
+**Lo que sí destraba, y es lo único técnico acá:** `PermanentMods` **no existe**. El vocabulario
+de efectos sabe ejecutar, no sabe responder. Hace falta un set chico y cerrado de modificadores
+de regla —`+N dados a`, `−N al umbral del reloj`, `+N coste a una acción`, `prohibir acción`,
+`+N spawn`— y con eso **cualquier boss futuro es data**. Es el agujero de escalabilidad de
+bosses, cerrado.
+
+**Descarta:** el contraste entre dos adversarios de textura distinta, que el original usa para
+dar identidad. Ya estaba descartado por [el alcance](../00-vision/alcance.md).
+
+---
+
+## D-16 — El título no bloquea, y sale de la lista de decisiones de diseño
+
+**2026-08-26**
+
+Cierra [A-08](abiertas.md). `THE SUMP` sigue siendo provisional y el título se decide cuando
+haya con qué — no es una dependencia de nada del desarrollo.
+
+**Por qué:** no toca código, ni datos, ni arquitectura. Estaba en la lista de decisiones abiertas
+como si arrastrara algo, y no arrastra nada.
+
+---
+
+## D-17 — La física del dado contesta un valor; nunca es dueña del estado
+
+**2026-08-26**
+
+Cierra [A-09](abiertas.md), y no por elegir entre las tres opciones sino porque una regla más
+general la vuelve innecesaria.
+
+Una tirada física **no es una animación: es una fuente que contesta un valor.** Es el mismo caso
+que "esperar una decisión del jugador" — la pila de resolución se estaciona esperando una
+respuesta— con otro respondedor:
+
+```
+la pila necesita un valor de dado
+  ├── dados físicos: se tiran, se detecta "asentado", contestan la cara
+  ├── si no se asienta en N segundos: contesta URandomSubsystem
+  └── modo rápido: contesta URandomSubsystem directo
+```
+
+**Por qué:** sale de [`08-presentacion-y-reglas.md`](../../architecture/08-presentacion-y-reglas.md).
+Si las reglas resuelven instantáneamente y la presentación reproduce, la física no puede ser
+autoridad de nada — solo puede contestar. Un `UDiceResolver` en C++ sigue siendo el único que
+**declara** el resultado; quién se lo sopló es indistinto para todo lo que venga después.
+
+**Descarta:** que el actor del dado declare el resultado, que era lo que complicaba el save a
+mitad de tirada y la coreografía de rerolls.
+
+---
+
+## D-18 — La forma: por turnos, con figuras 3D que caminan y cámara tipo XCOM
+
+**2026-08-26**
+
+Cierra A-10, que era la última decisión grande abierta y **no estaba registrada en ningún lado**
+— vivía sólo en el estado de sesión.
+
+- **Por turnos**, confirmado. No hay reinterpretación en tiempo real.
+- **Movimiento:** el personaje **camina** con rig animado de sala en sala. No teletransporta.
+- **Cámara:** controlada, con movimiento acotado, **al estilo XCOM** — no orbital libre ni fija.
+
+**Por qué los turnos no eran realmente una elección:** la base mecánica *es* un juego de mesa
+—dados, cartas, descarte visible, `Doom Track`—; pasarla a tiempo real no la adapta, la borra. Y
+la regla que define el juego —el `Toll` cobra siempre, así que **no hacer nada es una jugada
+legítima**— no existe sin turnos. Toda la arquitectura escrita ya lo asumía.
+
+**Lo que confirma:** `AProjectCCharacter` sigue heredando de `ACharacter` y no de `APawn`. Había
+una duda razonable —`CharacterMovementComponent` es mucha maquinaria para un tablero— y la
+caminata animada la justifica. Alimenta el Blendspace y la State Machine de la clase 6.
+
+**Lo que abre, y es nuevo:** el personaje camina **la arista del grafo**, y eso obliga a decidir
+qué ruta física recorre → A-15.
+
+**Descarta:** la representación de ficha que teletransporta de `Space` a `Space`, y la cámara
+orbital libre.
+
+---
+
+## D-19 — Los modificadores de regla son un tag + una operación, no un tipo por perilla
+
+**2026-08-26**
+
+Cierra A-11. Un efecto permanente **no se ejecuta: se consulta.** El vocabulario de efectos
+sabe ejecutar; esto es el mecanismo que le faltaba.
+
+```
+FRuleMod
+  ├─ Rule    FGameplayTag   qué perilla toca
+  ├─ Op      Add | Override | Forbid
+  └─ Value   int
+```
+
+El namespace `Rule.*` arranca con:
+
+| Tag | Default | Qué mueve |
+|---|---|---|
+| `Rule.Dice.Bonus.EnemyAttack` | 0 | dados que suman los ataques de enemigos |
+| `Rule.Dice.Bonus.AdversaryAttack` | 0 | ídem para el adversario — es el `BonusDice` acumulado de los stages |
+| `Rule.Dice.Bonus.PlayerAttack` | 0 | dados que suma el personaje activo |
+| `Rule.Clock.Threshold` | 3 | `Doom Symbol` necesarios para que avance el reloj |
+| `Rule.Move.Budget` | 3 | pasos de una acción `Move` |
+| `Rule.Recover.Amount` | 3 | puntos que reparte `Recover` |
+| `Rule.Action.Cost.*` | 1 | costo en acciones de una acción concreta |
+| `Rule.Action.Forbidden.*` | — | inhabilita una acción |
+| `Rule.Spawn.ExtraPerTurn` | 0 | invocaciones extra por turno |
+
+**Por qué un tag y no un tipo de struct por perilla:** agregar una perilla nueva pasa a ser
+**agregar un tag y un sitio de consulta**, no declarar un tipo y tocar a todos los llamadores. Es
+el punto donde los Gameplay Tags nativos dejan de ser una buena idea abstracta y empiezan a
+pagar.
+
+**Dónde viven los mods activos:** en `AMissionGameState`. Son estado de la misión que todos
+leen — el HUD tiene que poder mostrar "el reloj avanza más rápido".
+
+**La disciplina que lo hace funcionar, y sin la cual esto no sirve:** *todo* sitio que use uno de
+esos valores lo pide con `QueryMod(Rule.X, default)`. Un solo lugar que lea la constante directo
+es un modificador que silenciosamente no hace nada — y ese bug no tiene síntoma, sólo se nota
+jugando.
+
+**Consecuencia:** cualquier boss futuro es data. Era el agujero de escalabilidad de bosses.
+
+---
+
+## D-20 — La pila de resolución serializa el **resultado**, no la semilla
+
+**2026-08-26**
+
+Cierra A-12. Cada `FResolutionStep` guarda lo que pasó —las caras que salieron, qué se
+eligió— y no la semilla que lo produjo.
+
+**Por qué:** con la semilla, deshacer una tirada y rehacerla da un resultado distinto. Eso es
+*save scumming*, y desarma la tensión del `Toll`, que es la regla que define el juego. Con el
+resultado guardado, deshacer y rehacer da lo mismo y el undo sólo corrige un click.
+
+**No decide si hay undo** — decide que va a ser posible. Al revés no: con la semilla guardada, el
+undo queda descartado para siempre y no se retrofitea.
+
+**La semilla igual se guarda, pero de la misión, no del paso.** Sirve para reproducir una partida
+entera y perseguir un bug; no para re-tirar un dado suelto.
+
+---
+
+## D-21 — Un nivel por misión, con el grafo **sellado** antes de la primera consulta
+
+**2026-08-26**
+
+Cierra A-13. Todo el mapa carga al inicio. Los sublevels por sala siguen permitidos **como
+unidad de autoría** —que es lo que deja a dos personas editando salas distintas sin pisarse—
+pero se cargan todos al arranque, no bajo demanda.
+
+`UGraphSubsystem` **rechaza consultas hasta recibir el sellado**, que ocurre cuando terminaron de
+registrarse todos los `ASpace` y pasaron los 8 invariantes de F8.
+
+**Por qué:** `ASpace` se registra en `BeginPlay`. Con streaming, una sala que llega tarde deja el
+grafo incompleto, y un BFS sobre un grafo incompleto **no crashea: contesta mal** — devuelve "no
+hay camino" donde había uno. En un juego donde el camino más corto decide a dónde se mueven los
+enemigos, mentir es peor que crashear.
+
+Y para un tablero el streaming no compra nada: el mapa entero está presente desde el turno 1 por
+diseño.
+
+**Descarta:** el streaming de salas bajo demanda como técnica de performance. El tema sigue
+demostrable con la carga inicial de sublevels.
+
+---
+
+## D-22 — La caminata sigue **waypoints por arista**, no NavMesh
+
+**2026-08-26**
+
+Cierra A-15, que abrió [D-18](#d-18--la-forma-por-turnos-con-figuras-3d-que-caminan-y-cámara-tipo-xcom).
+Cada arista lleva una lista ordenada de waypoints, autorada con la sala. Sin waypoints, el
+recorrido es la recta entre los dos `Space` — que alcanza para las aristas internas de una sala.
+
+**Por qué no NavMesh:** una pared es la **ausencia de arista**, y puede no existir como
+geometría. Dos `Space` sin arista pueden estar visualmente abiertos, así que `MoveTo` puede
+rodear por una ruta que las reglas prohíben — y la figura camina un camino que el juego no
+permitía. Es la regla de [`08-presentacion-y-reglas.md`](../../architecture/08-presentacion-y-reglas.md)
+aplicada al movimiento: **la presentación no puede desmentir a las reglas.**
+
+**Costo:** con ~20 nodos y grado promedio 2.5 son unas 50 aristas. Con 1 a 3 `Space` por sala, la
+mayoría es "centro → puerta → centro": dos o tres puntos, no una spline elaborada.
+
+**El NavMesh se sigue necesitando** para la clase 9, pero para que el Behaviour Tree **decida** —
+no para que la figura **se mueva**.
+
+---
+
+## D-23 — `APlayerState` se adopta con las estadísticas de la partida; GAS se documenta, no se usa
+
+**2026-08-26**
+
+Cierra A-14. Los dos son temas de la cursada sin encaje obvio en un single player por turnos, y
+la respuesta correcta es distinta para cada uno.
+
+### `APlayerState` — se adopta
+
+Tenía un lugar real y estaba vacío porque nadie lo buscó. Lo que lo define es que **sobrevive a
+la muerte del Pawn**, y acá eso describe algo concreto: las estadísticas de la partida siguen
+vivas cuando una figura se pierde en el track.
+
+`AMissionPlayerState` guarda `TollTaken`, `RerollsSpent`, `EnemiesKilled`, `CharactersLost` y
+`SpacesMoved`.
+
+**Es el hogar correcto por descarte, no por relleno:** no son reglas de la misión (`GameMode`),
+ni estado del tablero que todos leen (`GameState`), ni cruzan de misión (`GameInstance`). Son
+del jugador y duran lo que dura la partida.
+
+Y hacen falta igual: **la pantalla de fin de misión no tiene de dónde sacar esos números.** Son
+cinco contadores que se iban a escribir de todos modos; lo único que se decidió es dónde viven.
+
+### GAS — sigue descartado, pero con el mapeo escrito
+
+No usarlo no significa no conocerlo. El mapeo concepto por concepto quedó en
+[`06-limite-cpp-blueprint.md`](../../architecture/06-limite-cpp-blueprint.md): `UAttributeSet` →
+los componentes de barras, `GameplayEffect` infinito → **`FRuleMod`** ([D-19](#d-19--los-modificadores-de-regla-son-un-tag--una-operación-no-un-tipo-por-perilla)),
+`GameplayAbility` → `UMissionAction`, `AbilityTask` → la pila de resolución. Los Gameplay Tags sí
+se adoptan y ya estaban adoptados.
+
+**Por qué no se fuerza:** el modelo de ejecución de GAS —instant / duration / periodic sobre
+atributos— no expresa "una carta que se resuelve paso a paso donde un paso que no se puede
+ejecutar se saltea", que es la semántica que vale para todo el juego. Y la mitad del peso de GAS
+es predicción de cliente y replicación, maquinaria para un problema que este juego no tiene.
+
+Saber **por qué no**, con el mapeo delante, es más sólido que bolteárselo encima a un juego que
+no lo pide.
+
+**Queda por consultar en la cursada:** GAS aparece en la slide de contenidos generales de la
+clase 1, pero **no figura en ninguna de las 19 clases del cronograma**. Es una inconsistencia del
+material, no del diseño.
+
+---
+
 ## Plantilla para agregar
 
 ```markdown
