@@ -84,9 +84,9 @@ Lo mismo con dos temas más chicos:
 
 | Clase | Tema | Artefacto de arquitectura | Dónde cae | Si llega tarde |
 |---|---|---|---|---|
-| 4 | Inputs | `IMC_`/`IA_` + Enhanced Input (ya viene habilitado) | `Input/` | — |
-| 4 | **Posesión** | alternar entre los 4 `Character` desde un `PlayerController` | [framework](04-mapa-de-clases.md) | encaje directo con el diseño: **el jugador controla los 4** |
-| 4 | Raycast | `ISelectable` | interfaces | si la selección se resuelve casteando, la UI empieza a arrastrar arte |
+| 4 | Inputs | `IMC_Mission` + 5 `IA_`, Enhanced Input | ✅ hecho, `Input/` | — |
+| 4 | **Posesión** | el `PlayerController` posee un `ACameraPawn` y **nunca** un personaje | ✅ hecho, [framework](04-mapa-de-clases.md) | el tema se demuestra igual, y con una sola ruta de input en vez de dos |
+| 4 | Raycast | `ISelectable` sobre el canal de trazado `Selectable` | ✅ hecho, interfaces | si la selección se resuelve casteando, la UI empieza a arrastrar arte |
 | 5 | **Diseño de clases** | la jerarquía y **qué es componente y qué es herencia** | [mapa de clases](04-mapa-de-clases.md) | la clase base que sabe todo es irreversible en la práctica |
 | 5 | **Comunicación entre Blueprints** | las 4 interfaces y los delegates | [comunicación](03-comunicacion-y-referencias.md) | **el tema con más deuda técnica potencial de todo el temario** |
 | 5 | **Levels y SubLevels** | una sala por sublevel | `Maps/` | es la **condición para trabajar en paralelo**, no un tema más |

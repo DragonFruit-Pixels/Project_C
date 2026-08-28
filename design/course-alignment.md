@@ -6,23 +6,29 @@ verificar cobertura contra una lista concreta en vez de a ojo.
 **Objetivo declarado por el usuario: cumplir el temario en su totalidad.** Ningún tema
 puede quedar sin un lugar propio en el juego.
 
-> Este documento responde **"¿está cubierto?"**. El **orden de construcción** —qué artefacto
-> produce cada clase, en qué Blueprint cae y qué se rompe si el tema llega tarde— está en
-> [`architecture/05-temario-como-orden-de-construccion.md`](architecture/05-temario-como-orden-de-construccion.md),
+> Este documento responde **"¿está cubierto?"**. El temario **original** está en
+> [`temario.md`](temario.md) y le gana a este si se contradicen. El **orden de construcción**
+> —qué artefacto produce cada clase, en qué Blueprint cae y qué se rompe si el tema llega tarde—
+> está en [`architecture/05-temario-como-orden-de-construccion.md`](architecture/05-temario-como-orden-de-construccion.md),
 > y el esqueleto técnico en [`architecture/README.md`](architecture/README.md).
 
 ## Fechas
 
 | Hito | Fecha | Cubre hasta |
 |---|---|---|
-| Estado al escribir esto | 19/8/2026 | clase 2 dictada |
-| Clase 3 | 20/8/2026 | — |
+| **Última verificación de esta matriz** | **27/8/2026** | **clases 1-3 dictadas** |
+| Clase 4 — Inputs, Posesión, Raycast | 27/8/2026 (hoy) | — |
 | **Entrega 1er Parcial** | **24/9/2026** | **clases 1-7** |
 | **Entrega 2do Parcial** | **12/11 y 19/11/2026** | **clases 1-14** |
 | Recuperatorio | 26/11/2026 | — |
 | Final | 17/12/2026 | — |
 
-**36 días hasta el 1er parcial. 85 hasta el 2do.**
+**28 días hasta el 1er parcial. 77 hasta el 2do.**
+
+Los temas de las clases 1-4 salen del material real (`Clase 1 - Intro a Unreal.pdf`,
+`Clase 2 - Blueprints.pdf`, `Clase 3 - Gameplay Framework.pdf` y el temario clase por clase),
+no de un resumen. La columna **Estado** se verificó contra el repo y contra los Blueprints
+leídos del editor por MCP, no a ojo.
 
 ## Condiciones de la cursada
 
@@ -61,28 +67,36 @@ puede quedar sin un lugar propio en el juego.
 
 ### Fundamentos del Gameplay
 
-| Clase | Tema | Dónde vive en el juego | Fase |
+Estado: ✅ hecho · ◐ parcial · ❌ sin empezar.
+
+| Clase | Tema | Estado | Dónde vive en el juego / qué falta |
 |---|---|---|---|
-| 1 | Estructura de proyecto, Source Control | Ya hecho: repo, LFS, .gitignore, convenciones | listo |
-| 1 | Templates, Editor | Hecho: proyecto creado. Pendiente el módulo de C++ de [D-13](gdd/06-decisiones/registro.md) | casi |
-| 2 | Actor, Blueprint, Componentes | Personaje, enemigo, dado, token, espacio del grafo | P1 |
-| 2 | Ciclo de vida del Actor | Spawn de enemigos en las 3 puertas; muerte y retorno al pool | P1 |
-| 2 | Depuración de Blueprints | Visualización del grafo de espacios y del cálculo de distancias | P1 |
-| 3 | Gameplay Framework | GameMode = árbitro de reglas. PlayerController = el jugador. Pawn = personaje activo | P1 |
-| 3 | Static Mesh | Salas, personajes, enemigos, dados | P1 |
-| 3 | **Físicas y Colisiones** | **Los dados.** Tirada física real con colisión | P1 |
-| 3 | Materiales | Caras de los dados, estado de las salas, feedback de trinquete en el personaje | P1 |
+| 1 | Estructura de proyecto | ✅ | `Source/` `Content/` `Config/` + `design/` |
+| 1 | **Source Control** | ✅ | git + **LFS** para `.uasset`/`.umap`, `.gitignore`, rama publicada |
+| 1 | Templates, Editor | ✅ | proyecto y `L_Mission_01` desde template |
+| 2 | Qué es un Actor | ✅ en C++ | `ASpace`, `AProjectCCharacter` |
+| 2 | Qué es un Blueprint | ◐ | los 5 Blueprints existen y heredan bien, pero **están vacíos** |
+| 2 | Componentes | ✅ en C++ | `URatchetComponent` (ActorComponent), `UBoxComponent` (SceneComponent) |
+| 2 | **Blueprint Workflow** | ❌ | variables, funciones, arrays, loops, casting, macros: **cero nodos** |
+| 2 | **Depuración de Blueprints** | ❌ | breakpoints y Blueprint Debugger sin usar. Iría sobre el cálculo de distancias del grafo |
+| 2 | Ciclo de vida del Actor | ◐ | `BeginPlay` en `ASpace`, `StartPlay` en GameMode. Falta **Spawn/Destroy**: enemigos en las 3 puertas |
+| 3 | **Gameplay Framework** | ✅✅ | las 6 clases del PDF: `MissionGameMode`, `MissionGameState`, `MissionPlayerController`, `MissionPlayerState`, `ProjectCGameInstance`, `AProjectCCharacter` |
+| 3 | Subsystems | ✅ extra | `UGraphSubsystem` (`UWorldSubsystem`). El PDF los nombra en la slide de GameInstance |
+| 3 | **Static Mesh** | ❌ | nada. `ASpace` tiene Box de colisión pero ningún mesh; el nivel está vacío |
+| 3 | Colisiones — canales, presets, modos | ✅ | `Space`/`Figure` (object) + `Selectable` (trace), perfiles `QueryOnly` |
+| 3 | **Físicas — simulación real** | ❌ | **los dados.** Sin `SimulatePhysics`, sin eventos `Hit`/`Overlap`, sin Physics Material ni Constraint |
+| 3 | Materiales | ❌ | caras de los dados, estado de las salas, feedback de trinquete |
 
 ### Mecánicas y Lógica del Juego
 
-| Clase | Tema | Dónde vive en el juego | Fase |
+| Clase | Tema | Estado | Dónde vive en el juego / qué falta |
 |---|---|---|---|
-| 4 | Inputs | Selección de personaje, acciones, movimiento | P1 |
-| 4 | **Posesión** | **Controlar los 4 personajes y alternar entre ellos.** Encaje directo | P1 |
-| 4 | Raycast | Seleccionar dados, espacios y enemigos con el mouse | P1 |
-| 5 | Diseño de clases | Jerarquía Figure -> Character / Enemy -> Adversary. Space, Deck, Track | P1 |
-| 5 | Comunicación entre Blueprints | Interfaces y event dispatchers entre árbitro, personajes y HUD | P1 |
-| 5 | **Levels y SubLevels** | **Cada sala es un sublevel.** Arma el mapa por composición | P1 |
+| 4 | **Inputs** | ✅ | `IMC_Mission` + 5 `IA_` en `Content/Project_C/Input/`. El `PlayerController` los recibe como `EditDefaultsOnly` y agrega el contexto por `UEnhancedInputLocalPlayerSubsystem` |
+| 4 | **Posesión** | ✅ | `ACameraPawn` en C++ (SpringArm + Camera) y `BP_CameraPawn` como `DefaultPawnClass`. **Corregido respecto de la versión anterior de este doc:** el jugador **no** posee personajes ([D-18](gdd/06-decisiones/registro.md), [`architecture/04-mapa-de-clases.md`](architecture/04-mapa-de-clases.md)). Posee una cámara, y cada figura la mueve su propio `AAIController`. El tema queda igual de demostrado, y de hecho por partida doble |
+| 4 | Raycast | ✅ | `ISelectable` + `GetHitResultUnderCursorByChannel` sobre el canal `Selectable`. Lo implementan `ASpace` y `AProjectCCharacter`; el highlight lo dibuja `BP_Space` |
+| 5 | Diseño de clases | ◐ | jerarquía `Figure` -> `Character` / `Enemy` -> `Adversary`. Hoy existen `AProjectCCharacter` y `ASpace`; falta el resto |
+| 5 | Comunicación entre Blueprints | ◐ | `OnPhaseChanged` ya es un `BlueprintAssignable` en el GameMode. Faltan interfaces y el resto de los dispatchers |
+| 5 | **Levels y SubLevels** | ❌ | **Corregido:** "cada sala es un sublevel" chocaba con [D-21](gdd/06-decisiones/registro.md) (un nivel por misión, grafo sellado al arrancar). Sirve igual **si los sublevels son Always Loaded y no streaming**: así terminan todos los `BeginPlay` antes de que `StartPlay` selle. Con streaming en runtime, un `ASpace` se registra tarde y `UGraphSubsystem` lo loguea como error |
 | 12 | **Data Assets y Data Tables** | Cartas de presión, cartas de botín, skills, tipos de enemigo, stages del jefe | P2 |
 | 12 | **Gameplay Tags** | Tipos de enemigo, fuentes de daño, efectos de carta, condiciones. Es el mecanismo que hace el core agnóstico al tema | P2 |
 | 12 | Save Game | Guardar partida en curso y progresión entre partidas | P2 |
@@ -120,6 +134,35 @@ puede quedar sin un lugar propio en el juego.
 | 13 | Optimización | Presupuestos de performance | P2 |
 | 13 | Packaging | Build jugable entregable | P2 |
 | 14 | C++ | **Adelantado**: el módulo, los servicios como Subsystems, los tipos de datos y los tests de reglas | P1 |
+
+## Los huecos, al 27/8 después de la clase 4
+
+Ordenados por urgencia, no por tamaño. La clase 4 cerró uno entero y mordió otro.
+
+1. **Los 8 ejercicios de Blueprint del profe siguen sin hacerse** (clase 2). Son Blueprint puro
+   —variables, arrays, `ForEachLoop`, structs, Actor Components, `Gate` + `Delay`— y todo eso
+   está resuelto en C++, que es más avanzado pero **no es donde lo van a buscar**. Es el hueco
+   más urgente porque el 1er parcial cubre clases 1-7.
+
+   Lo que **sí** se cerró: los Blueprints ya no son cascarones. `BP_Space` tiene un grafo real
+   (override de `SetHighlight`, función `ApplyHighlight` con un switch de 4 ramas que maneja
+   parámetros de material), `BP_PlayerController_Mission` tiene sus 6 referencias de Input,
+   `BP_CameraPawn` y `BP_Character` traen mallas y valores. `BP_GameState_Mission` y
+   `BP_GameInstance` siguen vacíos, y está bien: todavía no tienen dato que sostener.
+
+   No contradice [D-13](gdd/06-decisiones/registro.md): la arquitectura híbrida sigue en pie. Lo
+   que falta es llevar a Blueprint cosas que ya funcionan, no inventar lógica nueva.
+
+2. ~~**No hay nada visible**~~ — **cerrado el 27/8.** `L_Mission_01` tiene 9 `BP_Space` con malla
+   y material (`M_Space`, con parámetros `Colour` y `Glow`), una figura colocada, y el grafo
+   sella con 9 espacios y 11 aristas. El mapa **no es una retícula**: los grados van de 2 a 4, y
+   hay una "escalera" S1↔S8 que es lejana en geometría y adyacente en el grafo — que es
+   justamente lo que `Claustrophobia` necesita poder leer.
+
+3. **Faltan las físicas de verdad** (clase 3). Son **los dados**, que son mecánica central y no
+   decorado. Cuanto más tarde, más caro: [D-17](gdd/06-decisiones/registro.md) ya fijó que el dado
+   físico *responde* pero no *decide*, así que la costura está pensada, pero no construida.
+   **Pasa a ser el hueco técnico más grande.**
 
 ## Los dos temas que no tenían lugar natural
 
@@ -169,7 +212,7 @@ que la defensa 2 funcione de verdad.
 
 ## Plan de dos fases
 
-### Fase 1 — hasta el 24/9 (36 días)
+### Fase 1 — hasta el 24/9 (28 días)
 
 El loop completo jugable, con reglas en Blueprint y enemigos scripteados. **Los enemigos de
 DMD no necesitan IA para las reglas base**: te siguen al salir de un espacio y te atacan si
@@ -178,12 +221,12 @@ clases 9-10 el trabajo real de reemplazarlo.
 
 Alcance sugerido, más chico que la misión completa:
 
-- Grafo de espacios con 4-6 salas como sublevels
-- 2 personajes con posesión y alternancia (no los 4 todavía)
+- Grafo de espacios con 4-6 salas como sublevels **Always Loaded** (ver [D-21](gdd/06-decisiones/registro.md))
+- 2 personajes movidos por su `AAIController` y una cámara poseída por el jugador (no los 4 todavía)
 - 1 tipo de enemigo, spawn en 1 puerta
 - Dados físicos con las 4 caras y la tirada completa
 - Las 3 barras y los umbrales de trinquete con subida de skill
-- La secuencia de turno completa: 3 acciones, carta de presión, referéndum, fin de turno
+- La secuencia de turno completa: 3 acciones, carta de presión, `Reckoning`, fin de turno en sus 5 pasos
 - HUD en UMG y sonidos
 - Condición de victoria y de derrota
 
@@ -198,7 +241,7 @@ Alcance sugerido, más chico que la misión completa:
 
 ## Riesgos
 
-**El más grande: 36 días, y la fase 1 pide UMG pesado.** El HUD de este juego no es un HUD:
+**El más grande: 28 días, y la fase 1 pide UMG pesado.** El HUD de este juego no es un HUD:
 son 3 barras por personaje, el track del jefe, la pila de descarte visible, las cartas, los
 dados y los skills. Es el ítem que más se subestima y cae justo antes del 1er parcial.
 
@@ -218,12 +261,13 @@ hito adentro del juego, no el juego.
 
 Huecos de **este registro**, no del temario:
 
-- **El temario no está en el repo.** Vive en el chat y en esta matriz derivada. Si la matriz
-  es el contrato, el original tiene que ser un archivo: es lo único que puede invalidar todo
-  lo de acá.
-- **La clase 8 no figura en la matriz.** Puede ser la entrega del parcial o un tema sin
-  registrar.
-- **Las clases 15 a 19 no están desglosadas.** Se conocen las fechas, no los temas.
+- ~~**El temario no está en el repo.**~~ Resuelto el 27/8: transcrito en
+  [`temario.md`](temario.md) desde los PDFs de cátedra, con el detalle de lo dictado en las
+  clases 2 y 3. Ese archivo es el original y le gana a esta matriz si se contradicen.
+- ~~**La clase 8 no figura en la matriz.**~~ Resuelto: clase 8 (24/9) **es** la entrega del
+  1er parcial, no un tema.
+- ~~**Las clases 15 a 19 no están desglosadas.**~~ Resuelto: 15 y 16 son la entrega del 2do
+  parcial, 17 el recuperatorio, 18 libre y 19 el final. Ninguna trae tema nuevo.
 - **Ownership por área** — quién es dueño de qué Blueprints. No es una pregunta sobre el
   equipo: es la lista de áreas, y se puede escribir ya. Los sublevels y los componentes
-  chicos son la parte técnica; esto es la parte acordada.
+  chicos son la parte técnica; esto es la parte acordada. **Sigue abierto.**

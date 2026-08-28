@@ -27,6 +27,7 @@ datos. Los prefijos de asset siguen las convenciones del proyecto (`BP_`, `WBP_`
 | `AMissionGameState` | `BP_GameState_Mission` | `Doom Track`, ronda, personaje activo, mazos, figuras vivas | 3 |
 | `AMissionPlayerController` | `BP_PlayerController_Mission` | selección de figura, cámara, widgets | 3, 4, 7 |
 | `AMissionPlayerState` | — | estadísticas de la partida: `TollTaken`, `RerollsSpent`, `EnemiesKilled`, `CharactersLost`, `SpacesMoved` | 3 |
+| `ACameraPawn` | `BP_CameraPawn` | el encuadre: punto mirado, largo del brazo, yaw. **Es lo único que el jugador posee** | 4 |
 | `AProjectCCharacter` | `BP_Character_01` … `04` | su posición y su presentación | 2, 6 |
 | `AEnemyBase` | `BP_Enemy_*` | su posición y su presentación | 2, 9, 10 |
 | `AEnemyAIController` | `BP_AIC_Enemy` | la decisión de esta activación | 9, 10 |
@@ -76,10 +77,10 @@ subclase Blueprint los tunee sin recompilar.
 |---|---|---|
 | `UWoundsComponent` | `Wounds` actuales y su capacidad | [`barras-y-recursos.md`](../gdd/02-personaje/barras-y-recursos.md) |
 | `UReserveComponent` | `Reserve` disponible | idem |
-| `URatchetComponent` | posición en el track, umbrales cruzados, `Ratchet Card` asignada | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
+| `URatchetComponent` ✅ | posición en el track, umbrales cruzados, `Ratchet Card` asignada | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
 | `USkillsComponent` | nivel de cada skill y los dados bonus ganados | [`skills.md`](../gdd/02-personaje/skills.md) |
 | `UInventoryComponent` | `Trinket`, `Ally` y `Burden` en mano | [`contenido-de-una-mision.md`](../gdd/05-partida/contenido-de-una-mision.md) |
-| `UOccupancyComponent` | en qué `Space` está esta figura | [`mapa-y-espacios.md`](../gdd/01-fundamentos/mapa-y-espacios.md) |
+| `UOccupancyComponent` ✅ | en qué `Space` está esta figura. **Guarda, no valida**: si un movimiento es legal lo decide el `GameMode` | [`mapa-y-espacios.md`](../gdd/01-fundamentos/mapa-y-espacios.md) |
 
 `UWoundsComponent` va tanto en el `Character` como en el `Enemy` y en el `Ally`. Ese reuso entre
 clases que no comparten padre es la razón por la que esto son componentes y no herencia.
@@ -135,7 +136,7 @@ Existen desde el día 1 **con valores puestos a mano**, y se llenan de verdad en
 | `DT_PressureCards` | las 16 cartas de presión | [`reloj-y-avance.md`](../gdd/04-oposicion/reloj-y-avance.md) |
 | `DT_RewardCards` | las 15 de recompensa | [`contenido-de-una-mision.md`](../gdd/05-partida/contenido-de-una-mision.md) |
 | `DT_RatchetCards` | las 8 de trinquete, con sus dos ramas | [`trinquete.md`](../gdd/02-personaje/trinquete.md) |
-| `DT_Skills` | 6 skills × 4 niveles | [`skills.md`](../gdd/02-personaje/skills.md) |
+| `DT_Skills` | 6 skills × **3** niveles = 18 filas (el manual tiene 4 niveles) | [`skills.md`](../gdd/02-personaje/skills.md) |
 | `DA_AdversaryStage` | los 4 stages y sus efectos | [`objetivo-y-adversario.md`](../gdd/04-oposicion/objetivo-y-adversario.md) |
 
 **`DA_MissionConfig` es la costura más importante del proyecto.** Es lo que convierte la clase
@@ -151,7 +152,7 @@ como los Blueprints.
 | `IDamageable` | `Character`, `Servant`, `Creature`, `Adversary`, `Ally` | recibir `Hit` sin saber qué es el destino |
 | `IOccupant` | todo lo que ocupa un `Space` | preguntar y mover ocupación |
 | `IEffectTarget` | figuras, `Space`, mazos | ser apuntado por un efecto de carta |
-| `ISelectable` | `Space`, figuras, dados | ser elegido por el mouse (clase 4) |
+| `ISelectable` ✅ | `Space`, figuras, dados | ser elegido por el mouse (clase 4). Expone **un estado** (`SetHighlight`), no cuatro eventos — [D-24](../gdd/06-decisiones/registro.md) |
 
 Cuatro interfaces cubren casi todo el tráfico lateral del juego. Es deliberado: cada interfaz
 extra es una decisión más al implementar una carta nueva.
