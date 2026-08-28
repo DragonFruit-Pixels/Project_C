@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Core/Selectable.h"
 #include "Space.generated.h"
 
 class UBoxComponent;
@@ -22,7 +23,7 @@ class UBoxComponent;
  * Diseño: design/gdd/01-fundamentos/mapa-y-espacios.md
  */
 UCLASS()
-class PROJECTC_API ASpace : public AActor
+class PROJECTC_API ASpace : public AActor, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -51,6 +52,21 @@ public:
 	/** El volumen que el raycast de selección pega. Perfil de colisión `Space`: sólo query. */
 	UFUNCTION(BlueprintPure, Category = "Space")
 	UBoxComponent* GetBounds() const { return Bounds; }
+
+	/**
+	 * Dónde apoya los pies una figura parada acá: el centro de la base de `Bounds`.
+	 *
+	 * Existe para que quien mueve una figura no tenga que saber cómo está armado el `Space`. Sin
+	 * esto, cada llamador reconstruye el offset a mano y el día que `BP_Space` cambie la altura
+	 * de la caja las figuras se hunden en silencio.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Space")
+	FVector GetFigureAnchorLocation() const;
+
+	// --- ISelectable ---
+
+	virtual bool CanBeSelected_Implementation() const override { return true; }
+	virtual FText GetSelectableName_Implementation() const override;
 
 protected:
 	virtual void BeginPlay() override;

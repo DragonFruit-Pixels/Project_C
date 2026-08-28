@@ -68,6 +68,10 @@ enum class EMissionTurnPhase : uint8
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionPhaseChanged, EMissionTurnPhase, NewPhase);
 
+class ASpace;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnFigureMoved, AActor*, Figure, ASpace*, From, ASpace*, To);
+
 /**
  * El árbitro de la misión: reglas, secuencia de turno, victoria y derrota.
  *
@@ -105,8 +109,39 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Mission")
 	int32 GetActionsRemaining() const { return ActionsRemaining; }
 
+	/**
+	 * Los `Space` a los que `Figure` puede llegar gastando una acción de `Move`.
+	 *
+	 * Existe para que la presentación pinte los destinos **sin reimplementar la regla**. Si el
+	 * HUD calculara su propio alcance, habría dos versiones de "qué es legal" y el día que una
+	 * cambie el jugador vería un destino iluminado que el juego rechaza.
+	 *
+	 * Excluye el espacio de origen: quedarse quieto no es un movimiento, es no gastar la acción.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	TArray<ASpace*> GetLegalDestinations(AActor* Figure) const;
+
+	/**
+	 * Mueve una figura y cobra la acción. Devuelve false y **no cambia nada** si no era legal.
+	 *
+	 * Es el único camino por el que una figura cambia de `Space`. Vive acá y no en el
+	 * `PlayerController` porque decidir es del árbitro: cuando la muevan los enemigos (clase 9)
+	 * van a entrar por esta misma puerta, no por una segunda.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Mission")
+	bool TryMoveFigure(AActor* Figure, ASpace* To);
+
 	UPROPERTY(BlueprintAssignable, Category = "Mission")
 	FOnMissionPhaseChanged OnPhaseChanged;
+
+	/**
+	 * Una figura se movió. Lo escucha la presentación para animar.
+	 *
+	 * La regla no espera a que la animación termine: el movimiento ya pasó cuando esto se emite.
+	 * Ver design/architecture/08-presentacion-y-reglas.md.
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Mission")
+	FOnFigureMoved OnFigureMoved;
 
 protected:
 	/**
@@ -118,6 +153,16 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mission", meta = (ClampMin = "1"))
 	int32 ActionsPerTurn = 3;
+
+	/**
+	 * 3 espacios por acción de `Move` (manual pág. 13).
+	 *
+	 * Rango seguro 2–4: a 4 el kiting se vuelve viable y los enemigos pegajosos dejan de ser una
+	 * amenaza. Mismo dueño y mismo destino que `ActionsPerTurn`:
+	 * design/gdd/07-balance/perillas-y-constantes.md, y DA_MissionConfig cuando exista.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mission", meta = (ClampMin = "1"))
+	int32 SpacesPerMove = 3;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission")
 	EMissionTurnPhase Phase = EMissionTurnPhase::NotStarted;
