@@ -207,6 +207,7 @@ Acompañantes(k)  = unión de Seguidores(s_0 .. s_k−1), descontando los que mu
 
 SneakBudget por acción Move, según Stealth (manual p. 24):
     sin skill = 0   |   nivel 1 = 1   |   nivel 2 = 3   |   nivel 3 = 3   |   nivel 4 = sin límite
+    (el nivel 4 queda fuera de alcance en esta version: el tope real es 3)
 ```
 
 Un esquive gasta 1 del budget, deja **1** enemigo (elección del jugador) en el espacio que se
@@ -344,7 +345,7 @@ nunca se saltea → [`../06-decisiones/abiertas.md`](../06-decisiones/abiertas.m
 | Dados de ataque por enemigo | 1 estándar + 2 bonus (el único bloque visible, manual p. 17) | 1–4 dados totales | El costo por turno de quedarse sucio. **Estándar y bonus no son intercambiables**: los bonus no tienen cara `Toll`, así que subirlos aumenta el daño sin acelerar el trinquete → [`../02-personaje/trinquete.md`](../02-personaje/trinquete.md) |
 | Enemigos invocados por carta | 1 a 2 en los ejemplos del manual (p. 15) | 1–3 | La pendiente de la curva de presión. A 3 por carta, el pool se agota en pocos turnos y el juego se vuelve más fácil de lo esperado justo cuando debería apretar |
 | Proporción de cartas con spawn | Un tercio (afirmación de este documento; **la transcripción no da la composición del mazo**, solo que son 8 cartas por adversario) | 1/4 – 1/2 | Cuán a menudo la presión es "aparecen enemigos" en vez de "te pasa algo". Arriba de 1/2 el mapa se llena antes de que el reloj importe |
-| Budget de `Sneak` por nivel de `Stealth` | 0 / 1 / 3 / 3 / sin límite (manual p. 24) | ±1 por nivel; el nivel 4 es el peligroso | Si la regla de "te siguen" tiene contra o no. El nivel 4 **elimina la regla entera** para ese personaje, que es justamente lo que lo hace un premio de fin de progresión |
+| Budget de `Sneak` por nivel de `Stealth` | 0 / 1 / 3 / 3 / sin límite (manual p. 24) | ±1 por nivel; el nivel 4 es el peligroso, y hoy está fuera de alcance | Si la regla de "te siguen" tiene contra o no. El nivel 4 **elimina la regla entera** para ese personaje, que es justamente lo que lo hace un premio de fin de progresión |
 | Herida del esquive (`Stealth` 3+) | 1 por enemigo esquivado (manual p. 24) | 0–2 | Si escapar también limpia. A 2, un personaje de `Stealth` mata pool completo corriendo y el `Attack` pierde sentido |
 | ¿El `Adversary` sigue al personaje? | **Sin resolver en el manual** | Sí / No | Si el jefe es kiteable. "Sí" permite arrastrarlo lejos del `Objective` y trivializa su presencia; "No" crea zonas seguras a un paso de él |
 

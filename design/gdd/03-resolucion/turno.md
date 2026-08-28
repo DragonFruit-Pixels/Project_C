@@ -245,13 +245,13 @@ acciones_efectivas = acciones_gastables + acciones_gratis
 | Variable | Qué es | Rango |
 |---|---|---|
 | `3` | acciones base del turno (manual, pág. 13) | constante |
-| `acciones_extra` | +1 por `Swiftness` nivel 4 (manual, pág. 25) | 0–1 |
+| `acciones_extra` | +1 por `Swiftness` nivel 4 (manual, pág. 25). ⚠️ *nivel 4 fuera de alcance en esta versión*, así que hoy vale **0** | 0–1 |
 | `acciones_gratis` | 1 `Move` gratis con `Swiftness` nivel 2, 1 ataque a distancia gratis con `Marksman` nivel 4, más lo que den cartas | 0–3 |
 
 Las **acciones libres** de efectos y cartas no entran en ninguna de las dos cuentas: no
 consumen presupuesto y solo se pueden usar en `P1`.
 
-**Ejemplo:** personaje con `Swiftness` nivel 4 y `Marksman` nivel 4.
+**Ejemplo (con el manual completo, no con el alcance de esta versión):** personaje con `Swiftness` nivel 4 y `Marksman` nivel 4.
 `acciones_gastables = 3 + 1 = 4`. `acciones_gratis = 1` (`Move` de `Swiftness` nivel 2, que se
 suma porque los niveles de `Swiftness` no se reemplazan) `+ 1` (ataque de `Marksman` nivel 4)
 `= 2`. Total: **6 acciones efectivas**, el doble del default. Ese es el techo de la economía de

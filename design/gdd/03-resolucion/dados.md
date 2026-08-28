@@ -231,7 +231,7 @@ Hit_efectivos = H + c × min(W, w_max)
 |---|---|---|
 | `H` | `Hit` realmente tirados | 0…N |
 | `W` | `Wild` tirados | 0…N |
-| `c` | multiplicador de la conversión (manual, pág. 24) | 1 en niveles 1–3, 2 en nivel 4 |
+| `c` | multiplicador de la conversión (manual, pág. 24) | 1 en niveles 1–3, 2 en nivel 4 ⚠️ *nivel 4 fuera de alcance en esta versión* |
 | `w_max` | cuántos `Wild` se pueden convertir | 1 en nivel 1, ilimitado en nivel 2+ |
 
 En esperanza, con `w_max` ilimitado: `E[Hit_ef] = N × (p_H + c × p_W)`.
@@ -345,7 +345,7 @@ del orden.
 | Máximo de `Reserve` | 4 (manual, pág. 8) | 3–6 | Cuántos rerolls hay entre dos `Recover`. Interactúa con `Recover`: con máximo 6 y curación de 3 puntos, el techo nunca se alcanza de una sola acción. |
 | Umbrales que dan dado bonus | 4 (manual, pág. 8) | 2–6 | La pendiente de la curva de poder. Con 6, un personaje quemado llega a eficiencia 4.5 y trivializa el combate tardío. |
 | Bonus permanentes en tiradas contra vos mismo | No aplican (manual, pág. 11) | No tocar | Activarlo invierte el signo del trinquete: subir de nivel te haría más frágil al ser atacado y el jugador dejaría de querer `Ratchet`. Rompe [`trinquete.md`](../02-personaje/trinquete.md) entero. |
-| Multiplicador de conversión de `Insight` | 1 en niveles 1–3, 2 en nivel 4 (manual, pág. 24) | 1–2 | Cuánto vale la cara inerte. En nivel 4 con multiplicador 2, la skill equivale a 2 dados bonus que además funcionan contra vos mismo. |
+| Multiplicador de conversión de `Insight` | 1 en niveles 1–3, 2 en nivel 4 (manual, pág. 24). ⚠️ *nivel 4 fuera de alcance en esta versión*, así que hoy es constante 1 | 1–2 | Cuánto vale la cara inerte. En nivel 4 con multiplicador 2, la skill equivale a 2 dados bonus que además funcionan contra vos mismo. |
 
 ## ✅ Criterios de aceptación
 

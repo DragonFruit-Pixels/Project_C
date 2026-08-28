@@ -218,6 +218,13 @@ Y eso pega justo donde más duele, por dos razones que no son obvias:
    **skills que nunca llegan al nivel 4**. La mitad de arriba de las 24 celdas —la que
    `skills.md` llama "la superficie de maestría real del juego"— no se ve nunca.
    → [`../02-personaje/skills.md`](../02-personaje/skills.md)
+
+   > ⚠️ **Este punto no aplica al alcance recortado, y conviene entender por qué.** Con 2 skills
+   > de 3 niveles hay 4 subidas disponibles contra 6 umbrales: la build **siempre se completa**,
+   > y se completa al 4.º umbral. No existe la "media build". El problema deja de ser que la
+   > build no llegue, y pasa a ser que llegue igual jugando de cualquier manera — ver F4 en
+   > [`../02-personaje/skills.md`](../02-personaje/skills.md). El argumento de abajo sigue
+   > valiendo para el manual completo, no para lo que se construye hoy.
 2. **El sacrificio deliberado se queda sin pista.** La estrategia insignia de esta adaptación
    (quemar un personaje a propósito) solo se habilita después de que el adversario se
    manifiesta. Esa ventana se abre siempre a la misma **fracción** de la partida —ver R6— pero
@@ -246,7 +253,8 @@ incompatibles y hay que elegir uno.**
 
 - Si querés conservar **la build** (13,7 turnos propios por personaje), la sesión se duplica.
 - Si querés conservar **el largo de sesión** (27,5 turnos de personaje), la build se queda a
-  la mitad y el nivel 4 de las skills queda decorativo.
+  la mitad y el nivel 4 de las skills queda decorativo. *(Con el alcance recortado no hay
+  nivel 4 y la build se completa siempre, así que esta rama del dilema desaparece.)*
 
 No hay perilla que dé las dos cosas, porque las dos se miden en la misma unidad: turnos.
 

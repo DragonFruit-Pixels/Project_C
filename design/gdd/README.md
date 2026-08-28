@@ -17,6 +17,7 @@ presentación 3D. Reimplementa las mecánicas del juego de mesa *Cthulhu: Death 
 
 | Archivo | Qué contiene |
 |---|---|
+| 🎣 [`00-vision/high-concept.md`](00-vision/high-concept.md) | **Empezá acá.** Logline, pilares, core loop y qué lo hace distinto, en una página |
 | 🎯 [`00-vision/concepto.md`](00-vision/concepto.md) | Qué es el juego y cuál es su decisión central |
 | 📐 [`00-vision/alcance.md`](00-vision/alcance.md) | 1 misión + 1 adversario, y qué implica ese recorte |
 
@@ -33,7 +34,7 @@ presentación 3D. Reimplementa las mecánicas del juego de mesa *Cthulhu: Death 
 |---|---|
 | 📊 [`02-personaje/barras-y-recursos.md`](02-personaje/barras-y-recursos.md) | Wounds, Reserve y Ratchet |
 | ⚙️ [`02-personaje/trinquete.md`](02-personaje/trinquete.md) | **La mecánica central del juego** |
-| 🎓 [`02-personaje/skills.md`](02-personaje/skills.md) | 6 skills × 4 niveles |
+| 🎓 [`02-personaje/skills.md`](02-personaje/skills.md) | El pool de 6 skills. **2 por personaje × 3 niveles** en esta versión; 3 × 4 en el manual |
 
 ### 🎲 03 — Resolución
 

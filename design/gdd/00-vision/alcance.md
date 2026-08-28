@@ -19,7 +19,7 @@ adversario tenés una partida completa, ganable y perdible, no una porción de a
 | Personajes | 4, controlados todos por el jugador |
 | Adversario | 1, con sus 4 stages |
 | Objetivo | 1, más las 2 acciones propias de la misión |
-| Skills | Los 6, con sus 4 niveles cada uno |
+| Skills | El pool de 6, con **3 niveles** cada uno = 18 celdas. Cada personaje lleva **2** (el manual da 3 skills de 4 niveles) → [A-08](../06-decisiones/abiertas.md) |
 
 El inventario contado de contenido está en
 [`05-partida/contenido-de-una-mision.md`](../05-partida/contenido-de-una-mision.md).

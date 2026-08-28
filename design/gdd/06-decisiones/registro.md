@@ -519,6 +519,106 @@ no lo pide.
 clase 1, pero **no figura en ninguna de las 19 clases del cronograma**. Es una inconsistencia del
 material, no del diseño.
 
+## D-24 — La selección es **un estado**, no cuatro eventos
+
+**2026-08-27**
+
+`ISelectable` expone `SetHighlight(ESelectionHighlight)` —`None`, `Legal`, `Hovered`,
+`Selected`— en vez de `OnHoverBegin` / `OnHoverEnd` / `OnSelected` / `OnDeselected`. Quién decide
+el estado es `AMissionPlayerController`, con precedencia `Selected` > `Hovered` > `Legal`.
+
+**Por qué:** con cuatro eventos, cada implementador tiene que reconstruir el estado a partir de
+la secuencia de avisos, y el primer caso raro lo rompe: hoverear algo que ya está seleccionado
+manda `OnHoverBegin`, y al salir el objeto no sabe si volver a "normal" o a "seleccionado". Con
+un estado, el único que conoce las tres cosas a la vez decide una vez y el Blueprint sólo dibuja.
+
+**Descarta:** reaccionar a la *transición* (un sonido sólo al empezar el hover) sin comparar
+contra el estado anterior. Es barato de agregar si hace falta; el bug del resaltado huérfano no
+lo era.
+
+---
+
+## D-25 — Dos excepciones a "no hay Tick", las dos en presentación
+
+**2026-08-27**
+
+`ACameraPawn` tickea para interpolar pan, zoom y orbit. `AMissionPlayerController::PlayerTick`
+traza bajo el cursor una vez por frame para el hover. Nada más del proyecto tickea.
+
+**Por qué:** la regla de `01-por-donde-se-empieza.md` es sobre las **reglas** — que ningún estado
+de juego dependa del paso del tiempo. Estas dos son presentación pura y no tocan estado. Sin
+interpolación la cámara salta; trazando sólo cuando el mouse se mueve, mover la cámara con el
+mouse quieto deja el resaltado pegado en el espacio equivocado.
+
+**Descarta:** poder decir "el proyecto no usa Tick" sin matices. A cambio, la frase que queda es
+verificable: *ninguna clase de reglas tickea*.
+
+---
+
+## D-26 — La figura lleva un volumen de selección aparte de su cápsula
+
+**2026-08-27**
+
+`AProjectCCharacter` suma un `USphereComponent SelectionBounds` con perfil `Figure`. La cápsula
+conserva su perfil de movimiento.
+
+**Por qué:** el perfil `Figure` es `QueryOnly` e ignora todo salvo el canal `Selectable`.
+Pisárselo a la cápsula deja al personaje sin piso, y el síntoma aparecería recién con la
+locomoción de la clase 6 — muy lejos de la causa. Es además el patrón que `ASpace` ya usa con su
+`Bounds`: un componente cuyo único trabajo es ser trazable.
+
+**Descarta:** un componente menos por figura. Se paga barato y compra que colisión y selección no
+compartan destino.
+
+---
+
+## D-27 — Los placeholders salen de `/Engine/BasicShapes`, no de Meshy
+
+**2026-08-27**
+
+Un `Space` es un Cube escalado y una figura es un Cylinder, los dos del contenido del motor. El
+mannequin (`SKM_Manny`) **no** viene con el engine sino con el content pack Third Person, y esa
+decisión se pospone a la clase 6, cuando el Animation Blueprint lo necesite de verdad.
+
+**Por qué:** las formas básicas no pesan en el repo, no gastan créditos y no hay nada que
+esperar. Y sobre todo: con un `Space` que se ve lindo se deja de mirar si el grafo anda. Las
+reglas se prueban antes que el arte.
+
+**Descarta:** que la demo se vea presentable. Es a propósito.
+
+---
+
+## D-28 — 2 skills por personaje y 3 niveles, provisional
+
+**2026-08-27**
+
+El manual da 3 skills por personaje (1 de firma + 2 de un pool común de 6) con 4 niveles cada
+una: 24 celdas. Esta versión baja a **2 skills** y **3 niveles**, y construye 18 celdas. El
+nivel 4 no se borra de la documentación: se marca `fuera de alcance`.
+
+Qué 4 personajes entran y qué 2 skills lleva cada uno lo decide el diseñador a mano, y sigue
+abierto → [A-08](abiertas.md).
+
+**Por qué:** volumen de contenido para la entrega de la cursada. 24 celdas de skill, cada una
+con su efecto, su balance y su fila de Data Table, es la pieza de contenido más grande del
+proyecto y la que menos aporta a demostrar los temas del temario.
+
+**Descarta, y hay que saberlo:** la elección de build. Con 6 umbrales de `Ratchet` que dan 1
+nivel cada uno y sólo 4 subidas disponibles, la única repartición legal es `(3,3)` — **toda
+partida de todo personaje termina con sus 2 skills al máximo**, y dos umbrales pierden su
+subida. La decisión pasa a ser de orden y se disuelve al 4.º umbral.
+
+Eso contradice lo que el [high concept](../00-vision/high-concept.md) declara como motor de
+rejugabilidad ("qué subís y en qué orden") y neutraliza el argumento 1 de
+[`reloj-y-avance.md`](../04-oposicion/reloj-y-avance.md). Se acepta a sabiendas: es contenido
+contra variedad, y hoy pesa más entregar.
+
+**Cómo se revierte, si en playtest molesta:** volver a 4 niveles, o dejar 3 niveles y subir a 3
+skills. Las dos dan techo 6 y encajan exacto con los 6 umbrales. Ninguna toca código: son
+filas de `DT_Skills`.
+
+---
+
 ---
 
 ## Plantilla para agregar

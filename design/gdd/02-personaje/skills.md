@@ -2,14 +2,27 @@
 
 ← [Índice](../README.md)
 
+> ## ⚠️ Alcance de esta versión
+>
+> El manual da **3 skills por personaje** —1 de firma y 2 de un pool común de 6— con **4
+> niveles** cada una. Esta versión implementa **2 skills por personaje** y **3 niveles**: se
+> quita el nivel 4.
+>
+> **Todo lo que este documento dice del nivel 4 se conserva, marcado `fuera de alcance`.** No se
+> borra: es transcripción del manual y sigue siendo cierta del juego original. Si el nivel 4
+> vuelve, vuelve leyendo, no reconstruyendo.
+>
+> Qué 4 personajes entran y qué 2 skills lleva cada uno lo decide el diseñador a mano →
+> [A-08](../06-decisiones/abiertas.md).
+
 ## Estructura
 
-Cada `Character` tiene **3 skills**:
+Cada `Character` tiene **2 skills** (3 en el manual).
 
-- La primera es su **skill de firma**, única de ese personaje.
-- Las otras **2 salen de un pool común de 6**, así que dos personajes pueden compartirlas.
+El pool común sigue siendo de **6**, así que dos personajes pueden compartir una. Si esas 2
+son *firma + 1 común* o *2 comunes* está sin decidir → [A-08](../06-decisiones/abiertas.md).
 
-Cada skill tiene **4 niveles**. Todos arrancan en nivel 1.
+Cada skill tiene **3 niveles** (4 en el manual). Todos arrancan en nivel 1.
 
 **Se sube exactamente de una forma: cruzando un umbral de
 [`Ratchet`](trinquete.md).** Cada umbral da 1 nivel, a elección del jugador.
@@ -40,10 +53,13 @@ personaje no tenía esa skill, la gana en nivel 1; si ya la tenía, sube 1. Al p
 | `Swiftness` | Más movimiento y más acciones por turno | Economía de acciones |
 | `Toughness` | Reduce daño recibido y pérdida de `Ratchet` | Defensa |
 
-## Las 24 celdas
+## Las celdas
 
-**6 skills × 4 niveles = 24 efectos distintos.** Esa es la superficie de maestría real del
-juego: es donde el jugador aprende, compara y arma su build.
+**El manual tiene 24: 6 skills × 4 niveles.** Esa es la superficie de maestría del juego
+original: es donde el jugador aprende, compara y arma su build.
+
+**Esta versión construye 18**, porque el nivel 4 queda fuera de alcance. El pool sigue en 6
+skills; lo que se recorta es la altura, no el ancho.
 
 **El detalle exacto de las 24 celdas ya está transcripto** en
 `docs/rulebook/rulebook.md`, páginas 24 y 25. No se duplica acá a propósito: si estuviera en
@@ -195,19 +211,41 @@ exactamente `T`.
 
 ```
 Niveles ganados = U    (U = umbrales de Ratchet cruzados; 1 nivel por umbral)
-Σ (Lv_i − 1) = U       con Lv_i ∈ [1, 4] y 3 skills  →  techo de U útil = 9
+
+Esta versión:  Σ (Lv_i − 1) = U   con Lv_i ∈ [1, 3] y 2 skills  →  techo de U útil = 4
+El manual:     Σ (Lv_i − 1) = U   con Lv_i ∈ [1, 4] y 3 skills  →  techo de U útil = 9
 ```
 
-**Cuántos umbrales tiene el track NO está en el manual.** La transcripción solo dice que 4 de
-ellos dan dado bonus (p.8); el total está impreso en el tablero de personaje, que la
-transcripción no incluye. `trinquete.md` estima 4-6 y esa estimación **no tiene fuente**. Es
-el número que decide si las 24 celdas son alcanzables o decorativas: con 5 umbrales, un
-personaje toca 5 de las 9 subidas posibles y no ve un nivel 4 salvo que se dedique a uno solo.
+**El track tiene 6 umbrales**, en las casillas 4, 8, 12, 15, 18 y 19
+([`trinquete.md`](trinquete.md), verificado contra el componente y cubierto por
+`ProjectC.Rules.Ratchet.Thresholds`). O sea `U = 6` en una partida que llega al final.
 
-**Ejemplo con U = 5.** Las reparticiones legales son exactamente tres: `(4,3,1)`, `(4,2,2)` y
-`(3,3,2)`. Y la decisión no es cosmética: si una de las skills es `Toughness`, dejarla en 1
-(opción `4,3,1`) es **mejor** para un personaje que quiere subir `Ratchet`, porque
-`Toughness` 2+ le frena la progresión. Ahí está la rama donde subir es empeorar.
+### 🔴 La consecuencia del recorte: la decisión del umbral desaparece
+
+Con el manual, `U = 6` contra un techo de 9: el jugador gasta 6 de 9 subidas posibles y
+**elige cuáles**. Cada partida termina distinta, y eso es lo que hace que valga rejugar.
+
+Con 2 skills de 3 niveles el techo es 4, y con `U = 6`:
+
+- A partir del 5.º umbral **no queda nada que subir**. Dos umbrales por partida pierden su
+  subida (siguen dando la `Ratchet Card` y el dado bonus donde corresponda).
+- Y peor: la única repartición legal de 4 entre 2 skills con techo 2 cada una es **`(3,3)`**.
+  No hay alternativa. **Toda partida de todo personaje termina con sus 2 skills al máximo.**
+
+La decisión pasa a ser sólo de **orden**, y el orden se disuelve al 4.º umbral. Eso contradice
+lo que este documento afirma más arriba —"subir no siempre es mejorar"— y lo que el
+[high concept](../00-vision/high-concept.md) declara como motor de rejugabilidad: *"qué subís y
+en qué orden"*.
+
+**Las dos salidas baratas**, si en playtest esto molesta: volver a 4 niveles (techo 6, encaje
+exacto con los 6 umbrales) o dejar 3 niveles y dar 3 skills (techo 6 también). Las dos
+restauran la elección sin tocar el resto del sistema. → [A-08](../06-decisiones/abiertas.md)
+
+**Ejemplo con el manual, U = 5.** Las reparticiones legales son exactamente tres: `(4,3,1)`,
+`(4,2,2)` y `(3,3,2)`. Y la decisión no es cosmética: si una de las skills es `Toughness`,
+dejarla en 1 (opción `4,3,1`) es **mejor** para un personaje que quiere subir `Ratchet`, porque
+`Toughness` 2+ le frena la progresión. Ahí está la rama donde subir es empeorar. Nada de esto
+existe en el alcance recortado.
 
 ### F5 — Mitigación de `Toughness`
 
@@ -323,10 +361,10 @@ gratis atacando en tu espacio. El `Ally` absorbe una herida y se descarta en mit
 
 | Caso | Qué pasa |
 |---|---|
-| Cruzás un umbral con las 3 skills en nivel 4 | **El manual no lo cubre.** Decisión: el umbral dispara igual la `Ratchet Card` y el dado bonus si corresponde, y la subida de nivel **se pierde sin compensación**. Solo puede pasar si el track tiene más de 9 umbrales, número que el manual no da. |
-| Un `Ally` da nivel de un skill que ya está en 4 | **No cubierto.** Decisión: queda en 4 (el `min` de F9 corta), el nivel se desperdicia, y al perder el `Ally` **no baja a 3**. La implementación tiene que guardar `Lv_base` y `Lv_ef` separados o se rompe justo acá. |
-| Un `Ally` da un skill que el personaje no tiene | La gana en nivel 1 y tiene **4 skills** mientras lo conserve (manual p.16, explícito). |
-| Se pierde ese `Ally` | La skill **desaparece entera**, no queda en nivel 1. Vuelve a tener 3 skills. |
+| Cruzás un umbral con todas las skills al máximo | **El manual no lo cubre.** Decisión: el umbral dispara igual la `Ratchet Card` y el dado bonus si corresponde, y la subida de nivel **se pierde sin compensación**. En el manual esto era casi imposible (haría falta un track de más de 9 umbrales). **Con el alcance recortado pasa en todas las partidas**, dos veces: hay 6 umbrales y sólo 4 subidas. Ver F4. |
+| Un `Ally` da nivel de un skill que ya está al tope (3 acá, 4 en el manual) | **No cubierto.** Decisión: queda en el tope (el `min` de F9 corta), el nivel se desperdicia, y al perder el `Ally` **no baja**. La implementación tiene que guardar `Lv_base` y `Lv_ef` separados o se rompe justo acá. |
+| Un `Ally` da un skill que el personaje no tiene | La gana en nivel 1 y tiene **1 skill más** mientras lo conserve —3 en esta versión, 4 en el manual (p.16, explícito). |
+| Se pierde ese `Ally` | La skill **desaparece entera**, no queda en nivel 1. Vuelve a tener 2 skills. |
 | Se pierde el `Ally` después de haber usado el efecto del nivel que daba | **No cubierto.** Decisión: lo ya aplicado no se revierte; el nivel baja para la próxima tirada. |
 | `Insight` en una tirada contra vos mismo | **Permitido explícitamente** (p.24: "including rolls against themself, if the player wants"). Cada `Wild` que contás como éxito ahí te pega a vos. Con L3 es un canje deliberado: heridas a cambio de `Reserve`. |
 | Dos efectos quieren convertir la misma cara | Prohibido. Una cara convertida deja de contar como la original y no se puede convertir dos veces ([`../03-resolucion/dados.md`](../03-resolucion/dados.md)). |
@@ -376,12 +414,19 @@ gratis atacando en tu espacio. El `Ally` absorbe una herida y se descarta en mit
 | Reducción de `Ratchet` de `Toughness` L2-L4 | 1 | 0-1 | **La perilla más delicada del set.** En 0, `Toughness` deja de frenar la progresión y deja de ser una decisión interesante. En 2, un personaje con `Toughness` 4 casi no sube `Ratchet`, no cruza umbrales y nunca construye build: rompe [`trinquete.md`](trinquete.md) de raíz. |
 | Estructura suma/reemplazo por nivel (F0) | Según manual | **No tocar.** Es la única fila de esta tabla sin rango seguro: cualquier cambio es rediseño de la skill, no balanceo | Es el ajuste más barato de hacer y el más peligroso. Volver `Toughness` sumativa acumula reroll gratis + reducción + alcance total y la convierte en la mejor skill del juego sin tocar un solo número. |
 | Niveles que da un `Ally` | 1 | 1 | Si sube a 2, el `Ally` compite con el umbral como fuente de progresión, y el umbral es la **única** fuente que el diseño quiere tener. |
-| Tope de nivel efectivo con `Ally` | 4 | 4 | Permitir 5 abre una celda 25 que no existe en el manual y obligaría a inventar 6 efectos nuevos. |
+| Tope de nivel efectivo con `Ally` | 3 en esta versión (4 en el manual) | no subir | Pasarse del tope abre una celda que no existe en el manual y obligaría a inventar efectos nuevos. |
 
 ## ✅ Criterios de aceptación
 
-1. Un personaje nuevo arranca con exactamente **3 skills, todas en nivel 1**: 1 de firma y 2
-   del pool común de 6, sin repetir.
+> **Los criterios que nombran un nivel 4 quedan `fuera de alcance` en esta versión** —el 3
+> (`Insight` 4), el 5 (`Toughness` 4), el 6 (`Brawling` 4), el 8 (`Stealth` 4), el 9
+> (`Swiftness` 4) y el 10 (`Marksman` 4). Se conservan escritos porque son transcripción
+> verificada del manual y son lo que hay que testear el día que el nivel 4 vuelva. Un QA que
+> corra esta versión los saltea; no los da por fallidos.
+
+1. Un personaje nuevo arranca con exactamente **2 skills, las dos en nivel 1**, tomadas del
+   catálogo sin repetir. Cuáles son para cada personaje → [A-08](../06-decisiones/abiertas.md).
+   *(El manual dice 3: 1 de firma y 2 del pool común.)*
 2. Cruzar un umbral de `Ratchet` sube **exactamente 1 nivel de 1 skill** elegida por el
    jugador. Ninguna otra fuente — matar enemigos, `Reward Deck`, cumplir el `Objective`,
    `Recover` — sube niveles.
@@ -409,8 +454,9 @@ gratis atacando en tu espacio. El `Ally` absorbe una herida y se descarta en mit
     distancia alcance. Con `Marksman` 4, el ataque gratis se rechaza si el único objetivo
     disponible está en el espacio del personaje.
 11. Perder un `Ally` que daba `Brawling` a un personaje **que no tenía `Brawling`** le quita
-    la skill entera: vuelve a tener 3 skills, no queda con `Brawling` 1. Si el personaje
-    tenía `Brawling` 4 antes del `Ally`, sigue en **4** después de perderlo.
-12. Cruzar un umbral con las 3 skills en nivel 4 dispara la `Ratchet Card` y el dado bonus si
+    la skill entera: vuelve a tener 2 skills, no queda con `Brawling` 1. Si el personaje
+    tenía `Brawling` al tope antes del `Ally`, sigue al tope después de perderlo.
+12. Cruzar un umbral con las 2 skills en nivel 3 dispara la `Ratchet Card` y el dado bonus si
     corresponde, y registra la subida como **perdida**: el juego no bloquea el umbral ni
-    guarda el nivel para después.
+    guarda el nivel para después. **Este criterio se verifica en toda partida completa**, no es
+    un caso raro: hay 6 umbrales y 4 subidas (F4).

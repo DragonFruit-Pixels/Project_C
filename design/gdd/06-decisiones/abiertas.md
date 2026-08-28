@@ -92,3 +92,35 @@ rompe el jugador, es una herramienta.
 → [`../01-fundamentos/mapa-y-espacios.md`](../01-fundamentos/mapa-y-espacios.md)
 
 ---
+
+## A-08 — Qué 4 personajes entran, y qué 2 skills lleva cada uno
+
+**Arrastra:** bloquea `DT_Skills` y las fichas de personaje. No bloquea nada de código.
+
+El manual da 3 skills por personaje —1 de firma y 2 de un pool común de 6— con 4 niveles cada
+una. Para esta versión se baja a **2 skills por personaje**. La asignación concreta la hace el
+diseñador a mano, personaje por personaje: no hay regla que la derive.
+
+**Lo que queda dentro de esta misma decisión:** si esas 2 son *firma + 1 común* o *2 comunes*.
+No es cosmético — si se cae la de firma, los 4 personajes quedan mecánicamente
+intercambiables, y con ellos se cae la jugada de quemar deliberadamente a uno, que solo duele
+si ese personaje hacía algo que los otros no.
+
+**Y cuántos niveles quedan, que es lo que puede romper el reloj de progresión.** Con 6
+umbrales de `Ratchet` que dan 1 nivel cada uno:
+
+| Forma | Subidas disponibles | Umbrales que pierden su subida |
+|---|---|---|
+| 3 skills × 4 niveles (manual) | 9 | 0, y sobran 3 subidas sin usar |
+| **2 skills × 4 niveles** | **6** | **0, encaje exacto** |
+| 2 skills × 3 niveles | 4 | **2** |
+
+Con 3 niveles, dos umbrales de cada partida pierden su subida de skill. **No quedan en nada** —
+siguen disparando la `Ratchet Card` y el dado bonus donde corresponda— pero el propio
+[`skills.md`](../02-personaje/skills.md) trata ese caso como imposible ("solo puede pasar si el
+track tiene más de 9 umbrales") y pasaría en todas las partidas.
+
+→ [`../02-personaje/skills.md`](../02-personaje/skills.md),
+[`../02-personaje/trinquete.md`](../02-personaje/trinquete.md)
+
+---

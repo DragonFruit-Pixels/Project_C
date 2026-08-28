@@ -2,7 +2,7 @@
 
 ← [Índice](../README.md)
 
-Cada `Character` tiene **tres barras** y **tres skills**. Las skills están en
+Cada `Character` tiene **tres barras** y **dos skills** (tres en el manual). Las skills están en
 [`skills.md`](skills.md); acá van las barras.
 
 ## Las tres barras

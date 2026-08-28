@@ -39,6 +39,17 @@ balancearlo. El default es el valor original.
 | Capacidad de `Wounds` | **4** — la 5.a es letal | componente, ver abajo |
 | Capacidad de `Reserve` | **4** | pág. 8 + componente |
 
+### Dónde esta versión se aparta del manual
+
+La tabla de arriba es **transcripción**: dice lo que el juego original hace y no se toca. Esto
+es lo que este proyecto implementa distinto, y es una decisión de alcance, no de balance.
+
+| Constante | Manual | Esta versión | Por qué |
+|---|---|---|---|
+| Skills por personaje | 3 (1 de firma + 2 comunes) | **2** | Recorte de alcance para la cursada → [A-08](../06-decisiones/abiertas.md) |
+| Niveles por skill | 4 | **3** | Se quita el nivel 4. Baja el contenido a construir de 24 celdas a 18 |
+| Subidas de skill disponibles por partida | 9, contra 6 umbrales | **4**, contra 6 umbrales | **Consecuencia, no decisión.** Dos umbrales por partida pierden su subida, y la repartición legal pasa a ser única: `(3,3)`. La elección de build desaparece — ver F4 en [`skills.md`](../02-personaje/skills.md) |
+
 ---
 
 ## Perillas de balanceo

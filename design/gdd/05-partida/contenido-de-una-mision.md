@@ -17,12 +17,12 @@ checklist de producción y como estimación de esfuerzo.
 | `Gate` en el mapa | **3** | Layout |
 | Pool máximo de `Servant` | **10** | Regla |
 | Personajes jugables | **4** | Diseño propio |
-| Skills comunes | **6**, de 4 niveles cada uno = **24 efectos** | **Ya especificado** |
+| Skills comunes | **6**, de **3** niveles cada uno = **18 efectos** a construir (el manual tiene 4 niveles = 24) | **Ya especificado** |
 | Espacios del `Doom Track` | **8** | Regla |
 
 ## Lo que NO hay que diseñar
 
-**Las 24 celdas de skills ya están escritas.** Están en `docs/rulebook/rulebook.md`, páginas
+**Las celdas de skills ya están escritas** — las 24 del manual, de las que esta versión construye las 18 de los niveles 1 a 3. Están en `docs/rulebook/rulebook.md`, páginas
 24 y 25, transcriptas del manual original. Es el sistema más profundo del juego y viene
 resuelto.
 
