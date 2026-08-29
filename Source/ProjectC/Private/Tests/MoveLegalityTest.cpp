@@ -6,25 +6,25 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 /**
- * La regla de legalidad de la accion `Move`.
+ * The legality rule of the `Move` action.
  *
- * `AMissionGameMode::GetLegalDestinations` es lo que decide a donde puede ir una figura, y lo
- * decide llamando a `FGraphMath::Reachable` con las perillas de
- * design/gdd/07-balance/perillas-y-constantes.md: 3 espacios por `Move`.
+ * `AMissionGameMode::GetLegalDestinations` is what decides where a figure may go, and it decides
+ * by calling `FGraphMath::Reachable` with the knobs from
+ * design/gdd/07-balance/perillas-y-constantes.md: 3 spaces per `Move`.
  *
- * El GameMode necesita mundo y no se puede instanciar en un test de unidad. Lo que si se testea
- * es **la regla que consulta**, que es donde vive la logica: si el alcance esta bien, lo unico
- * que queda del lado del GameMode es cobrar la accion y sacar el origen de la lista.
+ * The GameMode needs a world and cannot be instantiated in a unit test. What is tested is **the
+ * rule it queries**, which is where the logic lives: if the range is right, all that is left on
+ * the GameMode's side is charging the action and dropping the origin from the list.
  *
- * Reusa el grafo de ejemplo de design/gdd/01-fundamentos/mapa-y-espacios.md, el mismo que ya usa
- * GraphMathTest.cpp. No se invento ningun caso.
+ * It reuses the example graph from design/gdd/01-fundamentos/mapa-y-espacios.md, the same one
+ * GraphMathTest.cpp already uses. No case was invented.
  */
 
 namespace
 {
 	/**
-	 *   S1 - S2 - S3 - S4 - S5          escalera:  S1 <-> S4
-	 *    |                              bloqueo:   pasaje S1 - S2
+	 *   S1 - S2 - S3 - S4 - S5          stairway: S1 <-> S4
+	 *    |                              block:    passage S1 - S2
 	 *   S6 - S7
 	 */
 	enum : int32 { S1 = 0, S2, S3, S4, S5, S6, S7, NodeCount };
@@ -38,11 +38,11 @@ namespace
 			FGraphEdge(S4, S5),
 			FGraphEdge(S1, S6),
 			FGraphEdge(S6, S7),
-			FGraphEdge(S1, S4), // escalera: adyacentes "para todo efecto"
+			FGraphEdge(S1, S4), // stairway: adjacent "for all purposes"
 		};
 	}
 
-	/** La perilla real del GDD: 3 espacios por accion de `Move` (manual pag. 13). */
+	/** The real GDD knob: 3 spaces per `Move` action (rulebook p. 13). */
 	constexpr int32 SpacesPerMove = 3;
 }
 
@@ -56,71 +56,72 @@ bool FMoveLegalityTest::RunTest(const FString& Parameters)
 	const TArray<FGraphEdge> Edges = ExampleGraph();
 	const FGraphQuery Movement = FGraphQuery::ForMovement();
 
-	// --- A un paso desde S1 ---
+	// --- One step from S1 ---
 	//
-	// Un solo caso verifica las dos reglas raras del mapa a la vez: el pasaje S1-S2 esta
-	// bloqueado, asi que S2 **no** entra aunque sea vecino; y la escalera S1-S4 es una arista
-	// como cualquier otra, asi que S4 **si** entra aunque este del otro lado del tablero.
+	// A single case verifies both of the map's odd rules at once: the S1-S2 passage is blocked, so
+	// S2 does **not** make it in even though it is a neighbour; and the S1-S4 stairway is an edge
+	// like any other, so S4 **does** make it in even though it is across the board.
 	{
 		const TArray<int32> OneStep = FGraphMath::Reachable(NodeCount, Edges, S1, 1, Movement);
 
-		TestTrue(TEXT("a 1 paso se llega a S6"), OneStep.Contains(S6));
-		TestTrue(TEXT("a 1 paso se llega a S4 por la escalera"), OneStep.Contains(S4));
-		TestFalse(TEXT("a 1 paso NO se llega a S2: el pasaje esta bloqueado"), OneStep.Contains(S2));
-		TestFalse(TEXT("a 1 paso NO se llega a S5: esta a 2"), OneStep.Contains(S5));
+		TestTrue(TEXT("at 1 step S6 is reachable"), OneStep.Contains(S6));
+		TestTrue(TEXT("at 1 step S4 is reachable via the stairway"), OneStep.Contains(S4));
+		TestFalse(TEXT("at 1 step S2 is NOT reachable: the passage is blocked"), OneStep.Contains(S2));
+		TestFalse(TEXT("at 1 step S5 is NOT reachable: it is at 2"), OneStep.Contains(S5));
 
-		// El origen entra porque d(a,a)=0 <= MaxSteps. Es correcto para "que espacios alcanzo",
-		// y es exactamente por eso que GetLegalDestinations lo saca despues: quedarse quieto no
-		// es un destino, es no gastar la accion.
-		TestTrue(TEXT("Reachable incluye el origen"), OneStep.Contains(S1));
-		// {S1, S4, S6} y nada mas. El conteo esta aparte de los Contains a proposito: los Contains
-		// verifican que este lo que tiene que estar, el conteo verifica que NO este nada mas.
-		TestEqual(TEXT("a 1 paso desde S1 hay 3 nodos contando el origen"), OneStep.Num(), 3);
+		// The origin is included because d(a,a)=0 <= MaxSteps. That is correct for "which spaces
+		// can I reach", and it is exactly why GetLegalDestinations drops it afterwards: standing
+		// still is not a destination, it is not spending the action.
+		TestTrue(TEXT("Reachable includes the origin"), OneStep.Contains(S1));
+		// {S1, S4, S6} and nothing else. The count is kept apart from the Contains on purpose: the
+		// Contains verify that what should be there is there, the count verifies nothing else is.
+		TestEqual(TEXT("at 1 step from S1 there are 3 nodes counting the origin"), OneStep.Num(), 3);
 	}
 
-	// --- El permiso de ignorar bloqueos es de la consulta, no del mapa ---
+	// --- The permission to ignore blocks belongs to the query, not to the map ---
 	//
-	// Mismo tablero, misma casilla, dos figuras distintas y dos conjuntos de destinos distintos.
+	// Same board, same tile, two different figures and two different destination sets.
 	{
 		FGraphQuery Ignoring = FGraphQuery::ForMovement();
 		Ignoring.bIgnoresBlocked = true;
 
 		const TArray<int32> OneStep = FGraphMath::Reachable(NodeCount, Edges, S1, 1, Ignoring);
 
-		TestTrue(TEXT("ignorando bloqueos, a 1 paso si se llega a S2"), OneStep.Contains(S2));
+		TestTrue(TEXT("ignoring blocks, at 1 step S2 is reachable"), OneStep.Contains(S2));
 	}
 
-	// --- Sin pasos no hay movimiento ---
+	// --- With no steps there is no movement ---
 	{
 		const TArray<int32> NoSteps = FGraphMath::Reachable(NodeCount, Edges, S1, 0, Movement);
 
-		TestEqual(TEXT("con 0 pasos solo queda el origen"), NoSteps.Num(), 1);
-		TestTrue(TEXT("y ese origen es S1"), NoSteps.Contains(S1));
+		TestEqual(TEXT("with 0 steps only the origin is left"), NoSteps.Num(), 1);
+		TestTrue(TEXT("and that origin is S1"), NoSteps.Contains(S1));
 	}
 
-	// --- Con la perilla real, el BFS no se corta antes de tiempo ---
+	// --- With the real knob, the BFS does not cut off early ---
 	//
-	// A 3 pasos desde S1 se llega a todo el tablero, incluido S2: bloqueado de frente, pero
-	// alcanzable rodeando por la escalera (S1 -> S4 -> S3 -> S2). Que un bloqueo no aisle un
-	// espacio sino que lo encarezca es la propiedad que hace que las paredes sean interesantes.
+	// At 3 steps from S1 the whole board is reachable, S2 included: blocked head-on, but reachable
+	// by going round via the stairway (S1 -> S4 -> S3 -> S2). That a block makes a space more
+	// expensive rather than isolating it is the property that makes walls interesting.
 	{
 		const TArray<int32> ThreeSteps = FGraphMath::Reachable(NodeCount, Edges, S1, SpacesPerMove, Movement);
 
-		TestEqual(TEXT("a 3 pasos desde S1 se alcanza el tablero entero"), ThreeSteps.Num(), NodeCount);
-		TestTrue(TEXT("S2 se alcanza rodeando el pasaje bloqueado"), ThreeSteps.Contains(S2));
+		TestEqual(TEXT("at 3 steps from S1 the whole board is reachable"), ThreeSteps.Num(), NodeCount);
+		TestTrue(TEXT("S2 is reached by going round the blocked passage"), ThreeSteps.Contains(S2));
 	}
 
-	// --- El alcance crece con los pasos, nunca se achica ---
+	// --- Range grows with the steps, it never shrinks ---
 	//
-	// Es la propiedad que hace que subir la perilla de 3 a 4 no pueda quitar destinos. Barata de
-	// verificar y es la que se rompe si alguien "optimiza" el BFS con una poda mal puesta.
+	// This is the property that makes raising the knob from 3 to 4 unable to remove destinations.
+	// Cheap to verify, and the one that breaks if someone "optimises" the BFS with a misplaced
+	// prune.
 	{
 		int32 Previous = 0;
 		for (int32 Steps = 0; Steps <= NodeCount; ++Steps)
 		{
 			const int32 Count = FGraphMath::Reachable(NodeCount, Edges, S1, Steps, Movement).Num();
 			TestTrue(
-				FString::Printf(TEXT("el alcance a %d pasos no es menor que a %d"), Steps, Steps - 1),
+				FString::Printf(TEXT("the range at %d steps is not smaller than at %d"), Steps, Steps - 1),
 				Count >= Previous);
 			Previous = Count;
 		}
