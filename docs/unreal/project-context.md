@@ -10,7 +10,14 @@
 - **Maintainer**: Sebastián Luser (solo dev)
 - **Drafted from**: codebase scan (`.uproject`, `Config/*.ini`, launcher manifest)
 
-> **Read this first**: the game concept does not exist yet. Everything below describes the
+> **Outdated in one respect**: the concept **now exists**. It lives in
+> [`design/gdd/`](../../design/gdd/README.md), and how it maps onto the engine lives in
+> [`design/architecture/`](../../design/architecture/README.md). Several **TBD**s below are
+> already answered there: single player, **hybrid C++ + Blueprint** (D-13), turn-based with 3D
+> presentation. This
+> file has not been regenerated since — refresh it with `/ue-project-context`.
+>
+> **Read this first**: the game concept did not exist when this was written. Everything below describes the
 > *technical* project as it stands. Anything that depends on what the game actually is
 > carries a **TBD** and will be settled after `/brainstorm`. Do not infer intent from the
 > template defaults recorded here — they were inherited, not chosen.
@@ -33,15 +40,24 @@ Also installed alongside the engine: QuixelBridge 5.8, Fab plugin 5.8.
 
 ## 2. Module Structure
 
-**No C++ modules.** The project is Blueprint-only and has no `Source/` directory.
+**The `ProjectC` module exists and builds.** D-13 (2026-08-20) moved the project to a hybrid
+C++ + Blueprint architecture, and the module was created the same day: `Project_CEditor` compiles
+and links, and two automation tests pass. Layout is `Public/` + `Private/` — required, not
+stylistic, see `design/architecture/06-limite-cpp-blueprint.md`.
 
 | Module | Type | Primary? | Public deps | Private deps |
 |--------|------|----------|-------------|--------------|
-| — | — | — | — | — |
+| `ProjectC` | Runtime | yes | `Core`, `CoreUObject`, `Engine`, `InputCore`, `EnhancedInput`, `GameplayTags` | `UMG`, `AIModule`, `NavigationSystem` |
 
-- **Decision pending**: whether to add a C++ game module at all. Depends on the concept —
-  revisit with `/ue-module-build-system` after `/brainstorm`. Adding one later is routine;
-  the cost is a rebuild, not a migration.
+- Module name is `ProjectC` (macro `PROJECTC_API`), without the underscore of the project name:
+  Epic module names are alphanumeric and an underscore causes friction in generated macros.
+- ✅ **C++ toolchain installed** (2026-08-20). The *Game development with C++* workload was added
+  to the existing VS 2022 Community: **MSVC 14.44.35207** (`cl.exe` 19.44.35227 x64) and
+  **Windows SDK 10.0.26100.0**, with `vswhere -requires VC.Tools.x86.x64` resolving. Verified by
+  compiling and running a program that includes `<windows.h>`, not just by checking paths. Every
+  machine that opens the project needs the same workload, because a project with a C++ module
+  compiles on open.
+- The boundary and the reasoning: `design/architecture/06-limite-cpp-blueprint.md`.
 
 ## 3. Plugin Dependencies
 
@@ -50,7 +66,13 @@ Also installed alongside the engine: QuixelBridge 5.8, Fab plugin 5.8.
 | ModelingToolsEditorMode | engine | no | Editor-only, enabled by the template |
 
 **Not yet enabled**, and deliberately so — each depends on the concept: GameplayAbilities (GAS),
-EnhancedInput, CommonUI, Niagara, PCG, MetaSounds, OnlineSubsystem, MassEntity, StateTree.
+CommonUI, Niagara, PCG, MetaSounds, OnlineSubsystem, MassEntity, StateTree. Verified against the
+installed engine: GAS, CommonUI and StateTree all ship `"EnabledByDefault": false`.
+
+> **Correction — Enhanced Input needs nothing enabled.** Its `.uplugin` in UE 5.8 carries
+> `"EnabledByDefault": true`, so `EnhancedInputLocalPlayerSubsystem` and the `IA_`/`IMC_` assets
+> are available as they are. Same for **Gameplay Tags**, which is not a plugin at all but a
+> runtime module (`Engine/Source/Runtime/GameplayTags`).
 
 > `Config/DefaultGame.ini` carries a `[/Script/CommonUI.CommonUISettings]` block, but the
 > **CommonUI plugin itself is not enabled** in `.uproject`. It is inert template residue, not
@@ -102,7 +124,13 @@ decided or does differently.
 - **Naming prefixes**: Epic standard `F`/`U`/`A`/`E`/`I`
 - **Header guards**: `#pragma once`
 - **Log categories**: none yet — no C++ module
-- **C++ vs Blueprint boundary**: **TBD**. Currently 100% Blueprint by default, not by decision
+- **C++ vs Blueprint boundary**: **decided** — C++ for framework bases, subsystems, data types,
+  algorithms, interfaces and tests; Blueprint for content subclasses, AnimBPs, widgets, BT/EQS
+  assets and placed actors. Full table in `design/architecture/06-limite-cpp-blueprint.md`
+- **IDE**: Rider, opening `Project_C.uproject` directly. Rider asks UBT for the project model
+  (`-Rider`, which emits JSON under `Intermediate/`) and keeps it current on its own: there is no
+  `.sln` and nothing to regenerate after adding a `.cpp` or editing a `.Build.cs`. The editor's
+  source-code accessor is `Rider Uproject`
 - **Formatting / linting**: none configured
 - **Line endings**: `.gitattributes` sets `* text=auto`. Note the machine's global
   `core.autocrlf` is `input` (a Linux/Mac value); `.gitattributes` governs over it
@@ -114,15 +142,16 @@ Nothing is in use — there is no gameplay code or content yet.
 | Subsystem | In use? | How it is used here |
 |-----------|---------|---------------------|
 | Gameplay Ability System | no | **TBD** — plugin not enabled |
-| Enhanced Input | no | **TBD** — plugin not enabled |
+| Enhanced Input | not yet | **Available now** — enabled by default in 5.8. Class 4 of the course |
 | CommonUI | no | **TBD** — settings block present but plugin disabled |
-| Replication / multiplayer | no | **TBD** — single biggest architectural fork; decide early |
+| Replication / multiplayer | no | **Decided: single player.** `GameState` is still used as the owner of shared state, which keeps the door open |
 | World Partition / level streaming | no | Editor settings exist by default; no maps yet |
 | Niagara | no | **TBD** |
 | Mass Entity / StateTree | no | **TBD** |
 | Save system | no | **TBD** |
 
-**Gameplay framework classes**: none. No custom GameMode, GameState, PlayerController or Pawn.
+**Gameplay framework classes**: none yet. The skeleton to create is specified in
+[`design/architecture/04-mapa-de-clases.md`](../../design/architecture/04-mapa-de-clases.md).
 
 ## 6. Build Configuration
 
@@ -177,10 +206,11 @@ Nothing is in use — there is no gameplay code or content yet.
 Every one of these is blocked on the concept. They are listed so the `ue-*` skills know to ask
 rather than assume.
 
-1. **What is the game?** Genre, core loop, pillars — everything else follows. → `/brainstorm`
-2. **Single-player or multiplayer?** The one decision that is genuinely expensive to reverse.
-   Replication shapes actor design from the first class onward
-3. **C++ module, or Blueprint-only?** Depends on system complexity and performance needs
+1. ~~**What is the game?**~~ **Answered** — see `design/gdd/`. Theme is still open (A-01)
+2. ~~**Single-player or multiplayer?**~~ **Answered: single player.** `GameState` still owns the
+   shared state, which keeps the door open at no cost
+3. ~~**C++ module, or Blueprint-only?**~~ **Answered: hybrid** (D-13), and the MSVC toolchain is
+   now installed and verified. What remains is creating `Source/` itself
 4. **Target platforms?** Determines whether the inherited Maximum/ray-tracing baseline survives
 5. **Substrate: keep or disable?** Free to decide now, costly later
 6. **GAS?** Powerful and heavy. Worth it for deep ability systems, overkill otherwise

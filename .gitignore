@@ -10,10 +10,19 @@ Build/
 Plugins/**/Binaries/
 Plugins/**/Intermediate/
 
-# ── Visual Studio / Rider / build tooling ───────────────────────
+# ── IDE / build tooling ─────────────────────────────
+# El IDE es Rider y el proyecto se abre por `Project_C.uproject`. El modelo lo genera
+# UBT solo, dentro de `Intermediate/`, que ya esta ignorado mas arriba. No hay .sln
+# que generar ni project files que regenerar al agregar un .cpp.
 .vs/
 .idea/
 *.sln
+# Restos de CMake, de cuando el IDE era CLion. Ya no se generan, pero quedan ignorados
+# porque un `-CMakefile` a mano los vuelve a dejar: `cmake-build-*` llegó a pesar 63 GB.
+/CMakeLists.txt
+/CMakeSettings.json
+/compile_commands.json
+/cmake-build-*/
 *.suo
 *.opensdf
 *.sdf
@@ -32,6 +41,11 @@ desktop.ini
 .claude/docs/presentations/*.pptx
 # Append-only session log; noise in diffs. active.md IS versioned.
 production/session-state/*.log
+
+# ── Secrets ─────────────────────────────────────────────────────
+# API keys and local-only config. This repo is public — never commit these.
+.env
+.env.local
 
 # ── Explicitly versioned ────────────────────────────────────────
 # Listed for the next person reading this file, not because git needs it:
