@@ -7,13 +7,13 @@
 #include "ProjectCGameInstance.generated.h"
 
 /**
- * Vive todo el proceso y sobrevive los cambios de nivel.
+ * Lives for the whole process and survives level changes.
  *
- * Le toca: la semilla del RNG, la partida en vuelo y la progresión entre misiones.
- * No le toca: ninguna regla de la misión — de eso se ocupa AMissionGameMode.
+ * Its business: the RNG seed, the run in flight and progression across missions.
+ * Not its business: any mission rule -- AMissionGameMode handles those.
  *
- * Los servicios de este ámbito (RNG, save) van a ser UGameInstanceSubsystem, no métodos de acá.
- * Ver design/architecture/02-managers-y-subsystems.md.
+ * The services at this scope (RNG, save) will be UGameInstanceSubsystem, not methods here.
+ * See design/architecture/02-managers-y-subsystems.md.
  */
 UCLASS()
 class PROJECTC_API UProjectCGameInstance : public UGameInstance

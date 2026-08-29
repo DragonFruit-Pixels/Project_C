@@ -7,13 +7,14 @@
 #include "MissionGameState.generated.h"
 
 /**
- * El estado compartido de la misión. **Guarda, no decide.**
+ * The mission's shared state. **It stores, it does not decide.**
  *
- * Existe igual en single player: es el lugar correcto para lo que todos leen, y usarlo bien es lo
- * que deja la puerta abierta si algún día hay red. Nadie castea al GameMode para leer un dato.
+ * It exists in single player all the same: it is the right home for what everyone reads, and
+ * using it properly is what leaves the door open if networking ever arrives. Nobody casts to the
+ * GameMode just to read a value.
  *
- * Le toca: el Doom Track, la ronda, el personaje activo, los mazos y las figuras vivas.
- * No le toca: el grafo de espacios — eso es UGraphSubsystem, un UWorldSubsystem.
+ * Its business: the Doom Track, the round, the active character, the decks and the live figures.
+ * Not its business: the space graph -- that is UGraphSubsystem, a UWorldSubsystem.
  */
 UCLASS()
 class PROJECTC_API AMissionGameState : public AGameStateBase
@@ -21,15 +22,15 @@ class PROJECTC_API AMissionGameState : public AGameStateBase
 	GENERATED_BODY()
 
 public:
-	/** Posición en el Doom Track. Sube cuando se acumulan suficientes Doom Symbol. */
+	/** Position on the Doom Track. It rises once enough Doom Symbol have piled up. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission")
 	int32 DoomTrackPosition = 0;
 
-	/** Ronda actual. Una ronda son los turnos de todos los personajes vivos. */
+	/** Current round. A round is the turns of every living character. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission")
 	int32 Round = 0;
 
-	/** Índice del personaje que está jugando. El jugador controla los 4. */
+	/** Index of the character currently playing. The player controls all 4. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission")
 	int32 ActiveCharacterIndex = 0;
 };

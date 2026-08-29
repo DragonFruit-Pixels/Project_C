@@ -5,7 +5,7 @@
 
 UOccupancyComponent::UOccupancyComponent()
 {
-	// Sin Tick: la ocupacion cambia porque una regla la cambio, nunca por el paso del tiempo.
+	// No Tick: occupancy changes because a rule changed it, never because time passed.
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -19,6 +19,6 @@ void UOccupancyComponent::SetSpace(ASpace* NewSpace)
 	ASpace* const OldSpace = CurrentSpace;
 	CurrentSpace = NewSpace;
 
-	// El aviso va despues de escribir, no antes: quien escuche tiene que ver el estado nuevo.
+	// The notification goes out after the write, not before: listeners must see the new state.
 	OnSpaceChanged.Broadcast(OldSpace, NewSpace);
 }

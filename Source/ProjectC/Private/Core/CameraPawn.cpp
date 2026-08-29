@@ -6,11 +6,11 @@
 
 ACameraPawn::ACameraPawn()
 {
-	// La unica excepcion de Tick del lado de la presentacion. Ver el comentario de la clase.
+	// The only Tick exception on the presentation side. See the class comment.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Un SceneComponent pelado como raiz: lo que se mueve al panear es el punto que la camara
-	// mira, no la camara. Con la camara como raiz, orbitar la desplazaria en vez de girarla.
+	// A bare SceneComponent as the root: panning moves the point the camera looks at, not the
+	// camera. With the camera as root, orbiting would translate it instead of turning it.
 	USceneComponent* const Pivot = CreateDefaultSubobject<USceneComponent>(TEXT("Pivot"));
 	SetRootComponent(Pivot);
 
@@ -19,12 +19,13 @@ ACameraPawn::ACameraPawn()
 	SpringArm->TargetArmLength = DefaultArmLength;
 	SpringArm->SetRelativeRotation(FRotator(Pitch, 0.0f, 0.0f));
 
-	// El brazo no colisiona: un tablero se mira desde arriba y no hay nada entre la camara y el
-	// piso que deba acercarla. Con colision, pasar sobre una pared alta pegaria un salto.
+	// The arm does not collide: a board is viewed from above and there is nothing between the
+	// camera and the floor that should pull it in. With collision, passing over a tall wall would
+	// snap it.
 	SpringArm->bDoCollisionTest = false;
 
-	// La interpolacion la hace Tick sobre los objetivos, no el brazo: asi el pan, el zoom y el
-	// orbit comparten una sola constante de suavizado y no tres que se pelean.
+	// Tick interpolates the targets, not the arm: that way pan, zoom and orbit share a single
+	// smoothing constant instead of three that fight each other.
 	SpringArm->bEnableCameraLag = false;
 	SpringArm->bEnableCameraRotationLag = false;
 	SpringArm->bUsePawnControlRotation = false;
@@ -33,7 +34,7 @@ ACameraPawn::ACameraPawn()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = false;
 
-	// El controller no rota este pawn: la camara la maneja el input de orbit y nada mas.
+	// The controller does not rotate this pawn: the orbit input drives the camera and nothing else.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -43,8 +44,8 @@ void ACameraPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Los objetivos arrancan en donde el pawn quedo colocado en el nivel, no en el origen: si no,
-	// el primer frame lo arrastra desde (0,0,0) y se ve un barrido.
+	// The targets start wherever the pawn was placed in the level, not at the origin: otherwise
+	// the first frame drags it from (0,0,0) and you see it sweep across.
 	TargetLocation = GetActorLocation();
 	TargetArmLength = FMath::Clamp(DefaultArmLength, MinArmLength, MaxArmLength);
 	TargetYaw = SpringArm->GetRelativeRotation().Yaw;
@@ -57,14 +58,14 @@ void ACameraPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Panear mas rapido cuanto mas lejos esta la camara. Sin esto, alejado el mapa se recorre a
-	// paso de hormiga y de cerca se pasa de largo: es la misma velocidad angular percibida.
+	// Pan faster the further the camera is. Without this, zoomed out you crawl across the map and
+	// zoomed in you overshoot: this keeps the perceived angular speed constant.
 	const float ZoomScale = TargetArmLength / FMath::Max(DefaultArmLength, 1.0f);
 
 	if (!PendingPan.IsNearlyZero())
 	{
-		// El eje llega relativo a la camara: se rota por el yaw actual para que "adelante" siga
-		// siendo hacia donde se mira despues de orbitar.
+		// The axis arrives relative to the camera: it is rotated by the current yaw so "forward"
+		// stays wherever you are looking after orbiting.
 		const FRotator YawOnly(0.0f, TargetYaw, 0.0f);
 		const FVector Forward = YawOnly.RotateVector(FVector::ForwardVector);
 		const FVector Right = YawOnly.RotateVector(FVector::RightVector);
@@ -95,7 +96,7 @@ void ACameraPawn::AddPanInput(const FVector2D& Axis)
 
 void ACameraPawn::AddZoomInput(float Axis)
 {
-	// Positivo acerca, asi que resta largo de brazo.
+	// Positive means closer, so it subtracts arm length.
 	TargetArmLength = FMath::Clamp(TargetArmLength - Axis * ZoomStep, MinArmLength, MaxArmLength);
 }
 

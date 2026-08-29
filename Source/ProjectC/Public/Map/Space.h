@@ -10,17 +10,17 @@
 class UBoxComponent;
 
 /**
- * Un nodo del grafo: un `Space`.
+ * A node of the graph: a `Space`.
  *
- * **Por qué es un Actor y no solo datos.** Tiene que existir en el mundo para que el raycast del
- * mouse lo seleccione (clase 4), para que la figura tenga a dónde caminar, y para que las salas
- * puedan editarse en sublevels distintos por personas distintas. El grafo *lógico* igual vive en
- * UGraphSubsystem, no repartido entre los actores.
+ * **Why it is an Actor and not just data.** It has to exist in the world so the mouse raycast can
+ * select it (class 4), so a figure has somewhere to walk to, and so rooms can be edited in
+ * separate sublevels by separate people. The *logical* graph still lives in UGraphSubsystem, not
+ * scattered across the actors.
  *
- * **Las paredes no existen.** Una pared es la ausencia de arista: si dos `Space` no se listan como
- * vecinos, no son adyacentes, haya o no geometría entre ellos.
+ * **Walls do not exist.** A wall is the absence of an edge: if two `Space` actors do not list each
+ * other as neighbours, they are not adjacent, geometry between them or not.
  *
- * Diseño: design/gdd/01-fundamentos/mapa-y-espacios.md
+ * Design: design/gdd/01-fundamentos/mapa-y-espacios.md
  */
 UCLASS()
 class PROJECTC_API ASpace : public AActor, public ISelectable
@@ -31,34 +31,34 @@ public:
 	ASpace();
 
 	/**
-	 * Los `Space` adyacentes a éste.
+	 * The `Space` actors adjacent to this one.
 	 *
-	 * **La adyacencia es bidireccional o no existe** (F1): si A lista a B, B tiene que listar a
-	 * A. UGraphSubsystem valida la simetría al sellar y falla ruidoso si falta un lado — una
-	 * flecha de un solo sentido es un mapa mal armado, no una arista dirigida.
+	 * **Adjacency is bidirectional or it does not exist** (F1): if A lists B, B has to list A.
+	 * UGraphSubsystem validates the symmetry when sealing and fails loudly if one side is
+	 * missing -- a one-way arrow is a badly built map, not a directed edge.
 	 */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Space")
 	TArray<TObjectPtr<ASpace>> Neighbours;
 
 	/**
-	 * Pasajes bloqueados ahora mismo, como subconjunto de `Neighbours`.
+	 * Passages blocked right now, as a subset of `Neighbours`.
 	 *
-	 * Un bloqueo no borra la arista: la deja intransitable para quien no pueda ignorarlo, y una
-	 * figura con ese permiso la cruza y además no la cuenta al medir distancias.
+	 * A block does not delete the edge: it leaves it impassable for whoever cannot ignore it, and
+	 * a figure with that permission crosses it and does not count it when measuring distances.
 	 */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Space")
 	TArray<TObjectPtr<ASpace>> BlockedTowards;
 
-	/** El volumen que el raycast de selección pega. Perfil de colisión `Space`: sólo query. */
+	/** The volume the selection raycast hits. Collision profile `Space`: query only. */
 	UFUNCTION(BlueprintPure, Category = "Space")
 	UBoxComponent* GetBounds() const { return Bounds; }
 
 	/**
-	 * Dónde apoya los pies una figura parada acá: el centro de la base de `Bounds`.
+	 * Where a figure standing here rests its feet: the centre of the base of `Bounds`.
 	 *
-	 * Existe para que quien mueve una figura no tenga que saber cómo está armado el `Space`. Sin
-	 * esto, cada llamador reconstruye el offset a mano y el día que `BP_Space` cambie la altura
-	 * de la caja las figuras se hunden en silencio.
+	 * It exists so whoever moves a figure does not need to know how the `Space` is built. Without
+	 * it, every caller rebuilds the offset by hand, and the day `BP_Space` changes the height of
+	 * the box the figures sink silently.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Space")
 	FVector GetFigureAnchorLocation() const;
@@ -72,10 +72,11 @@ protected:
 	virtual void BeginPlay() override;
 
 	/**
-	 * Volumen de selección, no de física.
+	 * A selection volume, not a physics one.
 	 *
-	 * Con perfil `Space` queda en QueryOnly: no simula, no bloquea el movimiento y no choca con
-	 * las figuras — no hay límite de figuras por espacio, así que nada debe empujar a nada.
+	 * With the `Space` profile it is QueryOnly: it does not simulate, does not block movement and
+	 * does not collide with figures -- there is no per-space figure limit, so nothing should be
+	 * pushing anything.
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Space")
 	TObjectPtr<UBoxComponent> Bounds;
