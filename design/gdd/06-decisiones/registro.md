@@ -619,6 +619,31 @@ filas de `DT_Skills`.
 
 ---
 
+## D-29 — El código se escribe en inglés; el diseño, en castellano
+
+**2026-08-29**
+
+Todo lo que vive bajo `Source/` —comentarios, mensajes de `UE_LOG`, nombres y aserciones de
+test— va en inglés y en ASCII puro: sin acentos y sin rayas largas. Los 41 documentos de
+`design/` y `docs/` siguen en castellano. **La frontera es el borde de `Source/`.**
+
+**Por qué:** el vocabulario del dominio ya estaba en inglés por regla propia
+([vocabulario.md](../01-fundamentos/vocabulario.md): "los IDs no se traducen"). El código
+quedaba entonces partido de la peor manera —identificadores en inglés explicados en
+castellano— y esa costura se abre de nuevo en cada archivo nuevo. Los documentos de diseño son
+lo contrario: se entregan y se defienden en una materia que se cursa en castellano.
+
+El ASCII no es una preferencia estética. "Cero bytes fuera de ASCII" se verifica con un `grep`
+y no se afloja con el tiempo; "no hay castellano" es una lectura humana que sí. De paso evita
+los avisos `C4819` de MSVC en archivos sin BOM.
+
+**Descarta:** que el profesor lea las explicaciones del código en su idioma. Se acepta porque
+lo que se evalúa como texto son los documentos, y esos no se tocaron.
+
+**Dónde se aplica sola:** `.claude/rules/unreal-code.md`, que ya está acotado a `Source/**`.
+
+---
+
 ---
 
 ## Plantilla para agregar
