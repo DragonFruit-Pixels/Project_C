@@ -22,6 +22,7 @@ paths:
 - Editor-only code lives in an editor module or behind `WITH_EDITOR`, and never ships in a runtime target
 - Profile with Unreal Insights and `stat` commands before AND after every optimization — document the measured numbers
 - Blueprint Nativization was removed in UE5; never propose it as an optimization
+- All code prose is English: comments, `UE_LOG` messages, test names and assertion messages. Restrict source files to ASCII -- no accented characters, no em dashes. Design documents under `design/` and `docs/` stay in Spanish; the boundary is the edge of `Source/`
 
 ## Examples
 

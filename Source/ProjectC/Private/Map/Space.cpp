@@ -7,18 +7,18 @@
 
 ASpace::ASpace()
 {
-	// Un juego por turnos con fases explicitas no necesita Tick: todo pasa porque una fase lo
-	// disparo. Ver 01-por-donde-se-empieza.md, paso 3.
+	// A turn-based game with explicit phases does not need Tick: everything happens because a
+	// phase fired it. See 01-por-donde-se-empieza.md, step 3.
 	PrimaryActorTick.bCanEverTick = false;
 
 	Bounds = CreateDefaultSubobject<UBoxComponent>(TEXT("Bounds"));
 	SetRootComponent(Bounds);
 
-	// Perfil definido en Config/DefaultEngine.ini: QueryOnly, bloquea solo el canal Selectable.
+	// Profile defined in Config/DefaultEngine.ini: QueryOnly, blocks only the Selectable channel.
 	Bounds->SetCollisionProfileName(ProjectCCollision::SpaceProfile());
 
-	// 400 uu de lado = 4 m. Un Space tiene que poder alojar 4 Character, 6 Creature y el
-	// Adversary a la vez: no hay limite de ocupacion, y el problema es de layout, no de reglas.
+	// 400 uu per side = 4 m. A Space has to hold 4 Character, 6 Creature and the Adversary at
+	// once: there is no occupancy limit, and the problem is layout, not rules.
 	Bounds->SetBoxExtent(FVector(200.0f, 200.0f, 100.0f));
 }
 
@@ -37,14 +37,14 @@ void ASpace::BeginPlay()
 
 FVector ASpace::GetFigureAnchorLocation() const
 {
-	// Base de la caja, no su centro: `Bounds` esta centrado en el actor, asi que el piso del
-	// espacio esta media altura mas abajo.
+	// The base of the box, not its centre: `Bounds` is centred on the actor, so the floor of the
+	// space sits half a height lower.
 	const FVector Centre = Bounds->GetComponentLocation();
 	return FVector(Centre.X, Centre.Y, Centre.Z - Bounds->GetScaledBoxExtent().Z);
 }
 
 FText ASpace::GetSelectableName_Implementation() const
 {
-	// El label del actor es lo que el diseñador ya escribio en el outliner al armar el mapa.
+	// The actor label is what the designer already typed in the outliner while building the map.
 	return FText::FromString(GetActorNameOrLabel());
 }

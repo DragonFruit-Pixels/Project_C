@@ -7,33 +7,33 @@
 #include "Selectable.generated.h"
 
 /**
- * Como se esta mostrando ahora mismo una cosa seleccionable.
+ * How a selectable thing is being displayed right now.
  *
- * Es **un estado, no cuatro eventos**. La alternativa —`OnHoverBegin`, `OnHoverEnd`,
- * `OnSelected`, `OnDeselected`— obliga a cada implementador a reconstruir el estado a partir de
- * la secuencia de avisos, y el primer caso raro lo rompe: hoverear algo que ya esta seleccionado
- * manda `OnHoverBegin` y el objeto no sabe si al salir tiene que volver a "normal" o a
- * "seleccionado".
+ * This is **one state, not four events**. The alternative -- `OnHoverBegin`, `OnHoverEnd`,
+ * `OnSelected`, `OnDeselected` -- forces every implementer to rebuild the state from the sequence
+ * of notifications, and the first odd case breaks it: hovering something already selected fires
+ * `OnHoverBegin`, and the object cannot tell whether leaving should return it to "normal" or to
+ * "selected".
  *
- * Con un estado, el que decide es uno solo —`AMissionPlayerController`, que es el unico que
- * conoce las tres cosas a la vez— y el Blueprint solo dibuja lo que le dicen. La precedencia
- * (`Selected` > `Hovered` > `Legal` > `None`) se resuelve ahi y no se replica.
+ * With a state, exactly one party decides -- `AMissionPlayerController`, the only one that knows
+ * all three things at once -- and the Blueprint just draws what it is told. The precedence
+ * (`Selected` > `Hovered` > `Legal` > `None`) is resolved there and never duplicated.
  *
- * Los valores mapean 1 a 1 al parametro escalar `HighlightState` del material.
+ * The values map 1 to 1 onto the material's `HighlightState` scalar parameter.
  */
 UENUM(BlueprintType)
 enum class ESelectionHighlight : uint8
 {
-	/** Sin resaltar. */
+	/** Not highlighted. */
 	None = 0,
 
-	/** Un destino legal de la accion en curso. Se pinta en conjunto, no de a uno. */
+	/** A legal destination of the action in progress. Painted as a set, not one by one. */
 	Legal = 1,
 
-	/** El mouse esta encima. */
+	/** The mouse is over it. */
 	Hovered = 2,
 
-	/** Es la seleccion actual del jugador. */
+	/** It is the player's current selection. */
 	Selected = 3
 };
 
@@ -44,15 +44,15 @@ class USelectable : public UInterface
 };
 
 /**
- * Lo que el mouse puede elegir: un `Space`, una figura, y mas adelante un dado.
+ * What the mouse can pick: a `Space`, a figure, and later on a die.
  *
- * Existe para que la seleccion **no se resuelva casteando**. El `PlayerController` traza contra
- * el canal `Selectable` y le habla al actor que pego sin saber de que clase es: es tráfico
- * lateral, y el mecanismo del proyecto para eso es la interfaz
+ * It exists so that selection **is not resolved by casting**. The `PlayerController` traces
+ * against the `Selectable` channel and talks to whatever actor it hit without knowing its class:
+ * that is lateral traffic, and the project's mechanism for it is the interface
  * (design/architecture/03-comunicacion-y-referencias.md).
  *
- * Todo es `BlueprintNativeEvent`: C++ da un default razonable y el Blueprint hijo decide **como
- * se ve**, que es presentación y por lo tanto no va en C++
+ * Everything is a `BlueprintNativeEvent`: C++ supplies a sane default and the child Blueprint
+ * decides **how it looks**, which is presentation and therefore does not belong in C++
  * (design/architecture/08-presentacion-y-reglas.md).
  */
 class PROJECTC_API ISelectable
@@ -61,25 +61,25 @@ class PROJECTC_API ISelectable
 
 public:
 	/**
-	 * Si ahora mismo se puede elegir esto.
+	 * Whether this can be picked right now.
 	 *
-	 * No es "existe": un `Space` fuera de alcance sigue siendo trazable y sigue mostrando su
-	 * nombre, pero no se selecciona. Default true.
+	 * It does not mean "exists": a `Space` out of range is still traceable and still shows its
+	 * name, but it does not get selected. Defaults to true.
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Selectable")
 	bool CanBeSelected() const;
 	virtual bool CanBeSelected_Implementation() const { return true; }
 
 	/**
-	 * Muestra este estado. El default de C++ no hace nada a propósito: sin subclase Blueprint no
-	 * hay material que tocar, y una base que asume que existe un mesh se rompe con el primer
-	 * seleccionable que no lo tenga.
+	 * Display this state. The C++ default does nothing on purpose: with no Blueprint subclass
+	 * there is no material to touch, and a base that assumes a mesh exists breaks on the first
+	 * selectable that has none.
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Selectable")
 	void SetHighlight(ESelectionHighlight Highlight);
 	virtual void SetHighlight_Implementation(ESelectionHighlight /*Highlight*/) {}
 
-	/** Para debug y, mas adelante, para el tooltip del HUD. */
+	/** For debugging and, later on, for the HUD tooltip. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Selectable")
 	FText GetSelectableName() const;
 	virtual FText GetSelectableName_Implementation() const { return FText::GetEmpty(); }

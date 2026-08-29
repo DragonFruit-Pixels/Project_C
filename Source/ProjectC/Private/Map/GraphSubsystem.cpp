@@ -14,10 +14,10 @@ void UGraphSubsystem::RegisterSpace(ASpace* Space)
 
 	if (bSealed)
 	{
-		// Un Space que llega tarde significa que algo se cargo despues del sellado —
-		// tipicamente streaming. Es exactamente lo que D-21 descarta, y hay que verlo.
+		// A Space arriving late means something loaded after sealing -- typically streaming.
+		// That is exactly what D-21 rules out, and it has to be visible.
 		UE_LOG(LogProjectCGraph, Error,
-			TEXT("'%s' se registro DESPUES del sellado del grafo. El grafo quedo incompleto y las consultas van a contestar mal."),
+			TEXT("'%s' registered AFTER the graph was sealed. The graph is incomplete and queries will answer wrong."),
 			*Space->GetName());
 		return;
 	}
@@ -47,7 +47,7 @@ bool UGraphSubsystem::SealGraph()
 		{
 			if (!IsValid(Neighbour))
 			{
-				UE_LOG(LogProjectCGraph, Error, TEXT("'%s' lista un vecino nulo."), *Space->GetName());
+				UE_LOG(LogProjectCGraph, Error, TEXT("'%s' lists a null neighbour."), *Space->GetName());
 				bValid = false;
 				continue;
 			}
@@ -56,32 +56,32 @@ bool UGraphSubsystem::SealGraph()
 			if (NeighbourIndex == INDEX_NONE)
 			{
 				UE_LOG(LogProjectCGraph, Error,
-					TEXT("'%s' lista a '%s', que no esta registrado. Falta cargar su sala?"),
+					TEXT("'%s' lists '%s', which is not registered. Is its room still unloaded?"),
 					*Space->GetName(), *Neighbour->GetName());
 				bValid = false;
 				continue;
 			}
 
-			// F8.1 — simetria. Una flecha de un solo lado no es una arista dirigida: es un mapa
-			// mal armado. El manual es explicito (p. 9) y por eso esto falla en vez de asumir.
+			// F8.1 -- symmetry. A one-sided arrow is not a directed edge: it is a badly built
+			// map. The rulebook is explicit (p. 9), so this fails instead of assuming.
 			if (!Neighbour->Neighbours.Contains(Space))
 			{
 				UE_LOG(LogProjectCGraph, Error,
-					TEXT("Adyacencia asimetrica: '%s' lista a '%s', pero no al reves."),
+					TEXT("Asymmetric adjacency: '%s' lists '%s', but not the other way round."),
 					*Space->GetName(), *Neighbour->GetName());
 				bValid = false;
 				continue;
 			}
 
-			// F8.2 — sin bucles.
+			// F8.2 -- no self-loops.
 			if (NeighbourIndex == Index)
 			{
-				UE_LOG(LogProjectCGraph, Error, TEXT("'%s' se lista a si mismo como vecino."), *Space->GetName());
+				UE_LOG(LogProjectCGraph, Error, TEXT("'%s' lists itself as a neighbour."), *Space->GetName());
 				bValid = false;
 				continue;
 			}
 
-			// Cada par se agrega una sola vez: las aristas ya son bidireccionales.
+			// Each pair is added once: the edges are already bidirectional.
 			if (NeighbourIndex < Index)
 			{
 				continue;
@@ -94,21 +94,21 @@ bool UGraphSubsystem::SealGraph()
 		}
 	}
 
-	// F8.3 — grado entre 1 y 6. Un espacio sin salidas parte el mapa; uno con demasiadas hace
-	// que el grado deje de distinguir, y Claustrophobia se vuelve constante.
+	// F8.3 -- degree between 1 and 6. A space with no exits splits the map; one with too many
+	// stops the degree from discriminating, and Claustrophobia becomes a constant.
 	for (int32 Index = 0; Index < Spaces.Num(); ++Index)
 	{
 		const int32 Degree = FGraphMath::Degree(Edges, Index, FGraphQuery::ForMovement());
 		if (Degree < 1 || Degree > 6)
 		{
 			UE_LOG(LogProjectCGraph, Error,
-				TEXT("'%s' tiene grado %d; el rango valido es 1..6."),
+				TEXT("'%s' has degree %d; the valid range is 1..6."),
 				*Spaces[Index]->GetName(), Degree);
 			bValid = false;
 		}
 	}
 
-	// F8.6 — conectividad sin bloqueos: todo Space tiene que ser alcanzable desde el primero.
+	// F8.6 -- connectivity ignoring blocks: every Space must be reachable from the first one.
 	if (Spaces.Num() > 0)
 	{
 		FGraphQuery Unblocked = FGraphQuery::ForMovement();
@@ -120,7 +120,7 @@ bool UGraphSubsystem::SealGraph()
 			if (Reach[Index] == FGraphMath::Unreachable)
 			{
 				UE_LOG(LogProjectCGraph, Error,
-					TEXT("'%s' es inalcanzable incluso sin bloqueos: el grafo esta partido."),
+					TEXT("'%s' is unreachable even with no blocks: the graph is split."),
 					*Spaces[Index]->GetName());
 				bValid = false;
 			}
@@ -129,8 +129,8 @@ bool UGraphSubsystem::SealGraph()
 
 	bSealed = true;
 
-	UE_LOG(LogProjectCGraph, Log, TEXT("Grafo sellado: %d espacios, %d aristas. Invariantes: %s"),
-		Spaces.Num(), Edges.Num(), bValid ? TEXT("OK") : TEXT("CON ERRORES"));
+	UE_LOG(LogProjectCGraph, Log, TEXT("Graph sealed: %d spaces, %d edges. Invariants: %s"),
+		Spaces.Num(), Edges.Num(), bValid ? TEXT("OK") : TEXT("FAILED"));
 
 	return bValid;
 }
@@ -143,7 +143,7 @@ bool UGraphSubsystem::EnsureSealed(const TCHAR* Context) const
 	}
 
 	UE_LOG(LogProjectCGraph, Error,
-		TEXT("'%s' se consulto con el grafo sin sellar. Falta llamar a SealGraph(). Se devuelve vacio a proposito: contestar sobre un grafo incompleto seria mentir."),
+		TEXT("'%s' was queried with the graph unsealed. SealGraph() has not been called. An empty result is returned on purpose: answering over an incomplete graph would be lying."),
 		Context);
 	return false;
 }

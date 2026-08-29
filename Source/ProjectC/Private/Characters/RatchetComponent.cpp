@@ -5,7 +5,7 @@
 
 URatchetComponent::URatchetComponent()
 {
-	// Un juego por turnos no tiene nada que tickear: todo pasa porque una fase lo disparó.
+	// A turn-based game has nothing to tick: everything happens because a phase fired it.
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -27,7 +27,7 @@ void URatchetComponent::AddToll(int32 Amount)
 
 	OnRatchetAdvanced.Broadcast(Position, Delta);
 
-	// Un solo avance puede cruzar varios umbrales, y cada uno es una decisión de build propia.
+	// A single advance can cross several thresholds, and each one is a build decision of its own.
 	for (const int32 Threshold : FRatchetRules::ThresholdsCrossed(Previous, Position, Config.Thresholds))
 	{
 		++ThresholdsCrossedCount;

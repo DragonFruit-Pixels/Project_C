@@ -16,19 +16,19 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHoveredChanged, AActor*, HoveredA
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, AActor*, SelectedActor);
 
 /**
- * La voluntad del jugador: input, cámara y dueño de la UI.
+ * The player's will: input, camera and owner of the UI.
  *
- * **El jugador no tiene cuerpo.** Conceptualmente es la cámara y quien da las órdenes, no una
- * figura del tablero: posee un `ACameraPawn` y **nunca** posee a los personajes. Las figuras se
- * eligen por raycast contra `ISelectable`, que es una sola ruta de input para figuras, `Space` y
- * dados.
+ * **The player has no body.** Conceptually it is the camera and whoever gives the orders, not a
+ * figure on the board: it possesses an `ACameraPawn` and **never** possesses the characters.
+ * Figures are picked by raycast against `ISelectable`, which is a single input route for figures,
+ * `Space` actors and dice.
  *
- * Consecuencia: todas las figuras del juego —personajes y enemigos— se mueven igual, cada una
- * por su propio AIController. Hay un solo camino de movimiento, no dos.
+ * Consequence: every figure in the game -- characters and enemies alike -- moves the same way,
+ * each through its own AIController. There is one movement path, not two.
  *
- * **No decide reglas.** Pregunta al `AMissionGameMode` qué es legal y le pide que mueva; nunca
- * calcula alcance por su cuenta. Si un widget necesita un dato, lo lee por interfaz o lo escucha
- * por delegate; no castea a un personaje concreto.
+ * **It decides no rules.** It asks `AMissionGameMode` what is legal and asks it to move; it never
+ * computes range on its own. If a widget needs a value it reads it through an interface or
+ * listens for a delegate; it does not cast to a concrete character.
  */
 UCLASS()
 class PROJECTC_API AMissionPlayerController : public APlayerController
@@ -42,12 +42,12 @@ public:
 	virtual void SetupInputComponent() override;
 
 	/**
-	 * El hover se resuelve acá, un trazo por frame.
+	 * Hover is resolved here, one trace per frame.
 	 *
-	 * Es la segunda y última excepción a "no hay Tick" del proyecto, y como la de `ACameraPawn`
-	 * está del lado de la presentación: el hover no toca estado de juego. La alternativa
-	 * —trazar sólo cuando el mouse se movió— ahorra un trazo contra ~10 cajas y agrega el bug de
-	 * que mover la cámara con el mouse quieto deja el resaltado pegado en el espacio equivocado.
+	 * This is the project's second and last exception to "there is no Tick", and like the one in
+	 * `ACameraPawn` it sits on the presentation side: hover touches no game state. The alternative
+	 * -- tracing only when the mouse moved -- saves one trace against ~10 boxes and adds the bug
+	 * that moving the camera with the mouse still leaves the highlight stuck on the wrong space.
 	 */
 	virtual void PlayerTick(float DeltaTime) override;
 
@@ -64,10 +64,11 @@ public:
 	AActor* GetHoveredActor() const { return HoveredActor; }
 
 	/**
-	 * Avisa que cambió el hover o la selección.
+	 * Announces that the hover or the selection changed.
 	 *
-	 * Son dispatchers y no llamadas directas porque el que habla no sabe quién escucha: hoy nadie,
-	 * mañana el HUD, un sonido y un log de debug. Ver 03-comunicacion-y-referencias.md.
+	 * They are dispatchers and not direct calls because the speaker does not know who listens:
+	 * today nobody, tomorrow the HUD, a sound and a debug log. See
+	 * 03-comunicacion-y-referencias.md.
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnHoveredChanged OnHoveredChanged;
@@ -76,11 +77,11 @@ public:
 	FOnSelectionChanged OnSelectionChanged;
 
 protected:
-	// --- Assets de Enhanced Input. Los enchufa BP_PlayerController_Mission. ---
+	// --- Enhanced Input assets. BP_PlayerController_Mission wires them up. ---
 
 	/**
-	 * `EditDefaultsOnly` y no `EditAnywhere`: el mapeo de teclas es de la clase, no de la
-	 * instancia. Dos controllers del mismo tipo con teclas distintas es un bug, no una feature.
+	 * `EditDefaultsOnly` and not `EditAnywhere`: the key mapping belongs to the class, not to the
+	 * instance. Two controllers of the same type with different keys is a bug, not a feature.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> MissionContext;
@@ -104,30 +105,31 @@ protected:
 	TObjectPtr<UInputAction> CameraOrbitAction;
 
 	/**
-	 * El actor bajo el cursor en el canal `Selectable`, o null.
+	 * The actor under the cursor on the `Selectable` channel, or null.
 	 *
-	 * **Es el único raycast del juego**, y lo consumen las dos rutas: el hover de cada frame y el
-	 * click. Que sea uno solo es lo que hace imposible que lo que se ilumina y lo que se puede
-	 * clickear difieran.
+	 * **This is the game's only raycast**, and both routes consume it: the per-frame hover and the
+	 * click. Having exactly one is what makes it impossible for what lights up and what can be
+	 * clicked to diverge.
 	 *
-	 * `BlueprintNativeEvent` a propósito. El raycast es presentación, no regla
-	 * (08-presentacion-y-reglas.md), así que vive del lado de Blueprint sin violar nada: lo
-	 * sobreescribe `BP_PlayerController_Mission` con un `Line Trace By Channel`, que deja el rayo,
-	 * su alcance, el canal y la lista de ignorados a la vista -y dibujables con `DrawDebugType`-
-	 * en lugar de escondidos dentro de un helper de C++.
+	 * `BlueprintNativeEvent` on purpose. The raycast is presentation, not rule
+	 * (08-presentacion-y-reglas.md), so it lives on the Blueprint side without violating anything:
+	 * `BP_PlayerController_Mission` overrides it with a `Line Trace By Channel`, which leaves the
+	 * ray, its reach, the channel and the ignore list in plain sight -- and drawable with
+	 * `DrawDebugType` -- instead of buried inside a C++ helper.
 	 *
-	 * C++ conserva la implementación por defecto y equivalente. Si el grafo se borra o se rompe,
-	 * el juego sigue respondiendo: esa red es lo que hace barato experimentar en el Blueprint.
+	 * C++ keeps the default, equivalent implementation. If the graph is deleted or breaks, the
+	 * game keeps responding: that safety net is what makes experimenting in the Blueprint cheap.
 	 *
-	 * El largo del rayo es `MouseInterface > Trace Distance` (`HitResultTraceDistance`, 100000 cm),
-	 * y es a propósito la del engine: la lee el grafo y la lee también
-	 * `GetHitResultUnderCursorByChannel`, que es el fallback de acá abajo. Una sola perilla es lo
-	 * que impide que las dos rutas se separen. Sobra para un tablero: la cámara nunca se aleja
-	 * más de 4500.
+	 * The ray's length is `MouseInterface > Trace Distance` (`HitResultTraceDistance`, 100000 cm),
+	 * and it is the engine's on purpose: the graph reads it and so does
+	 * `GetHitResultUnderCursorByChannel`, the fallback just below. A single knob is what stops the
+	 * two routes from drifting apart. It is more than enough for a board: the camera never pulls
+	 * back further than 4500.
 	 *
-	 * Se llama por el nombre pelado: en una `UCLASS` es UHT quien escribe el cuerpo de
-	 * `TraceSelectableUnderCursor()`, y ese cuerpo despacha al grafo si hay override y al
-	 * `_Implementation` si no. (El prefijo `Execute_` es sólo para interfaces, como `ISelectable`.)
+	 * It is called by its bare name: inside a `UCLASS` it is UHT that writes the body of
+	 * `TraceSelectableUnderCursor()`, and that body dispatches to the graph if there is an
+	 * override and to `_Implementation` otherwise. (The `Execute_` prefix is only for interfaces,
+	 * such as `ISelectable`.)
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Selection")
 	AActor* TraceSelectableUnderCursor();
@@ -142,18 +144,18 @@ protected:
 	void HandleOrbit(const FInputActionValue& Value);
 
 private:
-	/** Vuelve a preguntar al árbitro qué destinos son legales para la selección actual. */
+	/** Asks the referee again which destinations are legal for the current selection. */
 	void RefreshLegalDestinations();
 
 	/**
-	 * Empuja el estado visual a todo lo que corresponda.
+	 * Pushes the visual state out to everything that needs it.
 	 *
-	 * Apaga todo lo que estaba prendido y vuelve a prender desde cero. Es O(n) sobre un puñado de
-	 * actores y es lo que hace imposible el bug clásico de resaltado: un `Space` que queda
-	 * iluminado porque el evento que lo apagaba se perdió en una rama.
+	 * It turns off everything that was on and turns it back on from scratch. It is O(n) over a
+	 * handful of actors, and it is what makes the classic highlight bug impossible: a `Space` left
+	 * lit because the event that would have cleared it got lost down a branch.
 	 *
-	 * La precedencia sale del orden en que se aplica: `Legal`, después `Hovered`, después
-	 * `Selected`. El último gana.
+	 * The precedence falls out of the order it is applied in: `Legal`, then `Hovered`, then
+	 * `Selected`. The last one wins.
 	 */
 	void RefreshHighlights();
 
@@ -166,7 +168,7 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ASpace>> LegalDestinations;
 
-	/** Lo que ahora mismo tiene un resaltado distinto de `None`, para poder apagarlo. */
+	/** Whatever currently has a highlight other than `None`, so it can be cleared. */
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<AActor>> HighlightedActors;
 };

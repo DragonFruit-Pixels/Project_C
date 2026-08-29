@@ -10,22 +10,22 @@ class USpringArmComponent;
 class UCameraComponent;
 
 /**
- * El cuerpo del jugador: una cámara, y nada más.
+ * The player's body: a camera, and nothing else.
  *
- * **Esto es la posesión del juego.** El `PlayerController` posee este pawn y no posee nunca a un
- * personaje; las figuras se eligen con el mouse. La decisión y su costo están en
- * design/architecture/04-mapa-de-clases.md, "El jugador no tiene cuerpo": el input de un táctico
- * no es "mover mi pawn", es clickear una casilla, y con posesión rotativa había dos rutas de
- * input donde alcanza con una.
+ * **This is the game's possession model.** The `PlayerController` possesses this pawn and never
+ * possesses a character; figures are picked with the mouse. The decision and its cost are in
+ * design/architecture/04-mapa-de-clases.md, "El jugador no tiene cuerpo": a tactics game's input
+ * is not "move my pawn", it is clicking a tile, and rotating possession meant two input routes
+ * where one is enough.
  *
- * **Tick, a propósito.** El proyecto declara que un juego por turnos con fases explícitas no
- * necesita Tick (01-por-donde-se-empieza.md). Esa regla es sobre las **reglas**: nada del estado
- * del juego puede depender del paso del tiempo. Una cámara es presentación pura y no toca estado,
- * y sin interpolación el zoom salta y el pan se siente roto. Es una de las dos excepciones del
- * proyecto, y las dos están de este lado de la línea.
+ * **Tick, on purpose.** The project states that a turn-based game with explicit phases does not
+ * need Tick (01-por-donde-se-empieza.md). That rule is about the **rules**: no game state may
+ * depend on the passage of time. A camera is pure presentation and touches no state, and without
+ * interpolation the zoom snaps and the pan feels broken. This is one of the project's two
+ * exceptions, and both sit on this side of the line.
  *
- * Cámara táctica, no orbital libre: el pitch es fijo y sólo gira en yaw. Un tablero se lee desde
- * arriba, y dejar inclinar la cámara sólo habilita ángulos desde los que no se entiende el mapa.
+ * A tactical camera, not a free orbit: the pitch is fixed and it only turns in yaw. A board is
+ * read from above, and letting the camera tilt only enables angles the map cannot be read from.
  */
 UCLASS()
 class PROJECTC_API ACameraPawn : public APawn
@@ -38,15 +38,15 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	/**
-	 * Desplaza el punto que la cámara mira, en el plano del tablero.
+	 * Moves the point the camera looks at, in the plane of the board.
 	 *
-	 * El eje llega **relativo a la cámara**, no al mundo: después de orbitar, "adelante" sigue
-	 * siendo hacia donde mira la cámara. Es lo que hace que W no se sienta arbitrario.
+	 * The axis arrives **relative to the camera**, not to the world: after orbiting, "forward" is
+	 * still wherever the camera faces. That is what keeps W from feeling arbitrary.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void AddPanInput(const FVector2D& Axis);
 
-	/** Positivo acerca. Se aplica al toque porque la rueda es discreta; lo que interpola es el brazo. */
+	/** Positive moves closer. Applied at once because the wheel is discrete; the arm interpolates. */
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void AddZoomInput(float Axis);
 
@@ -65,13 +65,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> Camera;
 
-	// --- Perillas. El Blueprint hijo las tunea sin recompilar. ---
+	// --- Knobs. The child Blueprint tunes them without recompiling. ---
 
-	/** uu por segundo con el brazo en su largo por defecto. Se escala con el zoom: ver Tick. */
+	/** uu per second with the arm at its default length. Scaled by zoom: see Tick. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Tuning", meta = (ClampMin = "100"))
 	float PanSpeed = 1800.0f;
 
-	/** uu de brazo por muesca de rueda. */
+	/** uu of arm length per wheel notch. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Tuning", meta = (ClampMin = "10"))
 	float ZoomStep = 250.0f;
 
@@ -87,26 +87,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Tuning", meta = (ClampMin = "200"))
 	float DefaultArmLength = 1800.0f;
 
-	/** Negativo mira hacia abajo. -55 deja ver las caras de las figuras y el layout a la vez. */
+	/** Negative looks downwards. -55 shows the figures' faces and the layout at the same time. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Tuning", meta = (ClampMin = "-89", ClampMax = "-10"))
 	float Pitch = -55.0f;
 
-	/** Cuánto persigue la cámara a su objetivo. Más alto = más rígido. */
+	/** How hard the camera chases its target. Higher = stiffer. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Tuning", meta = (ClampMin = "1"))
 	float InterpSpeed = 10.0f;
 
 private:
-	/** Objetivos que Tick persigue. El input escribe acá; nunca mueve el actor directo. */
+	/** Targets that Tick chases. Input writes here; it never moves the actor directly. */
 	FVector TargetLocation = FVector::ZeroVector;
 	float TargetArmLength = 0.0f;
 	float TargetYaw = 0.0f;
 
 	/**
-	 * Eje de pan acumulado desde el último Tick.
+	 * Pan axis accumulated since the last Tick.
 	 *
-	 * Enhanced Input dispara `Triggered` una vez por frame mientras la tecla está apretada, pero
-	 * no entrega DeltaTime. Guardar el eje y consumirlo en Tick es lo que hace que la velocidad
-	 * no dependa del framerate.
+	 * Enhanced Input fires `Triggered` once per frame while the key is held, but does not hand
+	 * over DeltaTime. Storing the axis and consuming it in Tick is what keeps the speed from
+	 * depending on the framerate.
 	 */
 	FVector2D PendingPan = FVector2D::ZeroVector;
 	float PendingOrbit = 0.0f;

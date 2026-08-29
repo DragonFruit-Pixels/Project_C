@@ -11,13 +11,13 @@
 
 AMissionGameMode::AMissionGameMode()
 {
-	// El GameMode se enchufa desde la subclase Blueprint, no desde acá. Estos defaults son para
-	// que el módulo sea coherente si alguien lo usa directo.
+	// The GameMode is wired up from the Blueprint subclass, not from here. These defaults exist
+	// so the module is coherent if someone uses it directly.
 	GameStateClass = AMissionGameState::StaticClass();
 	PlayerControllerClass = AMissionPlayerController::StaticClass();
 	PlayerStateClass = AMissionPlayerState::StaticClass();
 
-	// El jugador posee una cámara y nunca un personaje. Ver CameraPawn.h y
+	// The player possesses a camera and never a character. See CameraPawn.h and
 	// design/architecture/04-mapa-de-clases.md.
 	DefaultPawnClass = ACameraPawn::StaticClass();
 
@@ -27,8 +27,8 @@ AMissionGameMode::AMissionGameMode()
 
 void AMissionGameMode::StartPlay()
 {
-	// Super::StartPlay() es lo que dispara los BeginPlay de todos los actores, y ahi es donde
-	// cada ASpace se registra. Sellar antes daria un grafo incompleto, que es peor que ninguno.
+	// Super::StartPlay() is what fires every actor's BeginPlay, and that is where each ASpace
+	// registers itself. Sealing earlier would give an incomplete graph, which is worse than none.
 	Super::StartPlay();
 
 	if (UWorld* World = GetWorld())
@@ -39,18 +39,18 @@ void AMissionGameMode::StartPlay()
 		}
 	}
 
-	// Arranque mínimo del turno, y nada más que eso.
+	// A minimal turn bootstrap, and nothing more than that.
 	//
-	// La máquina de turno de verdad —rondas, rotación de personaje, las 4 fases— no existe
-	// todavía: es clase 5. Sin esto `ActionsRemaining` queda en 0 y ninguna acción se puede
-	// pagar, así que no habría nada que probar. Entrar a `CharacterTurn` es lo único que recarga
-	// las acciones (ver SetPhase), y de ahí se pasa a `Actions`.
+	// The real turn machine -- rounds, character rotation, the 4 phases -- does not exist yet:
+	// that is class 5. Without this `ActionsRemaining` stays at 0 and no action can be paid for,
+	// so there would be nothing to test. Entering `CharacterTurn` is the only thing that refills
+	// the actions (see SetPhase), and from there it moves on to `Actions`.
 	SetPhase(EMissionTurnPhase::CharacterTurn);
 	SetPhase(EMissionTurnPhase::Actions);
 }
 
-// Nota: `Figure` no es `const AActor*` aunque no se modifique. Blueprint no soporta parametros
-// de puntero a objeto const, y esta funcion tiene que ser llamable desde el HUD.
+// Note: `Figure` is not `const AActor*` even though it is not modified. Blueprint does not
+// support const object pointer parameters, and this function has to be callable from the HUD.
 TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 {
 	TArray<ASpace*> Destinations;
@@ -75,10 +75,10 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 
 	ASpace* const From = Occupancy->GetSpace();
 
-	// La regla de alcance ya está escrita y testeada en FGraphMath; acá sólo se consulta.
+	// The range rule is already written and tested in FGraphMath; here it is only queried.
 	Destinations = Graph->GetReachable(From, SpacesPerMove);
 
-	// `Reachable` incluye el origen porque d(a,a)=0 <= MaxSteps. Como destino no sirve.
+	// `Reachable` includes the origin because d(a,a)=0 <= MaxSteps. As a destination it is useless.
 	Destinations.Remove(From);
 
 	return Destinations;
@@ -94,19 +94,19 @@ bool AMissionGameMode::TryMoveFigure(AActor* Figure, ASpace* To)
 	UOccupancyComponent* const Occupancy = Figure->FindComponentByClass<UOccupancyComponent>();
 	if (Occupancy == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TryMoveFigure: %s no tiene UOccupancyComponent"), *Figure->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("TryMoveFigure: %s has no UOccupancyComponent"), *Figure->GetName());
 		return false;
 	}
 
-	// La legalidad se pregunta a la misma función que pinta el highlight. Es lo que garantiza que
-	// lo iluminado y lo permitido no puedan diferir.
+	// Legality is asked of the same function that paints the highlight. That is what guarantees
+	// what is lit and what is allowed cannot diverge.
 	if (!GetLegalDestinations(Figure).Contains(To))
 	{
 		return false;
 	}
 
-	// La acción se cobra después de validar y antes de mover: si `SpendAction` falla no quedan
-	// acciones, y la figura no se movió.
+	// The action is charged after validating and before moving: if `SpendAction` fails there are
+	// no actions left, and the figure has not moved.
 	if (!SpendAction())
 	{
 		return false;
@@ -115,8 +115,8 @@ bool AMissionGameMode::TryMoveFigure(AActor* Figure, ASpace* To)
 	ASpace* const From = Occupancy->GetSpace();
 	Occupancy->SetSpace(To);
 
-	// Teletransporte, no caminata. El pathfinding es clase 9; hasta entonces el movimiento del
-	// tablero es instantáneo y la animación se la debe la capa de presentación.
+	// Teleport, not a walk. Pathfinding is class 9; until then board movement is instantaneous
+	// and the presentation layer still owes the animation.
 	const FVector Anchor = To->GetFigureAnchorLocation();
 	Figure->SetActorLocation(Anchor + FVector(0.0f, 0.0f, Figure->GetSimpleCollisionHalfHeight()));
 
@@ -134,8 +134,8 @@ void AMissionGameMode::SetPhase(EMissionTurnPhase NewPhase)
 
 	Phase = NewPhase;
 
-	// Entrar al turno de un personaje es lo único que recarga las acciones. Ponerlo acá y no en el
-	// llamador es lo que evita que un camino nuevo se olvide de recargarlas.
+	// Entering a character's turn is the only thing that refills the actions. Putting it here and
+	// not in the caller is what stops a new code path from forgetting to refill them.
 	if (Phase == EMissionTurnPhase::CharacterTurn)
 	{
 		ActionsRemaining = ActionsPerTurn;

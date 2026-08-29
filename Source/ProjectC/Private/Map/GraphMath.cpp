@@ -6,11 +6,11 @@
 namespace
 {
 	/**
-	 * Lista de adyacencia para una consulta concreta.
+	 * Adjacency list for one concrete query.
 	 *
-	 * Se arma por consulta y no se cachea a propósito: los permisos de la figura y los bloqueos
-	 * cambian el conjunto de aristas, así que un cache sería una tabla por combinación. Con el
-	 * tamaño de mapa del GDD el costo es despreciable.
+	 * It is built per query and deliberately not cached: the figure's permissions and the blocks
+	 * change the set of edges, so a cache would be one table per combination. At the map size the
+	 * GDD calls for, the cost is negligible.
 	 */
 	TArray<TArray<int32>> BuildAdjacency(int32 NodeCount, const TArray<FGraphEdge>& Edges, const FGraphQuery& Query)
 	{
@@ -24,7 +24,7 @@ namespace
 				continue;
 			}
 
-			// Una arista fuera de rango es un mapa mal armado, no un caso a manejar en silencio.
+			// An out-of-range edge is a badly built map, not a case to swallow silently.
 			if (!Adjacency.IsValidIndex(Edge.A) || !Adjacency.IsValidIndex(Edge.B) || Edge.A == Edge.B)
 			{
 				continue;
@@ -37,7 +37,7 @@ namespace
 		return Adjacency;
 	}
 
-	/** BFS que además guarda de dónde vino cada nodo, para poder reconstruir el camino. */
+	/** BFS that also records where each node came from, so the path can be rebuilt. */
 	void BreadthFirst(const TArray<TArray<int32>>& Adjacency, int32 From, TArray<int32>& OutDistances, TArray<int32>* OutPrevious)
 	{
 		const int32 NodeCount = Adjacency.Num();
@@ -79,7 +79,7 @@ namespace
 		}
 	}
 
-	/** Extremos por distancia, compartido entre Nearest y Farthest. */
+	/** Distance extremes, shared between Nearest and Farthest. */
 	TArray<int32> Extremes(int32 NodeCount, const TArray<FGraphEdge>& Edges, int32 From, const TArray<int32>& Candidates, const FGraphQuery& Query, bool bWantNearest)
 	{
 		TArray<int32> Distances;
@@ -97,7 +97,7 @@ namespace
 
 			const int32 D = Distances[Candidate];
 
-			// Un inalcanzable no es "el mas lejano": sale del conjunto candidato.
+			// An unreachable node is not "the farthest": it drops out of the candidate set.
 			if (D == FGraphMath::Unreachable)
 			{
 				continue;
@@ -121,13 +121,13 @@ namespace
 
 bool FGraphMath::EdgeApplies(const FGraphEdge& Edge, const FGraphQuery& Query)
 {
-	// La adyacencia condicional de un Trinket habilita moverse pero se ignora al medir.
+	// A Trinket's conditional adjacency enables movement but is ignored when measuring.
 	if (Edge.bMovementOnly && !Query.bIncludeMovementOnly)
 	{
 		return false;
 	}
 
-	// Un bloqueo solo detiene a quien no puede ignorarlo.
+	// A block only stops whoever cannot ignore it.
 	if (Edge.bBlocked && !Query.bIgnoresBlocked)
 	{
 		return false;
@@ -228,7 +228,7 @@ int32 FGraphMath::PushTowards(int32 NodeCount, const TArray<FGraphEdge>& Edges, 
 {
 	const TArray<int32> Path = ShortestPath(NodeCount, Edges, From, To, Query);
 
-	// Sin camino, el paso que empujaba se saltea y la carta sigue resolviendose.
+	// With no path, the pushing step is skipped and the card keeps resolving.
 	if (Path.Num() == 0)
 	{
 		return INDEX_NONE;
@@ -239,7 +239,7 @@ int32 FGraphMath::PushTowards(int32 NodeCount, const TArray<FGraphEdge>& Edges, 
 		return From;
 	}
 
-	// Para al llegar: el sobrante se descarta, no sigue de largo.
+	// It stops on arrival: the leftover is discarded, it does not overshoot.
 	const int32 Index = FMath::Min(Steps, Path.Num() - 1);
 	return Path[Index];
 }

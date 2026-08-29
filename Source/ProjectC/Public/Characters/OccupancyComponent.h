@@ -11,20 +11,20 @@ class ASpace;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSpaceChanged, ASpace*, OldSpace, ASpace*, NewSpace);
 
 /**
- * En que `Space` esta parada esta figura.
+ * Which `Space` this figure is standing on.
  *
- * Es un componente y no un campo de la clase base porque lo necesitan tres jerarquias que no
- * comparten padre —`Character`, `Enemy`, `Ally`—, que es exactamente el criterio del proyecto
- * para componer en vez de heredar (design/architecture/04-mapa-de-clases.md).
+ * It is a component and not a field on the base class because three hierarchies that share no
+ * parent need it -- `Character`, `Enemy`, `Ally` -- which is exactly the project's criterion for
+ * composing instead of inheriting (design/architecture/04-mapa-de-clases.md).
  *
- * **Guarda la posicion, no la valida.** Si un movimiento es legal lo decide `AMissionGameMode`
- * consultando `UGraphSubsystem`; este componente obedece. Poner la validacion aca la duplicaria
- * en cada figura y la volveria imposible de testear sin mundo.
+ * **It stores the position, it does not validate it.** Whether a move is legal is decided by
+ * `AMissionGameMode` querying `UGraphSubsystem`; this component obeys. Putting the validation here
+ * would duplicate it in every figure and make it impossible to test without a world.
  *
- * **Primer corte deliberado.** Falta la consulta inversa —quien esta en un `Space`—, que es lo
- * que necesita el estado `Clear` (design/gdd/01-fundamentos/mapa-y-espacios.md) y la
- * pegajosidad de enemigos. Las dos son clase 5 y no entran todavia: la relacion inversa se
- * mantiene sola o se desincroniza, y sostenerla sin nadie que la use es donde aparecen los bugs.
+ * **A deliberate first cut.** The reverse query -- who is on a `Space` -- is missing, and it is
+ * what the `Clear` state (design/gdd/01-fundamentos/mapa-y-espacios.md) and enemy stickiness need.
+ * Both are class 5 and do not come in yet: the reverse relation either maintains itself or goes
+ * out of sync, and holding it up with nobody using it is where the bugs come from.
  */
 UCLASS(ClassGroup = (ProjectC), meta = (BlueprintSpawnableComponent))
 class PROJECTC_API UOccupancyComponent : public UActorComponent
@@ -37,7 +37,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Occupancy")
 	ASpace* GetSpace() const { return CurrentSpace; }
 
-	/** Mover no es teletransportar el Actor: eso lo hace quien llama, con la posicion del `Space`. */
+	/** Moving is not teleporting the Actor: the caller does that, using the `Space` position. */
 	UFUNCTION(BlueprintCallable, Category = "Occupancy")
 	void SetSpace(ASpace* NewSpace);
 
@@ -46,9 +46,9 @@ public:
 
 protected:
 	/**
-	 * `EditInstanceOnly` porque es la posicion de **esta** figura en **este** nivel: el default
-	 * de la clase no tiene sentido, y dejarlo editable en el Blueprint invitaria a que las cuatro
-	 * figuras arranquen en el mismo lado.
+	 * `EditInstanceOnly` because it is **this** figure's position in **this** level: a class
+	 * default makes no sense, and leaving it editable in the Blueprint would invite all four
+	 * figures to start in the same place.
 	 */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Occupancy")
 	TObjectPtr<ASpace> CurrentSpace;

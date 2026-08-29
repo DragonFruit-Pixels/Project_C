@@ -6,34 +6,34 @@
 #include "Engine/EngineTypes.h"
 
 /**
- * Los canales y perfiles de colision propios del proyecto, con nombre.
+ * The project's own collision channels and profiles, given names.
  *
- * Los canales se declaran en Config/DefaultEngine.ini como `ECC_GameTraceChannel1..3`, que son
- * ranuras posicionales: si alguien inserta un canal nuevo, los numeros se corren y cada trace
- * escrito a mano empieza a pegarle a otra cosa **sin error de compilacion**. Este header es el
- * unico lugar donde vive esa correspondencia.
+ * The channels are declared in Config/DefaultEngine.ini as `ECC_GameTraceChannel1..3`, which are
+ * positional slots: if someone inserts a new channel, the numbers shift and every hand-written
+ * trace starts hitting something else **with no compile error**. This header is the only place
+ * where that correspondence lives.
  *
- * Los perfiles son FName y se devuelven por funcion, no por constante global: construir un FName
- * durante la inicializacion estatica corre antes de que exista la tabla de nombres del engine.
- * Es el mismo motivo por el que los tests arman sus TArray dentro de una funcion.
+ * The profiles are FName and are returned from a function, not a global constant: building an
+ * FName during static initialisation runs before the engine's name table exists. It is the same
+ * reason the tests build their TArray inside a function.
  */
 namespace ProjectCCollision
 {
-	/** Nodo del grafo. Objeto, no trazado: `bTraceType=False` en el .ini. */
+	/** A graph node. Object, not trace: `bTraceType=False` in the .ini. */
 	inline constexpr ECollisionChannel Space = ECC_GameTraceChannel1;
 
-	/** Personaje, enemigo o Ally. Objeto. */
+	/** Character, enemy or Ally. Object. */
 	inline constexpr ECollisionChannel Figure = ECC_GameTraceChannel2;
 
 	/**
-	 * El canal que traza el mouse. Es **canal de trazado** (`bTraceType=True`), no de objeto:
-	 * no describe que es una cosa, describe una pregunta que se le hace al mundo.
+	 * The channel the mouse traces on. It is a **trace channel** (`bTraceType=True`), not an
+	 * object one: it does not describe what a thing is, it describes a question asked of the world.
 	 */
 	inline constexpr ECollisionChannel Selectable = ECC_GameTraceChannel3;
 
-	/** Perfil de `ASpace::Bounds`: QueryOnly, solo bloquea `Selectable`. */
+	/** Profile for `ASpace::Bounds`: QueryOnly, blocks `Selectable` only. */
 	inline FName SpaceProfile() { return FName(TEXT("Space")); }
 
-	/** Perfil del volumen de seleccion de una figura. No es el perfil de su capsula. */
+	/** Profile for a figure's selection volume. Not the profile of its capsule. */
 	inline FName FigureProfile() { return FName(TEXT("Figure")); }
 }

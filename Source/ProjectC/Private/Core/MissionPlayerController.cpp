@@ -16,8 +16,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogProjectCInput, Log, All);
 
 AMissionPlayerController::AMissionPlayerController()
 {
-	// Un juego de tablero se juega con el mouse a la vista. No es una preferencia: sin cursor no
-	// hay hover, y sin hover el jugador no sabe qué va a clickear.
+	// A board game is played with the mouse in sight. This is not a preference: with no cursor
+	// there is no hover, and with no hover the player cannot tell what they are about to click.
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 }
@@ -26,27 +26,27 @@ void AMissionPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// GameAndUI y no GameOnly: los widgets del HUD (clase 7) tienen que poder recibir clicks sin
-	// que el mundo deje de recibirlos. Cambiarlo después obliga a revisar cada widget.
+	// GameAndUI and not GameOnly: the HUD widgets (class 7) have to be able to receive clicks
+	// without the world losing them. Changing it later means reviewing every widget.
 	//
-	// `SetHideCursorDuringCapture(false)`: GameAndUI pone al viewport en `CaptureDuringMouseDown`,
-	// y por defecto esconde el cursor mientras el botón está apretado. En un juego que se juega
-	// entero con el cursor eso es simplemente incorrecto: el jugador pierde de vista lo que está
-	// por clickear justo en el momento en que lo clickea.
+	// `SetHideCursorDuringCapture(false)`: GameAndUI puts the viewport in `CaptureDuringMouseDown`,
+	// and by default hides the cursor while the button is held. In a game played entirely with the
+	// cursor that is simply wrong: the player loses sight of what they are about to click at the
+	// exact moment they click it.
 	SetInputMode(FInputModeGameAndUI()
 		.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock)
 		.SetHideCursorDuringCapture(false));
 
-	// El contexto se agrega por el subsystem del LocalPlayer, no por el controller: es el punto
-	// que el temario marca como servicio de Enhanced Input.
-	// Ruidoso a propósito, y en las tres ramas. El síntoma de cualquiera de estas fallas es el
-	// mismo -"el juego no hace nada"- y ese síntoma no dice dónde mirar. Una rama muda acá cuesta
-	// una sesión entera de debug.
+	// The context is added through the LocalPlayer's subsystem, not through the controller: that
+	// is the point the syllabus marks as the Enhanced Input service.
+	// Loud on purpose, in all three branches. The symptom of any of these failures is the same --
+	// "the game does nothing" -- and that symptom does not say where to look. A silent branch here
+	// costs a whole debugging session.
 	const ULocalPlayer* const LocalPlayer = GetLocalPlayer();
 	if (LocalPlayer == nullptr)
 	{
 		UE_LOG(LogProjectCInput, Error,
-			TEXT("%s no tiene LocalPlayer en BeginPlay: no se puede agregar el contexto de input."),
+			TEXT("%s has no LocalPlayer in BeginPlay: the input context cannot be added."),
 			*GetName());
 		return;
 	}
@@ -56,22 +56,22 @@ void AMissionPlayerController::BeginPlay()
 	if (Input == nullptr)
 	{
 		UE_LOG(LogProjectCInput, Error,
-			TEXT("No hay UEnhancedInputLocalPlayerSubsystem. Revisar que el plugin EnhancedInput este activo."));
+			TEXT("No UEnhancedInputLocalPlayerSubsystem. Check that the EnhancedInput plugin is enabled."));
 		return;
 	}
 
 	if (MissionContext == nullptr)
 	{
 		UE_LOG(LogProjectCInput, Error,
-			TEXT("%s no tiene MissionContext asignado: no va a responder ningun input. ")
-			TEXT("Se asigna en el Blueprint hijo (BP_PlayerController_Mission)."),
+			TEXT("%s has no MissionContext assigned: it will not respond to any input. ")
+			TEXT("It is assigned in the child Blueprint (BP_PlayerController_Mission)."),
 			*GetName());
 		return;
 	}
 
 	Input->AddMappingContext(MissionContext, MissionContextPriority);
 
-	UE_LOG(LogProjectCInput, Log, TEXT("Contexto de input '%s' agregado con prioridad %d."),
+	UE_LOG(LogProjectCInput, Log, TEXT("Input context '%s' added with priority %d."),
 		*MissionContext->GetName(), MissionContextPriority);
 }
 
@@ -83,20 +83,20 @@ void AMissionPlayerController::SetupInputComponent()
 	if (Input == nullptr)
 	{
 		UE_LOG(LogProjectCInput, Error,
-			TEXT("El InputComponent no es un UEnhancedInputComponent. Revisar DefaultInputComponentClass ")
-			TEXT("en Project Settings > Input."));
+			TEXT("The InputComponent is not a UEnhancedInputComponent. Check DefaultInputComponentClass ")
+			TEXT("in Project Settings > Input."));
 		return;
 	}
 
-	// Started y no Triggered para el click: Triggered repite mientras el boton esta apretado, y
-	// un click sostenido sobre un destino legal gastaria las 3 acciones de una.
+	// Started and not Triggered for the click: Triggered repeats while the button is held, and a
+	// held click over a legal destination would spend all 3 actions at once.
 	if (SelectAction != nullptr)
 	{
 		Input->BindAction(SelectAction, ETriggerEvent::Started, this, &AMissionPlayerController::HandleSelect);
 	}
 	else
 	{
-		UE_LOG(LogProjectCInput, Error, TEXT("SelectAction sin asignar: esa accion no responde."));
+		UE_LOG(LogProjectCInput, Error, TEXT("SelectAction is unassigned: that action will not respond."));
 	}
 
 	if (CancelAction != nullptr)
@@ -105,17 +105,17 @@ void AMissionPlayerController::SetupInputComponent()
 	}
 	else
 	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CancelAction sin asignar: esa accion no responde."));
+		UE_LOG(LogProjectCInput, Error, TEXT("CancelAction is unassigned: that action will not respond."));
 	}
 
-	// Los tres de camara si son Triggered: valen mientras la tecla siga apretada.
+	// The three camera ones are Triggered: they hold while the key stays pressed.
 	if (CameraPanAction != nullptr)
 	{
 		Input->BindAction(CameraPanAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandlePan);
 	}
 	else
 	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraPanAction sin asignar: esa accion no responde."));
+		UE_LOG(LogProjectCInput, Error, TEXT("CameraPanAction is unassigned: that action will not respond."));
 	}
 
 	if (CameraZoomAction != nullptr)
@@ -124,7 +124,7 @@ void AMissionPlayerController::SetupInputComponent()
 	}
 	else
 	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraZoomAction sin asignar: esa accion no responde."));
+		UE_LOG(LogProjectCInput, Error, TEXT("CameraZoomAction is unassigned: that action will not respond."));
 	}
 
 	if (CameraOrbitAction != nullptr)
@@ -133,7 +133,7 @@ void AMissionPlayerController::SetupInputComponent()
 	}
 	else
 	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraOrbitAction sin asignar: esa accion no responde."));
+		UE_LOG(LogProjectCInput, Error, TEXT("CameraOrbitAction is unassigned: that action will not respond."));
 	}
 }
 
@@ -156,8 +156,8 @@ AActor* AMissionPlayerController::TraceSelectableUnderCursor_Implementation()
 {
 	FHitResult Hit;
 
-	// El canal `Selectable` existe justamente para esto: no hay que filtrar el resultado ni
-	// preguntarle al actor si le interesaba, porque solo lo bloquea lo que es seleccionable.
+	// The `Selectable` channel exists precisely for this: there is no need to filter the result or
+	// ask the actor whether it cared, because only selectable things block it.
 	const bool bHit = GetHitResultUnderCursorByChannel(
 		UEngineTypes::ConvertToTraceType(ProjectCCollision::Selectable),
 		/*bTraceComplex*/ false,
@@ -170,7 +170,8 @@ AActor* AMissionPlayerController::TraceSelectableUnderCursor_Implementation()
 
 	AActor* const Actor = Hit.GetActor();
 
-	// Que bloquee el canal no alcanza: la interfaz es el contrato, el canal es solo el filtro.
+	// Blocking the channel is not enough: the interface is the contract, the channel is only the
+	// filter.
 	return (Actor != nullptr && Actor->Implements<USelectable>()) ? Actor : nullptr;
 }
 
@@ -178,21 +179,21 @@ void AMissionPlayerController::HandleSelect()
 {
 	AActor* const Hit = TraceSelectableUnderCursor();
 
-	// Un click es un evento del jugador, no un tick: loguearlo no cuesta nada y es lo que
-	// convierte "no pasa nada" en una linea que dice por que.
-	UE_LOG(LogProjectCInput, Log, TEXT("Click sobre %s (seleccionado: %s)"),
-		Hit ? *Hit->GetName() : TEXT("nada"),
-		SelectedActor ? *SelectedActor->GetName() : TEXT("nada"));
+	// A click is a player event, not a tick: logging it costs nothing and is what turns "nothing
+	// happens" into a line that says why.
+	UE_LOG(LogProjectCInput, Log, TEXT("Click on %s (selected: %s)"),
+		Hit ? *Hit->GetName() : TEXT("nothing"),
+		SelectedActor ? *SelectedActor->GetName() : TEXT("nothing"));
 
 	if (Hit == nullptr)
 	{
-		// Click al vacío: deseleccionar. Es lo que espera cualquiera que haya jugado un táctico.
+		// Click on empty space: deselect. It is what anyone who has played a tactics game expects.
 		ClearSelection();
 		return;
 	}
 
-	// Primero, la orden de movimiento: solo si hay algo seleccionado y el destino estaba
-	// iluminado. Se consulta la misma lista que se pintó, no se recalcula.
+	// First, the move order: only if something is selected and the destination was lit. It queries
+	// the same list that was painted; it does not recompute.
 	ASpace* const HitSpace = Cast<ASpace>(Hit);
 	if (SelectedActor != nullptr && HitSpace != nullptr && LegalDestinations.Contains(HitSpace))
 	{
@@ -200,8 +201,8 @@ void AMissionPlayerController::HandleSelect()
 		{
 			if (GameMode->TryMoveFigure(SelectedActor, HitSpace))
 			{
-				// La figura sigue seleccionada: gastar una de tres acciones y tener que
-				// reseleccionar para las otras dos sería tedio, no decisión.
+				// The figure stays selected: spending one of three actions and having to reselect
+				// for the other two would be tedium, not decision.
 				RefreshLegalDestinations();
 				RefreshHighlights();
 				return;
@@ -209,7 +210,7 @@ void AMissionPlayerController::HandleSelect()
 		}
 	}
 
-	// Si no era una orden, es un intento de selección.
+	// If it was not an order, it is a selection attempt.
 	if (ISelectable::Execute_CanBeSelected(Hit))
 	{
 		SelectActor(Hit);
@@ -278,8 +279,8 @@ void AMissionPlayerController::RefreshLegalDestinations()
 		return;
 	}
 
-	// Quién puede moverse a dónde lo decide el árbitro. Si esto se calculara acá habría dos
-	// versiones de la misma regla, y la que ve el jugador sería la equivocada.
+	// Who can move where is the referee's call. If this were computed here there would be two
+	// versions of the same rule, and the one the player sees would be the wrong one.
 	if (const AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
 	{
 		for (ASpace* const Destination : GameMode->GetLegalDestinations(SelectedActor))
@@ -291,7 +292,7 @@ void AMissionPlayerController::RefreshLegalDestinations()
 
 void AMissionPlayerController::RefreshHighlights()
 {
-	// Apagar todo primero. Es lo que hace que no exista el resaltado huérfano.
+	// Clear everything first. That is what makes an orphaned highlight impossible.
 	for (const TObjectPtr<AActor>& Actor : HighlightedActors)
 	{
 		if (IsValid(Actor) && Actor->Implements<USelectable>())
@@ -301,7 +302,7 @@ void AMissionPlayerController::RefreshHighlights()
 	}
 	HighlightedActors.Reset();
 
-	// Y volver a prender en orden de precedencia creciente: el último que escribe, gana.
+	// Then light up again in increasing order of precedence: the last writer wins.
 	auto Apply = [this](AActor* Actor, ESelectionHighlight Highlight)
 	{
 		if (IsValid(Actor) && Actor->Implements<USelectable>())

@@ -12,18 +12,18 @@ class UOccupancyComponent;
 class USphereComponent;
 
 /**
- * El cuerpo de un personaje jugable.
+ * The body of a playable character.
  *
- * Hereda de ACharacter y no de APawn a propósito: trae CharacterMovementComponent y cápsula, que
- * es lo que alimenta el Blendspace de locomoción (clase 6). Un Pawn pelado obligaría a escribir
- * el movimiento a mano.
+ * It inherits from ACharacter and not APawn on purpose: that brings CharacterMovementComponent and
+ * a capsule, which is what feeds the locomotion Blendspace (class 6). A bare Pawn would force the
+ * movement to be written by hand.
  *
- * **El jugador nunca posee a un personaje.** Se los selecciona con el mouse, como a cualquier
- * otra figura del tablero; el `PlayerController` posee un pawn-cámara. Ver
+ * **The player never possesses a character.** They are picked with the mouse, like any other
+ * figure on the board; the `PlayerController` possesses a camera pawn. See
  * design/architecture/04-mapa-de-clases.md, "El jugador no tiene cuerpo".
  *
- * Las capacidades son componentes, no herencia — el `Ratchet` es de la figura, no de la jerarquía.
- * Los BP_Character_01..04 heredan de acá y traen su mesh, sus valores y su arte.
+ * Capabilities are components, not inheritance -- the `Ratchet` belongs to the figure, not to the
+ * hierarchy. BP_Character_01..04 inherit from here and bring their mesh, values and art.
  */
 UCLASS()
 class PROJECTC_API AProjectCCharacter : public ACharacter, public ISelectable
@@ -52,15 +52,15 @@ protected:
 	TObjectPtr<UOccupancyComponent> Occupancy;
 
 	/**
-	 * El volumen que traza el mouse, **separado de la cápsula**.
+	 * The volume the mouse traces against, **separate from the capsule**.
 	 *
-	 * La cápsula no puede llevar el perfil `Figure`: ese perfil ignora todo salvo `Selectable`, y
-	 * el CharacterMovementComponent barre la cápsula contra el mundo para caminar. Pisárselo
-	 * dejaría al personaje sin piso, y el síntoma aparecería en la clase 6 con la locomoción, muy
-	 * lejos de la causa.
+	 * The capsule cannot carry the `Figure` profile: that profile ignores everything but
+	 * `Selectable`, and CharacterMovementComponent sweeps the capsule against the world in order to
+	 * walk. Overwriting it would leave the character with no floor, and the symptom would show up
+	 * in class 6 with locomotion, a long way from the cause.
 	 *
-	 * Es el mismo patrón que ASpace ya usa con su `Bounds`: un componente cuyo único trabajo es
-	 * ser trazable.
+	 * It is the same pattern ASpace already uses with its `Bounds`: a component whose only job is
+	 * to be traceable.
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProjectC|Character")
 	TObjectPtr<USphereComponent> SelectionBounds;

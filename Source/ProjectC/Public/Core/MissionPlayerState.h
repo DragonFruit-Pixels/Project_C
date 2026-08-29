@@ -7,20 +7,20 @@
 #include "MissionPlayerState.generated.h"
 
 /**
- * Lo que le pasó al **jugador** durante esta misión.
+ * What happened to the **player** during this mission.
  *
- * La propiedad que define a APlayerState es que **sobrevive a la muerte del Pawn**, y acá eso
- * describe algo concreto: estos contadores siguen vivos cuando una figura se pierde en el track.
+ * The defining property of APlayerState is that it **outlives the Pawn's death**, and here that
+ * describes something concrete: these counters stay alive when a figure is lost on the track.
  *
- * Es el hogar correcto por descarte, no por relleno:
- *   - no son reglas de la misión      -> eso es AMissionGameMode
- *   - no son estado del tablero       -> eso es AMissionGameState
- *   - no cruzan de misión             -> eso es UProjectCGameInstance
- * Son del jugador, y duran lo que dura la partida.
+ * It is the right home by elimination, not as filler:
+ *   - they are not mission rules      -> that is AMissionGameMode
+ *   - they are not board state        -> that is AMissionGameState
+ *   - they do not cross missions      -> that is UProjectCGameInstance
+ * They belong to the player, and they last as long as the run does.
  *
- * Se necesitan igual: la pantalla de fin de misión no tiene de dónde sacar estos números.
+ * They are needed regardless: the end-of-mission screen has nowhere else to get these numbers.
  *
- * Ver design/gdd/06-decisiones/registro.md, D-23.
+ * See design/gdd/06-decisiones/registro.md, D-23.
  */
 UCLASS()
 class PROJECTC_API AMissionPlayerState : public APlayerState
@@ -29,26 +29,26 @@ class PROJECTC_API AMissionPlayerState : public APlayerState
 
 public:
 	/**
-	 * `Ratchet` acumulado por todas las figuras en toda la misión.
+	 * `Ratchet` accumulated by every figure across the whole mission.
 	 *
-	 * Es la métrica que mejor resume una partida: cuánto costó actuar. Sube por `Toll` en
-	 * cualquier tirada, así que crece incluso en los turnos que salieron bien.
+	 * It is the metric that best sums up a run: what acting cost. It rises on `Toll` in any roll,
+	 * so it grows even on the turns that went well.
 	 */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission|Stats")
 	int32 TollTaken = 0;
 
-	/** `Reserve` gastado en rerolls. Mide cuánto se peleó contra la varianza. */
+	/** `Reserve` spent on rerolls. Measures how hard the player fought variance. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission|Stats")
 	int32 RerollsSpent = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission|Stats")
 	int32 EnemiesKilled = 0;
 
-	/** Figuras que llegaron al final del track. No se recuperan. */
+	/** Figures that reached the end of the track. They do not come back. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission|Stats")
 	int32 CharactersLost = 0;
 
-	/** Aristas recorridas. Cuenta cada paso, así que un `Move` de 3 suma 3. */
+	/** Edges travelled. It counts every step, so a `Move` of 3 adds 3. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission|Stats")
 	int32 SpacesMoved = 0;
 };
