@@ -127,9 +127,10 @@ decided or does differently.
 - **C++ vs Blueprint boundary**: **decided** — C++ for framework bases, subsystems, data types,
   algorithms, interfaces and tests; Blueprint for content subclasses, AnimBPs, widgets, BT/EQS
   assets and placed actors. Full table in `design/architecture/06-limite-cpp-blueprint.md`
-- **IDE**: CLion. UBT has a first-class generator for it — `-CLion` (which is `-CMakefile` under
-  the hood, per `CLionGenerator.cs`), emitting a generated `CMakeLists.txt` at the project root.
-  Regenerate it after adding files or editing a `.Build.cs`
+- **IDE**: Rider, opening `Project_C.uproject` directly. Rider asks UBT for the project model
+  (`-Rider`, which emits JSON under `Intermediate/`) and keeps it current on its own: there is no
+  `.sln` and nothing to regenerate after adding a `.cpp` or editing a `.Build.cs`. The editor's
+  source-code accessor is `Rider Uproject`
 - **Formatting / linting**: none configured
 - **Line endings**: `.gitattributes` sets `* text=auto`. Note the machine's global
   `core.autocrlf` is `input` (a Linux/Mac value); `.gitattributes` governs over it

@@ -10,11 +10,15 @@ Build/
 Plugins/**/Binaries/
 Plugins/**/Intermediate/
 
-# ── Visual Studio / CLion / Rider / build tooling ───────────────
+# ── IDE / build tooling ─────────────────────────────
+# El IDE es Rider y el proyecto se abre por `Project_C.uproject`. El modelo lo genera
+# UBT solo, dentro de `Intermediate/`, que ya esta ignorado mas arriba. No hay .sln
+# que generar ni project files que regenerar al agregar un .cpp.
 .vs/
 .idea/
 *.sln
-# UBT genera estos para CLion con -CLion / -CMakefile. Se regeneran, no se versionan.
+# Restos de CMake, de cuando el IDE era CLion. Ya no se generan, pero quedan ignorados
+# porque un `-CMakefile` a mano los vuelve a dejar: `cmake-build-*` llegó a pesar 63 GB.
 /CMakeLists.txt
 /CMakeSettings.json
 /compile_commands.json

@@ -277,12 +277,13 @@ Comandos verificados en esta máquina, no copiados de un tutorial.
 
 Devuelve **exit code 0** si pasan y **255** si alguno falla, así que sirve tal cual para CI.
 
-**Regenerar los project files de CLion:**
+**Pedirle a UBT el modelo de proyecto para el IDE.** No hace falta a mano: Rider se lo pide solo
+al abrir el `.uproject`. Sirve para verificar que el toolchain está sano.
 
 ```
 "…\Engine\Binaries\ThirdParty\DotNet\10.0\win-x64\dotnet.exe" ^
   "…\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll" ^
-  -projectfiles -project="…\Project_C.uproject" -game -CLion -progress
+  -projectfiles -project="…\Project_C.uproject" -game -Rider -progress
 ```
 
 > **Por qué el `dotnet.exe` del engine y no `UnrealBuildTool.exe` directo.** Llamar al `.exe`
@@ -290,44 +291,52 @@ Devuelve **exit code 0** si pasan y **255** si alguno falla, así que sirve tal 
 > propio .NET 10 en `Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/`, y es lo que usa `Build.bat`
 > por dentro — por eso compilar funciona y llamar a UBT a mano no.
 
-### Un detalle de CLion que va a confundir
+## El IDE: Rider, abriendo el `.uproject`
 
-El `CMakeLists.txt` generado declara `set(CMAKE_CXX_STANDARD 14)`, pero **el build real usa
-`/std:c++20`** (verificado en los `.obj.rsp`; es el default desde `BuildSettingsVersion.V4`).
+**Se abre `Project_C.uproject`. No la carpeta, no un `.sln`.** No es una preferencia de estilo:
+es lo que decide si Rider carga un proyecto de Unreal o cualquier otra cosa.
 
-O sea que el parser de CLion va a marcar como error sintaxis de C++17/20 perfectamente válida que
-compila sin chistar. No es un problema del proyecto ni del código: es el generador de CMake que
-quedó viejo. Se arregla forzando el estándar en la configuración de CMake de CLion.
+Abriendo el `.uproject`, Rider le pide el modelo a UBT (generador `-Rider`, que escribe JSON en
+`Intermediate/`) y lo mantiene al día solo. **No hay `.sln` que generar ni project files que
+regenerar** al agregar un `.cpp` o tocar un `.Build.cs` — que era justamente el impuesto del
+esquema anterior.
 
-También conviene saber que el `CMakeLists.txt` de la raíz es solo un cascarón: las listas reales
-de archivos viven en `Intermediate/ProjectFiles/cmake-*.cmake`, que ya está gitignoreado.
+**El accessor del editor se llama `Rider Uproject`**, y el nombre no es adivinable. El plugin
+`RiderSourceCodeAccess` —que viene con el engine, con `EnabledByDefault: true`, así que no hay que
+tocar el `.uproject`— registra varios accessors con nombre generado en tiempo de arranque
+(`RiderSourceCodeAccessorModule.cpp`):
 
-## El IDE: CLion
+| Accessor | `FName` |
+|---|---|
+| Agregado, modelo `.uproject` | `Rider Uproject` |
+| Agregado, modelo `.sln` | `Rider` — y se autodesactiva si el `.sln` no existe |
+| Uno por instalación encontrada | `Rider 2025.x (installed)`, `… (toolbox)` |
 
-**UBT tiene un generador de project files dedicado para CLion.** Verificado en el engine
-instalado: `Engine/Source/Programs/UnrealBuildTool/ProjectFiles/CLion/CLionGenerator.cs`, y el
-flag de línea de comandos es `-CLion` (declarado en `Modes/GenerateProjectFilesMode.cs`, junto a
-`-CMakefile`, `-Rider` y `-VisualStudio`).
+Y cuidado con **dónde** vive ese setting. `Config/DefaultEditorSettings.ini` es solo la semilla
+para una máquina nueva; una vez que el editor arrancó manda el `EditorSettings.ini` de
+`%LOCALAPPDATA%\UnrealEngine\5.8\Saved\Config\WindowsEditor\`, que es global a todos los proyectos
+y es lo que edita Editor Preferences > Source Code.
 
-Leyendo el generador: `CLionGenerator` **hereda de `CMakefileGenerator` y no agrega nada** — el
-comentario del propio Epic dice que existe *"only here for UBT to match against"*. O sea que
-`-CLion` y `-CMakefile` producen lo mismo: un `CMakeLists.txt` en la raíz del proyecto.
+**RiderLink** es la integración editor↔IDE: Blueprints navegables desde el IDE y el log del editor
+dentro de Rider. Rider la ofrece instalar sola la primera vez. Conviene instalarla en el **Engine**
+y no en el Game: en el Game aparece un `Plugins/RiderLink/` dentro del repo y hay que decidir si se
+versiona.
 
-Consecuencias prácticas:
+### Lo que dejó CLion, para que no vuelva a pasar
 
-- **`CMakeLists.txt` es generado, no fuente.** Hay que regenerarlo cada vez que se agrega un
-  archivo `.cpp`/`.h` o cambia un `.Build.cs`. Ya está en `.gitignore` junto con
-  `cmake-build-*/` y `compile_commands.json`.
-- **CLion no trae compilador.** En Windows usa el MSVC de Microsoft igual que Visual Studio, así
-  que el workload de C++ es igual de obligatorio. La elección de IDE no cambia nada de los
-  prerequisitos.
-- **El editor de Unreal compila por su cuenta**, con UBT y Live Coding. CLion es para escribir y
-  navegar el código; el botón de compilar que importa para iterar está en el editor.
+El esquema anterior generaba un `CMakeLists.txt` en la raíz con `-CLion` (que es `-CMakefile`
+disfrazado: `CLionGenerator` hereda de `CMakefileGenerator` y no agrega nada — el comentario de
+Epic dice que existe *"only here for UBT to match against"*). Dos cosas de ahí valen como cicatriz:
 
-> **Sobre Rider.** Es el IDE de JetBrains que tiene el soporte de Unreal más completo —incluido
-> UnrealLink, la integración editor↔IDE que CLion no tiene— y hay licencia no comercial gratuita.
-> No es una recomendación de cambiar: CLion funciona y UBT lo soporta de fábrica. Queda anotado
-> por si en algún momento la integración con el editor empieza a molestar.
+- **Ese `CMakeLists.txt` es lo que rompió el cambio de IDE.** Mientras estuvo en la raíz, Rider
+  abría la carpeta como proyecto **CMake**: sin targets de UBT, sin configuraciones de build, sin
+  integración de Blueprints. El síntoma es "no me buildea la solución", y la causa es que no había
+  solución — había un proyecto CMake.
+- **El configure arrastraba el árbol de fuentes del engine entero.** `cmake-build-debug-visual-studio`
+  llegó a **63 GB**, con un `build.ninja` de 31.9 GB en un solo archivo.
+
+Los dos directorios y el `CMakeLists.txt` se borraron el 2026-08-29. El `.gitignore` los sigue
+ignorando por si alguien corre un `-CMakefile` a mano.
 
 ## Lo que **no** adoptamos, y por qué
 
