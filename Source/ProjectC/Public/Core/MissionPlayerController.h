@@ -119,6 +119,12 @@ protected:
 	 * C++ conserva la implementación por defecto y equivalente. Si el grafo se borra o se rompe,
 	 * el juego sigue respondiendo: esa red es lo que hace barato experimentar en el Blueprint.
 	 *
+	 * El largo del rayo es `MouseInterface > Trace Distance` (`HitResultTraceDistance`, 100000 cm),
+	 * y es a propósito la del engine: la lee el grafo y la lee también
+	 * `GetHitResultUnderCursorByChannel`, que es el fallback de acá abajo. Una sola perilla es lo
+	 * que impide que las dos rutas se separen. Sobra para un tablero: la cámara nunca se aleja
+	 * más de 4500.
+	 *
 	 * Se llama por el nombre pelado: en una `UCLASS` es UHT quien escribe el cuerpo de
 	 * `TraceSelectableUnderCursor()`, y ese cuerpo despacha al grafo si hay override y al
 	 * `_Implementation` si no. (El prefijo `Execute_` es sólo para interfaces, como `ISelectable`.)
@@ -126,13 +132,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Selection")
 	AActor* TraceSelectableUnderCursor();
 	virtual AActor* TraceSelectableUnderCursor_Implementation();
-
-	/**
-	 * Largo del rayo, en cm. Lo usa el grafo para calcular el End a partir de la dirección del
-	 * cursor. Sobra para un tablero: la cámara nunca se aleja más de 4500.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Selection", meta = (ClampMin = "1.0"))
-	float TraceDistance = 100000.0f;
 
 	// --- Handlers ---
 
