@@ -317,6 +317,24 @@ para una máquina nueva; una vez que el editor arrancó manda el `EditorSettings
 `%LOCALAPPDATA%\UnrealEngine\5.8\Saved\Config\WindowsEditor\`, que es global a todos los proyectos
 y es lo que edita Editor Preferences > Source Code.
 
+### Prerrequisito: un SDK de .NET en el sistema
+
+Rider corre `UnrealBuildTool.dll` para armar el modelo del proyecto, y para eso necesita un **SDK**
+de .NET instalado en el sistema — no alcanza con los runtimes. Sin eso falla con
+*"Running UnrealBuildTool.dll failed: .NET Core installation folder not found"*, no genera el
+modelo, y no hay nada que buildear.
+
+Esta máquina tenía solo runtimes 8.0 y **cero SDK** (`dotnet --list-sdks` vacío), que es lo que
+rompió la primera apertura. Se resolvió el 2026-08-29 instalando el SDK 10:
+
+```
+winget install --id Microsoft.DotNet.SDK.10 --exact
+```
+
+El engine trae su propio SDK 10 en `Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/` y se le puede
+apuntar Rider a mano, pero conviene el del sistema: Rider lo autodetecta solo y no queda atado a la
+ruta de una versión del engine.
+
 **RiderLink** es la integración editor↔IDE: Blueprints navegables desde el IDE y el log del editor
 dentro de Rider. Rider la ofrece instalar sola la primera vez. Conviene instalarla en el **Engine**
 y no en el Game: en el Game aparece un `Plugins/RiderLink/` dentro del repo y hay que decidir si se
