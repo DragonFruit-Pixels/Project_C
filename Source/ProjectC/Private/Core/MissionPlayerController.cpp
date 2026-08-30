@@ -146,14 +146,17 @@ void AMissionPlayerController::HandleSelect()
 	}
 
 	ASpace* const HitSpace = Cast<ASpace>(Hit);
-	if (SelectedActor != nullptr && HitSpace != nullptr && LegalDestinations.Contains(HitSpace))
+	if (SelectedActor != nullptr && HitSpace != nullptr)
 	{
-		if (AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
+		if (LegalDestinations.Contains(HitSpace))
 		{
-			if (GameMode->TryMoveFigure(SelectedActor, HitSpace))
+			if (AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
 			{
-				RefreshLegalDestinations();
-				RefreshHighlights();
+				if (GameMode->TryMoveFigure(SelectedActor, HitSpace))
+				{
+					RefreshLegalDestinations();
+					RefreshHighlights();
+				}
 			}
 		}
 		return;
