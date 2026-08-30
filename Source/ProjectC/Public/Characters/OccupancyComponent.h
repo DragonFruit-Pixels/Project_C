@@ -37,9 +37,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Occupancy")
 	ASpace* GetSpace() const { return CurrentSpace; }
 
-	/** Moving is not teleporting the Actor: the caller does that, using the `Space` position. */
+	/**
+	 * Moving is not teleporting the Actor: the caller does that, using the `Space` position.
+	 *
+	 * **Returns the space it replaced**, so reporting a move never needs a read of the old value
+	 * before the write. That read is easy to write and easy to get wrong from a graph: a pure
+	 * Blueprint getter is evaluated where its output is *used*, not where the node was placed, so
+	 * a `GetSpace` wired into a later node reads the value after this call, not before it. Handing
+	 * the old space back removes the trap instead of documenting it.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Occupancy")
-	void SetSpace(ASpace* NewSpace);
+	ASpace* SetSpace(ASpace* NewSpace);
 
 	UPROPERTY(BlueprintAssignable, Category = "Occupancy")
 	FOnSpaceChanged OnSpaceChanged;
