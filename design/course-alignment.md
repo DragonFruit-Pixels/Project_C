@@ -149,9 +149,13 @@ Ordenados por urgencia, no por tamaño. La clase 4 cerró uno entero y mordió o
    parámetros de material), `BP_PlayerController_Mission` tiene sus 6 referencias de Input, y
    `BP_CameraPawn` dejó de ser un cascarón para pasar a ser **la cámara entera** —componentes,
    15 variables, `BeginPlay`, `Tick` y los tres eventos de Enhanced Input— con el C++ que hacía
-   ese trabajo ya borrado ([D-30](gdd/06-decisiones/registro.md)). `BP_Character` trae mallas y
-   valores. `BP_GameState_Mission` y
-   `BP_GameInstance` siguen vacíos, y está bien: todavía no tienen dato que sostener.
+   ese trabajo ya borrado ([D-30](gdd/06-decisiones/registro.md)). `BP_Character` trae valores,
+   pero **no trae malla propia**: su `CharacterMesh0` heredado está deliberadamente en `None`, y
+   lo que se ve es un componente `Body` (StaticMeshComponent) con el placeholder
+   `/Engine/BasicShapes/Cylinder` escalado 0.68 / 0.68 / 1.76. Es una decisión, no un pendiente
+   ([D-27](gdd/06-decisiones/registro.md)): los placeholders salen de `/Engine/BasicShapes` y el
+   mannequin recién entra en la clase 6. `BP_GameState_Mission` y `BP_GameInstance` siguen
+   vacíos, y está bien: todavía no tienen dato que sostener.
 
    No contradice [D-13](gdd/06-decisiones/registro.md): la arquitectura híbrida sigue en pie. Lo
    que falta es llevar a Blueprint cosas que ya funcionan, no inventar lógica nueva.
