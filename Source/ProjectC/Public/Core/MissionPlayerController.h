@@ -10,7 +10,6 @@
 class UInputMappingContext;
 class UInputAction;
 class ASpace;
-struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHoveredChanged, AActor*, HoveredActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, AActor*, SelectedActor);
@@ -19,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, AActor*, Select
  * The player's will: input, camera and owner of the UI.
  *
  * **The player has no body.** Conceptually it is the camera and whoever gives the orders, not a
- * figure on the board: it possesses an `ACameraPawn` and **never** possesses the characters.
+ * figure on the board: it possesses `BP_CameraPawn` and **never** possesses the characters.
  * Figures are picked by raycast against `ISelectable`, which is a single input route for figures,
  * `Space` actors and dice.
  *
@@ -45,7 +44,7 @@ public:
 	 * Hover is resolved here, one trace per frame.
 	 *
 	 * This is the project's second and last exception to "there is no Tick", and like the one in
-	 * `ACameraPawn` it sits on the presentation side: hover touches no game state. The alternative
+	 * `BP_CameraPawn` it sits on the presentation side: hover touches no game state. The alternative
 	 * -- tracing only when the mouse moved -- saves one trace against ~10 boxes and adds the bug
 	 * that moving the camera with the mouse still leaves the highlight stuck on the wrong space.
 	 */
@@ -95,15 +94,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> CancelAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> CameraPanAction;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> CameraZoomAction;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> CameraOrbitAction;
-
 	/**
 	 * The actor under the cursor on the `Selectable` channel, or null.
 	 *
@@ -139,9 +129,6 @@ protected:
 
 	void HandleSelect();
 	void HandleCancel();
-	void HandlePan(const FInputActionValue& Value);
-	void HandleZoom(const FInputActionValue& Value);
-	void HandleOrbit(const FInputActionValue& Value);
 
 private:
 	/** Asks the referee again which destinations are legal for the current selection. */

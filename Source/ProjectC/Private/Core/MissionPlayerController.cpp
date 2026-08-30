@@ -2,7 +2,6 @@
 
 #include "Core/MissionPlayerController.h"
 #include "Core/MissionGameMode.h"
-#include "Core/CameraPawn.h"
 #include "Core/ProjectCCollision.h"
 #include "Map/Space.h"
 
@@ -10,7 +9,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
-#include "InputActionValue.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogProjectCInput, Log, All);
 
@@ -108,33 +106,10 @@ void AMissionPlayerController::SetupInputComponent()
 		UE_LOG(LogProjectCInput, Error, TEXT("CancelAction is unassigned: that action will not respond."));
 	}
 
-	// The three camera ones are Triggered: they hold while the key stays pressed.
-	if (CameraPanAction != nullptr)
-	{
-		Input->BindAction(CameraPanAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandlePan);
-	}
-	else
-	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraPanAction is unassigned: that action will not respond."));
-	}
-
-	if (CameraZoomAction != nullptr)
-	{
-		Input->BindAction(CameraZoomAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandleZoom);
-	}
-	else
-	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraZoomAction is unassigned: that action will not respond."));
-	}
-
-	if (CameraOrbitAction != nullptr)
-	{
-		Input->BindAction(CameraOrbitAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandleOrbit);
-	}
-	else
-	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraOrbitAction is unassigned: that action will not respond."));
-	}
+	// The camera binds nothing here. Its three actions are heard by BP_CameraPawn itself, on the
+	// pawn the player possesses, so possession and input are one thing instead of two. This
+	// controller still adds the mapping context that carries them: the context is per LocalPlayer,
+	// so adding it here is what makes the pawn's events fire at all.
 }
 
 void AMissionPlayerController::PlayerTick(float DeltaTime)
@@ -224,30 +199,6 @@ void AMissionPlayerController::HandleSelect()
 void AMissionPlayerController::HandleCancel()
 {
 	ClearSelection();
-}
-
-void AMissionPlayerController::HandlePan(const FInputActionValue& Value)
-{
-	if (ACameraPawn* const CameraPawn = Cast<ACameraPawn>(GetPawn()))
-	{
-		CameraPawn->AddPanInput(Value.Get<FVector2D>());
-	}
-}
-
-void AMissionPlayerController::HandleZoom(const FInputActionValue& Value)
-{
-	if (ACameraPawn* const CameraPawn = Cast<ACameraPawn>(GetPawn()))
-	{
-		CameraPawn->AddZoomInput(Value.Get<float>());
-	}
-}
-
-void AMissionPlayerController::HandleOrbit(const FInputActionValue& Value)
-{
-	if (ACameraPawn* const CameraPawn = Cast<ACameraPawn>(GetPawn()))
-	{
-		CameraPawn->AddOrbitInput(Value.Get<float>());
-	}
 }
 
 void AMissionPlayerController::SelectActor(AActor* NewSelection)

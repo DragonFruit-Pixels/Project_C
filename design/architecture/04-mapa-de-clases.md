@@ -27,7 +27,7 @@ datos. Los prefijos de asset siguen las convenciones del proyecto (`BP_`, `WBP_`
 | `AMissionGameState` | `BP_GameState_Mission` | `Doom Track`, ronda, personaje activo, mazos, figuras vivas | 3 |
 | `AMissionPlayerController` | `BP_PlayerController_Mission` | selección de figura, cámara, widgets | 3, 4, 7 |
 | `AMissionPlayerState` | — | estadísticas de la partida: `TollTaken`, `RerollsSpent`, `EnemiesKilled`, `CharactersLost`, `SpacesMoved` | 3 |
-| `ACameraPawn` | `BP_CameraPawn` | el encuadre: punto mirado, largo del brazo, yaw. **Es lo único que el jugador posee** | 4 |
+| — | `BP_CameraPawn` | el encuadre: punto mirado, largo del brazo, yaw. **Es lo único que el jugador posee**, y es **todo Blueprint**: no hay clase de C++ debajo ([D-30](../gdd/06-decisiones/registro.md)) | 4 |
 | `AProjectCCharacter` | `BP_Character_01` … `04` | su posición y su presentación | 2, 6 |
 | `AEnemyBase` | `BP_Enemy_*` | su posición y su presentación | 2, 9, 10 |
 | `AEnemyAIController` | `BP_AIC_Enemy` | la decisión de esta activación | 9, 10 |

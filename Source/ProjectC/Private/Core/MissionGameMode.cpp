@@ -4,7 +4,7 @@
 #include "Core/MissionGameState.h"
 #include "Core/MissionPlayerController.h"
 #include "Core/MissionPlayerState.h"
-#include "Core/CameraPawn.h"
+#include "GameFramework/Pawn.h"
 #include "Characters/OccupancyComponent.h"
 #include "Map/GraphSubsystem.h"
 #include "Map/Space.h"
@@ -17,9 +17,15 @@ AMissionGameMode::AMissionGameMode()
 	PlayerControllerClass = AMissionPlayerController::StaticClass();
 	PlayerStateClass = AMissionPlayerState::StaticClass();
 
-	// The player possesses a camera and never a character. See CameraPawn.h and
-	// design/architecture/04-mapa-de-clases.md.
-	DefaultPawnClass = ACameraPawn::StaticClass();
+	// The player possesses a camera and never a character
+	// (design/architecture/04-mapa-de-clases.md). The camera itself is BP_CameraPawn, and it is the
+	// Blueprint subclass that sets it here -- the whole camera lives in Blueprint because that is
+	// where classes 1-13 of the syllabus are taught.
+	//
+	// A bodiless APawn is the coherent default for anyone using this class directly. Deliberately
+	// not ADefaultPawn: that one brings its own camera, its own movement component and its own
+	// input bindings, and all three would fight the Blueprint that is supposed to be in charge.
+	DefaultPawnClass = APawn::StaticClass();
 
 	bStartPlayersAsSpectators = false;
 	PrimaryActorTick.bCanEverTick = false;
