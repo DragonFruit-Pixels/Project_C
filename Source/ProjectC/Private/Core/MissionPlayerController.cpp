@@ -155,12 +155,11 @@ void AMissionPlayerController::HandleSelect()
 		{
 			if (GameMode->TryMoveFigure(SelectedActor, HitSpace))
 			{
-
 				RefreshLegalDestinations();
 				RefreshHighlights();
-				return;
 			}
 		}
+		return;
 	}
 
 	if (ISelectable::Execute_CanBeSelected(Hit))
