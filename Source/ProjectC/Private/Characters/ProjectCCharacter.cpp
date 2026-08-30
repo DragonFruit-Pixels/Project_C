@@ -23,7 +23,6 @@ AProjectCCharacter::AProjectCCharacter()
 
 bool AProjectCCharacter::CanBeSelected_Implementation() const
 {
-
 	return Ratchet == nullptr || !Ratchet->IsLost();
 }
 

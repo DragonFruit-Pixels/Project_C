@@ -64,7 +64,6 @@ public:
 	FOnSelectionChanged OnSelectionChanged;
 
 protected:
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> MissionContext;
 

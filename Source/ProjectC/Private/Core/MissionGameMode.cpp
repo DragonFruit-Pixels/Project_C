@@ -13,7 +13,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogProjectCMission, Log, All);
 
 AMissionGameMode::AMissionGameMode()
 {
-
 	GameStateClass = AMissionGameState::StaticClass();
 	PlayerControllerClass = AMissionPlayerController::StaticClass();
 	PlayerStateClass = AMissionPlayerState::StaticClass();
@@ -26,7 +25,6 @@ AMissionGameMode::AMissionGameMode()
 
 void AMissionGameMode::StartPlay()
 {
-
 	Super::StartPlay();
 
 	if (UWorld* World = GetWorld())
@@ -52,7 +50,6 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 	const UOccupancyComponent* const Occupancy = Figure->FindComponentByClass<UOccupancyComponent>();
 	if (Occupancy == nullptr)
 	{
-
 		UE_LOG(LogProjectCMission, Warning,
 			TEXT("%s has no UOccupancyComponent, so it can reach nothing."), *Figure->GetName());
 		return Destinations;
@@ -81,7 +78,6 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 
 bool AMissionGameMode::TryMoveFigure_Implementation(AActor* Figure, ASpace* To)
 {
-
 	UE_LOG(LogProjectCMission, Error,
 		TEXT("TryMoveFigure has no Blueprint implementation: %s cannot move to %s. ")
 		TEXT("BP_GameMode_Mission is what implements it."),

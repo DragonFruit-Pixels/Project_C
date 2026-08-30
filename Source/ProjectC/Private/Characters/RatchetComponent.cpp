@@ -5,7 +5,6 @@
 
 URatchetComponent::URatchetComponent()
 {
-
 	PrimaryComponentTick.bCanEverTick = false;
 }
 

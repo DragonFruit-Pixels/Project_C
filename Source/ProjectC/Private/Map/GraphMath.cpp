@@ -110,7 +110,6 @@ namespace
 
 bool FGraphMath::EdgeApplies(const FGraphEdge& Edge, const FGraphQuery& Query)
 {
-
 	if (Edge.bMovementOnly && !Query.bIncludeMovementOnly)
 	{
 		return false;

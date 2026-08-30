@@ -14,7 +14,6 @@ void UGraphSubsystem::RegisterSpace(ASpace* Space)
 
 	if (bSealed)
 	{
-
 		UE_LOG(LogProjectCGraph, Error,
 			TEXT("'%s' registered AFTER the graph was sealed. The graph is incomplete and queries will answer wrong."),
 			*Space->GetName());

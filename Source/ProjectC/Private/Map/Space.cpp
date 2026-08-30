@@ -7,7 +7,6 @@
 
 ASpace::ASpace()
 {
-
 	PrimaryActorTick.bCanEverTick = false;
 
 	Bounds = CreateDefaultSubobject<UBoxComponent>(TEXT("Bounds"));
@@ -33,13 +32,11 @@ void ASpace::BeginPlay()
 
 FVector ASpace::GetFigureAnchorLocation() const
 {
-
 	const FVector Centre = Bounds->GetComponentLocation();
 	return FVector(Centre.X, Centre.Y, Centre.Z - Bounds->GetScaledBoxExtent().Z);
 }
 
 FText ASpace::GetSelectableName_Implementation() const
 {
-
 	return FText::FromString(GetActorNameOrLabel());
 }

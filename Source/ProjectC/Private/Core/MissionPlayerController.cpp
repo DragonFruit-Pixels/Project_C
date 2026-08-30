@@ -14,7 +14,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogProjectCInput, Log, All);
 
 AMissionPlayerController::AMissionPlayerController()
 {
-
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 }
@@ -90,7 +89,6 @@ void AMissionPlayerController::SetupInputComponent()
 	{
 		UE_LOG(LogProjectCInput, Error, TEXT("CancelAction is unassigned: that action will not respond."));
 	}
-
 }
 
 void AMissionPlayerController::PlayerTick(float DeltaTime)
@@ -143,7 +141,6 @@ void AMissionPlayerController::HandleSelect()
 
 	if (Hit == nullptr)
 	{
-
 		ClearSelection();
 		return;
 	}
@@ -220,7 +217,6 @@ void AMissionPlayerController::RefreshLegalDestinations()
 
 void AMissionPlayerController::RefreshHighlights()
 {
-
 	for (const TObjectPtr<AActor>& Actor : HighlightedActors)
 	{
 		if (IsValid(Actor) && Actor->Implements<USelectable>())
