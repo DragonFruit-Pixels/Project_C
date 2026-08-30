@@ -108,22 +108,28 @@ void AMissionPlayerController::PlayerTick(float DeltaTime)
 	OnHoveredChanged.Broadcast(HoveredActor);
 }
 
+TArray<TEnumAsByte<EObjectTypeQuery>> AMissionPlayerController::GetSpaceObjectTypes()
+{
+	return { UEngineTypes::ConvertToObjectType(ProjectCCollision::Space) };
+}
+
+TArray<TEnumAsByte<EObjectTypeQuery>> AMissionPlayerController::GetFigureObjectTypes()
+{
+	return { UEngineTypes::ConvertToObjectType(ProjectCCollision::Figure) };
+}
+
 AActor* AMissionPlayerController::TraceSelectableUnderCursor_Implementation()
 {
+	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes =
+		(InteractionMode == EInteractionMode::Move) ? GetSpaceObjectTypes() : GetFigureObjectTypes();
+
 	FHitResult Hit;
-
-	const bool bHit = GetHitResultUnderCursorByChannel(
-		UEngineTypes::ConvertToTraceType(ProjectCCollision::Selectable),
-		/*bTraceComplex*/ false,
-		Hit);
-
-	if (!bHit)
+	if (!GetHitResultUnderCursorForObjects(ObjectTypes, /*bTraceComplex*/ false, Hit))
 	{
 		return nullptr;
 	}
 
 	AActor* const Actor = Hit.GetActor();
-
 	return (Actor != nullptr && Actor->Implements<USelectable>()) ? Actor : nullptr;
 }
 
@@ -182,6 +188,9 @@ void AMissionPlayerController::SelectActor(AActor* NewSelection)
 	SelectedActor = NewSelection;
 
 	RefreshLegalDestinations();
+
+	InteractionMode = LegalDestinations.IsEmpty() ? EInteractionMode::SelectFigure : EInteractionMode::Move;
+
 	RefreshHighlights();
 
 	OnSelectionChanged.Broadcast(SelectedActor);
