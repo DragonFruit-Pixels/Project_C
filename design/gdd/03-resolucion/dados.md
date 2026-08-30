@@ -337,7 +337,7 @@ del orden.
 | Perilla | Default | Rango seguro | Qué afecta |
 |---|---|---|---|
 | Caras `Toll` por dado estándar | **No está en el manual.** Provisional: 2 de 6, o sea `p_T = 1/3` | 1–3 de 6 (`p_T` 0.167–0.5) | La velocidad de la progresión y la del reloj de muerte, al mismo tiempo y en el mismo sentido. Es la perilla más peligrosa del juego: mover esto reescribe la duración de la partida y desincroniza la ventana de sacrificio con la manifestación del adversario → rompe [`04-oposicion/reloj-y-avance.md`](../04-oposicion/reloj-y-avance.md). |
-| Caras `Hit` por dado estándar | **No está en el manual.** Provisional: 3 de 6 | 2–4 de 6 | Cuántas acciones cuesta matar cada enemigo, o sea la densidad de combate del turno. Subirlo hace que el mapa se limpie solo y el referéndum deje de doler. |
+| Caras `Hit` por dado estándar | **No está en el manual.** Provisional: 3 de 6 | 2–4 de 6 | Cuántas acciones cuesta matar cada enemigo, o sea la densidad de combate del turno. Subirlo hace que el mapa se limpie solo y el `Reckoning` deje de doler. |
 | Caras `Wild` por dado estándar | **No está en el manual.** Provisional: 1 de 6 | 1–2 de 6 | El valor de `Insight`, y nada más. Con 0 `Wild` la skill deja de existir; con 2 pasa a ser la mejor del pool común. |
 | Dados estándar por tirada | 3 (manual, pág. 11) | 2–4 | Sube el daño y el `Ratchet` **en la misma proporción**, así que no sirve para ajustar letalidad sin tocar progresión. Para eso están las caras. |
 | `Toll` en los dados bonus | Ninguno (manual, pág. 11) | No tocar | Si los bonus cobraran `Toll`, el premio de los umbrales dejaría de ser premio y la estrategia de quemar un personaje a propósito se muere. Es un axioma disfrazado de perilla. |

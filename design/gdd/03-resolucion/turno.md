@@ -12,7 +12,7 @@ Las cuatro fases van **siempre en este orden**, y ninguna se puede saltear:
 ```
 1. Tres acciones
 2. Carta de presión
-3. Referéndum  (`Reckoning`)
+3. Reckoning
 4. Fin de turno
 ```
 
@@ -103,7 +103,7 @@ Esta semántica vale para todo el juego y hay que implementarla una sola vez.
 
 ---
 
-## Fase 3 — Referéndum · `Reckoning`
+## Fase 3 — `Reckoning`
 
 La fase más corta y la que más define el juego. Depende de una sola pregunta: **¿tu espacio
 está `Clear`?**
@@ -285,7 +285,7 @@ tokens_agarrados = Σ tokens_en_el_espacio(e)   para cada espacio e que ABANDON�
 `Move` con **3 tokens encima**, y `S1` y `S3` siguen con 1 y 2 respectivamente. En `P4_2` va a
 tirar **3 dados estándar** en una sola tirada.
 
-### 5. El referéndum en números
+### 5. El `Reckoning` en números
 
 ```
 n_atacantes = enemigos_al_empezar_P3 + entraron_durante_P3 − salieron_durante_P3
@@ -426,7 +426,7 @@ es lo que hay que poder leer en pantalla al terminarlo.
 | Fracción de cartas con `Doom Symbol` | **No está en el manual.** Solo dice que el mazo son 16 cartas | 0.3–0.6 | La misma velocidad de reloj que la perilla anterior, pero por la vía de la varianza: con `f` bajo el reloj es lento y errático, con `f` alto es rápido y predecible. |
 | Tamaño del `Pressure Deck` | 16 cartas (manual, pág. 10) | 12–20 | Cuánto se repiten los efectos dentro de una partida y qué tan pronto se agota el mazo. Con 12 hay que resolver ya el caso borde del mazo vacío. |
 | Cartas de presión por turno | 1 (manual, pág. 15) | 1–2 | La presión total del juego. A 2 se duplican el reloj y los spawns al mismo tiempo: es la perilla más brusca de todas. |
-| Cartas de `Reward` por referéndum | 1 (manual, pág. 16) | 1–2 | Cuánto paga limpiar el espacio. Subirlo hace que valga la pena invertir dos acciones en limpiar, y baja la presión de la rama de pelea. |
+| Cartas de `Reward` por `Reckoning` | 1 (manual, pág. 16) | 1–2 | Cuánto paga limpiar el espacio. Subirlo hace que valga la pena invertir dos acciones en limpiar, y baja la presión de la rama de pelea. |
 | Acciones propias de la misión | 2 (manual, pág. 13) | 2–3 | Cuánto del turno se dedica al objetivo en vez de al combate. Con 3 el escenario compite con las acciones base por el presupuesto. |
 | Personajes por ronda | 4 (decisión del GDD, ver [`00-vision/alcance.md`](../00-vision/alcance.md); **el manual no fija la cantidad**) | 1–4 | Cuántos turnos hay por avance del reloj. Con 2 personajes, cada avance del adversario cae cada media ronda y la partida se acorta a la mitad en tiempo real sin cambiar ningún número. |
 
