@@ -9,6 +9,8 @@
 #include "Map/GraphSubsystem.h"
 #include "Map/Space.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogProjectCMission, Log, All);
+
 AMissionGameMode::AMissionGameMode()
 {
 	// The GameMode is wired up from the Blueprint subclass, not from here. These defaults exist
@@ -45,14 +47,10 @@ void AMissionGameMode::StartPlay()
 		}
 	}
 
-	// A minimal turn bootstrap, and nothing more than that.
-	//
-	// The real turn machine -- rounds, character rotation, the 4 phases -- does not exist yet:
-	// that is class 5. Without this `ActionsRemaining` stays at 0 and no action can be paid for,
-	// so there would be nothing to test. Entering `CharacterTurn` is the only thing that refills
-	// the actions (see SetPhase), and from there it moves on to `Actions`.
-	SetPhase(EMissionTurnPhase::CharacterTurn);
-	SetPhase(EMissionTurnPhase::Actions);
+	// The graph is complete, so the turn can start. What starts it lives in
+	// BP_GameMode_Mission: the turn machine is Gameplay Framework, which is class 3 and therefore
+	// Blueprint. All this owes the graph is an entry point that runs after the seal.
+	OnMissionReady();
 }
 
 // Note: `Figure` is not `const AActor*` even though it is not modified. Blueprint does not
@@ -67,7 +65,18 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 	}
 
 	const UOccupancyComponent* const Occupancy = Figure->FindComponentByClass<UOccupancyComponent>();
-	if (Occupancy == nullptr || Occupancy->GetSpace() == nullptr)
+	if (Occupancy == nullptr)
+	{
+		// A figure with no UOccupancyComponent is a setup error, not a game state: it is a
+		// Blueprint someone built without the component that puts it on the board. Saying so here
+		// rather than in the mover catches it when the figure is selected, which is the first
+		// moment anything asks the question.
+		UE_LOG(LogProjectCMission, Warning,
+			TEXT("%s has no UOccupancyComponent, so it can reach nothing."), *Figure->GetName());
+		return Destinations;
+	}
+
+	if (Occupancy->GetSpace() == nullptr)
 	{
 		return Destinations;
 	}
@@ -90,73 +99,17 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 	return Destinations;
 }
 
-bool AMissionGameMode::TryMoveFigure(AActor* Figure, ASpace* To)
+bool AMissionGameMode::TryMoveFigure_Implementation(AActor* Figure, ASpace* To)
 {
-	if (Figure == nullptr || To == nullptr)
-	{
-		return false;
-	}
+	// Reached only when BP_GameMode_Mission does not override this, which for a working project
+	// means the Blueprint is missing, broken or was reparented away. It refuses instead of moving
+	// the figure: charging the action would mean keeping a second `ActionsRemaining` down here,
+	// and two counters that nothing keeps in step is a worse failure than not moving at all.
+	UE_LOG(LogProjectCMission, Error,
+		TEXT("TryMoveFigure has no Blueprint implementation: %s cannot move to %s. ")
+		TEXT("BP_GameMode_Mission is what implements it."),
+		Figure ? *Figure->GetName() : TEXT("nothing"),
+		To ? *To->GetName() : TEXT("nowhere"));
 
-	UOccupancyComponent* const Occupancy = Figure->FindComponentByClass<UOccupancyComponent>();
-	if (Occupancy == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TryMoveFigure: %s has no UOccupancyComponent"), *Figure->GetName());
-		return false;
-	}
-
-	// Legality is asked of the same function that paints the highlight. That is what guarantees
-	// what is lit and what is allowed cannot diverge.
-	if (!GetLegalDestinations(Figure).Contains(To))
-	{
-		return false;
-	}
-
-	// The action is charged after validating and before moving: if `SpendAction` fails there are
-	// no actions left, and the figure has not moved.
-	if (!SpendAction())
-	{
-		return false;
-	}
-
-	ASpace* const From = Occupancy->GetSpace();
-	Occupancy->SetSpace(To);
-
-	// Teleport, not a walk. Pathfinding is class 9; until then board movement is instantaneous
-	// and the presentation layer still owes the animation.
-	const FVector Anchor = To->GetFigureAnchorLocation();
-	Figure->SetActorLocation(Anchor + FVector(0.0f, 0.0f, Figure->GetSimpleCollisionHalfHeight()));
-
-	OnFigureMoved.Broadcast(Figure, From, To);
-
-	return true;
-}
-
-void AMissionGameMode::SetPhase(EMissionTurnPhase NewPhase)
-{
-	if (Phase == NewPhase)
-	{
-		return;
-	}
-
-	Phase = NewPhase;
-
-	// Entering a character's turn is the only thing that refills the actions. Putting it here and
-	// not in the caller is what stops a new code path from forgetting to refill them.
-	if (Phase == EMissionTurnPhase::CharacterTurn)
-	{
-		ActionsRemaining = ActionsPerTurn;
-	}
-
-	OnPhaseChanged.Broadcast(Phase);
-}
-
-bool AMissionGameMode::SpendAction()
-{
-	if (ActionsRemaining <= 0)
-	{
-		return false;
-	}
-
-	--ActionsRemaining;
-	return true;
+	return false;
 }

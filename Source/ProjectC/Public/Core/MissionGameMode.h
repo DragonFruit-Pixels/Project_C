@@ -68,17 +68,18 @@ enum class EMissionTurnPhase : uint8
 	Finished
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionPhaseChanged, EMissionTurnPhase, NewPhase);
-
 class ASpace;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnFigureMoved, AActor*, Figure, ASpace*, From, ASpace*, To);
 
 /**
  * The mission's referee: rules, turn sequence, victory and defeat.
  *
  * **It decides, it does not store.** The state others need to read lives in AMissionGameState. If
  * something here has to be read by the UI or by a character, it is in the wrong place.
+ *
+ * **The turn itself lives in BP_GameMode_Mission**, not here. Gameplay Framework is class 3 of the
+ * syllabus and C++ is class 14, so a turn machine written in C++ is written where nobody is going
+ * to look for it (see design/course-alignment.md, and D-30 for the same move on the camera). What
+ * stays below is the part a graph cannot express safely.
  *
  * See design/architecture/01-por-donde-se-empieza.md, step 3.
  */
@@ -91,32 +92,34 @@ public:
 	AMissionGameMode();
 
 	/**
-	 * Seals the graph as soon as every `ASpace` has finished its `BeginPlay`.
+	 * Seals the graph once every `ASpace` has finished its `BeginPlay`, then hands the turn over
+	 * to the Blueprint.
 	 *
-	 * Deciding that the world is ready is the referee's call, not the subsystem's: the subsystem
-	 * answers questions. See D-21.
+	 * **This is the one thing that cannot move to the graph.** A Blueprint's `BeginPlay` fires
+	 * from inside `Super::StartPlay()`, together with every other actor's and in no guaranteed
+	 * order, so sealing from there would seal a graph that some `ASpace` had not registered with
+	 * yet. Sealing after `Super::StartPlay()` returns is what makes the graph complete, and
+	 * deciding that the world is ready is the referee's call rather than the subsystem's -- the
+	 * subsystem answers questions. See D-21.
 	 */
 	virtual void StartPlay() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Mission")
-	void SetPhase(EMissionTurnPhase NewPhase);
-
-	UFUNCTION(BlueprintPure, Category = "Mission")
-	EMissionTurnPhase GetPhase() const { return Phase; }
-
-	/** Consumes one action of the turn. Returns false if there were none left. */
-	UFUNCTION(BlueprintCallable, Category = "Mission")
-	bool SpendAction();
-
-	UFUNCTION(BlueprintPure, Category = "Mission")
-	int32 GetActionsRemaining() const { return ActionsRemaining; }
+	/**
+	 * The graph is sealed and the mission can begin. `BP_GameMode_Mission` starts the turn here.
+	 *
+	 * It exists so the Blueprint gets an entry point with the ordering guarantee above already
+	 * kept. Using `BeginPlay` for this instead would be the bug the guarantee prevents.
+	 */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Mission")
+	void OnMissionReady();
 
 	/**
 	 * The `Space` actors `Figure` can reach by spending one `Move` action.
 	 *
-	 * It exists so presentation can paint the destinations **without reimplementing the rule**. If
-	 * the HUD computed its own range there would be two versions of "what is legal", and the day
-	 * one of them changed the player would see a highlighted destination the game rejects.
+	 * Stays in C++ because it is a **rule**, not framework: it delegates to `FGraphMath::Reachable`,
+	 * which is what `ProjectC.Rules.Move.Legality` covers. Presentation paints destinations by
+	 * calling this instead of reimplementing the range, so there is never a second version of
+	 * "what is legal" for a highlighted destination to disagree with.
 	 *
 	 * It excludes the origin space: standing still is not a move, it is not spending the action.
 	 */
@@ -127,33 +130,49 @@ public:
 	 * Moves a figure and charges the action. Returns false and **changes nothing** if it was not
 	 * legal.
 	 *
-	 * It is the only route by which a figure changes `Space`. It lives here and not in the
-	 * `PlayerController` because deciding is the referee's job: when the enemies move it
-	 * (class 9) they will come through this same door, not a second one.
+	 * It is the only route by which a figure changes `Space`. It belongs to the referee and not to
+	 * the `PlayerController` because when the enemies move (class 9) they will come through this
+	 * same door, not a second one.
+	 *
+	 * `BlueprintNativeEvent`, and `BP_GameMode_Mission` is what implements it. Unlike
+	 * `TraceSelectableUnderCursor`, whose C++ body is a **working** fallback, the body below only
+	 * logs and refuses: the action counter it would have to charge now lives in the Blueprint, and
+	 * a C++ copy of that counter would be a second source of truth that nothing refills. A seam
+	 * that fails loudly beats a safety net that quietly disagrees with the game.
+	 *
+	 * The seam is temporary. It exists so `AMissionPlayerController` keeps working while it is
+	 * still C++, and goes away with it.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Mission")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Mission")
 	bool TryMoveFigure(AActor* Figure, ASpace* To);
-
-	UPROPERTY(BlueprintAssignable, Category = "Mission")
-	FOnMissionPhaseChanged OnPhaseChanged;
+	virtual bool TryMoveFigure_Implementation(AActor* Figure, ASpace* To);
 
 	/**
-	 * A figure moved. Presentation listens to it in order to animate.
+	 * The turn phase. **Storage, not machinery**: what drives it is `SetPhase` in
+	 * BP_GameMode_Mission, together with the action counter and the dispatchers.
 	 *
-	 * The rule does not wait for the animation to finish: the move has already happened by the
-	 * time this is broadcast. See design/architecture/08-presentacion-y-reglas.md.
+	 * It stays here for the same reason `EMissionTurnPhase` does -- the 13 phases carry the GDD's
+	 * sequence in their own documentation, and the value belongs next to the type that explains
+	 * it. `BlueprintReadWrite` because the graph is the only writer: there is no setter here to
+	 * enforce anything, since what has to be enforced on a phase change -- refilling the actions,
+	 * firing `OnPhaseChanged` -- is the graph's job now.
 	 */
-	UPROPERTY(BlueprintAssignable, Category = "Mission")
-	FOnFigureMoved OnFigureMoved;
+	UPROPERTY(BlueprintReadWrite, Category = "Mission")
+	EMissionTurnPhase Phase = EMissionTurnPhase::NotStarted;
 
 protected:
 	/**
 	 * 3 actions per turn.
 	 *
-	 * The owner of this number is design/gdd/07-balance/perillas-y-constantes.md. It sits here as
-	 * an editable default and will come from DA_MissionConfig once that exists (class 12) -- the
-	 * seam is already in place so that becomes a change of where the value comes from, not a
-	 * rewrite of the rules.
+	 * Here and not in the Blueprint because it is one of a pair: this and `SpacesPerMove` are the
+	 * two balance knobs, they share an owner in design/gdd/07-balance/perillas-y-constantes.md and
+	 * they share a destination in DA_MissionConfig (class 12). Splitting them across two languages
+	 * bought nothing -- `EditDefaultsOnly` is edited in the details panel exactly like a Blueprint
+	 * variable -- and cost the default: a Blueprint variable is born at 0, and a turn with 0
+	 * actions is a turn where nothing can move, with nothing in the log to say why.
+	 *
+	 * The counter it refills, `ActionsRemaining`, does live in the graph: that one is the turn
+	 * machine's state, and 0 is the right value for it to start at.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mission", meta = (ClampMin = "1"))
 	int32 ActionsPerTurn = 3;
@@ -161,16 +180,11 @@ protected:
 	/**
 	 * 3 spaces per `Move` action (rulebook p. 13).
 	 *
-	 * Safe range 2-4: at 4 kiting becomes viable and sticky enemies stop being a threat. Same
-	 * owner and same destination as `ActionsPerTurn`:
-	 * design/gdd/07-balance/perillas-y-constantes.md, and DA_MissionConfig once it exists.
+	 * Safe range 2-4: at 4 kiting becomes viable and sticky enemies stop being a threat. It sits
+	 * here rather than in the Blueprint because `GetLegalDestinations` is its only reader. The
+	 * owner of the number is design/gdd/07-balance/perillas-y-constantes.md, and it will come from
+	 * DA_MissionConfig once that exists (class 12).
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mission", meta = (ClampMin = "1"))
 	int32 SpacesPerMove = 3;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission")
-	EMissionTurnPhase Phase = EMissionTurnPhase::NotStarted;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Mission")
-	int32 ActionsRemaining = 0;
 };
