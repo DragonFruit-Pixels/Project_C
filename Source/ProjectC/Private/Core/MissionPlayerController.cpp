@@ -89,6 +89,15 @@ void AMissionPlayerController::SetupInputComponent()
 	{
 		UE_LOG(LogProjectCInput, Error, TEXT("CancelAction is unassigned: that action will not respond."));
 	}
+
+	if (EndTurnAction != nullptr)
+	{
+		Input->BindAction(EndTurnAction, ETriggerEvent::Started, this, &AMissionPlayerController::HandleEndTurn);
+	}
+	else
+	{
+		UE_LOG(LogProjectCInput, Error, TEXT("EndTurnAction is unassigned: that action will not respond."));
+	}
 }
 
 void AMissionPlayerController::PlayerTick(float DeltaTime)
@@ -170,6 +179,20 @@ void AMissionPlayerController::HandleSelect()
 	{
 		ClearSelection();
 	}
+}
+
+void AMissionPlayerController::HandleEndTurn()
+{
+	AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr;
+	if (GameMode == nullptr)
+	{
+		UE_LOG(LogProjectCInput, Error, TEXT("There is no AMissionGameMode, so the turn cannot end."));
+		return;
+	}
+
+	GameMode->EndTurn();
+	RefreshLegalDestinations();
+	RefreshHighlights();
 }
 
 void AMissionPlayerController::HandleCancel()

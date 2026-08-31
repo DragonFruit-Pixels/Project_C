@@ -76,12 +76,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> CancelAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> EndTurnAction;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Selection")
 	AActor* TraceSelectableUnderCursor();
 	virtual AActor* TraceSelectableUnderCursor_Implementation();
 
 	void HandleSelect();
 	void HandleCancel();
+	void HandleEndTurn();
 
 private:
 	void RefreshLegalDestinations();
