@@ -46,6 +46,10 @@ public:
 	bool TryMoveFigure(AActor* Figure, ASpace* To);
 	virtual bool TryMoveFigure_Implementation(AActor* Figure, ASpace* To);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Mission")
+	void EndTurn();
+	virtual void EndTurn_Implementation();
+
 	UPROPERTY(BlueprintReadWrite, Category = "Mission")
 	EMissionTurnPhase Phase = EMissionTurnPhase::NotStarted;
 

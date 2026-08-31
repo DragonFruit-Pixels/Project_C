@@ -76,6 +76,13 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 	return Destinations;
 }
 
+void AMissionGameMode::EndTurn_Implementation()
+{
+	UE_LOG(LogProjectCMission, Error,
+		TEXT("EndTurn has no Blueprint implementation, so the turn cannot end and the actions ")
+		TEXT("will never refill. BP_GameMode_Mission is what implements it."));
+}
+
 bool AMissionGameMode::TryMoveFigure_Implementation(AActor* Figure, ASpace* To)
 {
 	UE_LOG(LogProjectCMission, Error,
