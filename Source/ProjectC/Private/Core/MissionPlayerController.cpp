@@ -154,20 +154,8 @@ void AMissionPlayerController::HandleSelect()
 		return;
 	}
 
-	ASpace* const HitSpace = Cast<ASpace>(Hit);
-	if (SelectedActor != nullptr && HitSpace != nullptr)
+	if (TryGiveMoveOrder(Cast<ASpace>(Hit)))
 	{
-		if (LegalDestinations.Contains(HitSpace))
-		{
-			if (AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
-			{
-				if (GameMode->TryMoveFigure(SelectedActor, HitSpace))
-				{
-					RefreshLegalDestinations();
-					RefreshHighlights();
-				}
-			}
-		}
 		return;
 	}
 
@@ -179,6 +167,39 @@ void AMissionPlayerController::HandleSelect()
 	{
 		ClearSelection();
 	}
+}
+
+bool AMissionPlayerController::TryGiveMoveOrder(ASpace* Destination)
+{
+	if (SelectedActor == nullptr || Destination == nullptr)
+	{
+		return false;
+	}
+
+	if (!LegalDestinations.Contains(Destination))
+	{
+		UE_LOG(LogProjectCInput, Log, TEXT("Refused: %s is not within reach of %s."),
+			*Destination->GetName(), *SelectedActor->GetName());
+		return true;
+	}
+
+	AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr;
+	if (GameMode == nullptr)
+	{
+		UE_LOG(LogProjectCInput, Error, TEXT("There is no AMissionGameMode, so no order can be given."));
+		return true;
+	}
+
+	if (!GameMode->TryMoveFigure(SelectedActor, Destination))
+	{
+		UE_LOG(LogProjectCInput, Log, TEXT("Refused by the referee: %s cannot move to %s right now."),
+			*SelectedActor->GetName(), *Destination->GetName());
+		return true;
+	}
+
+	RefreshLegalDestinations();
+	RefreshHighlights();
+	return true;
 }
 
 void AMissionPlayerController::HandleEndTurn()

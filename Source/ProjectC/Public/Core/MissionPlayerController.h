@@ -88,6 +88,8 @@ protected:
 	void HandleEndTurn();
 
 private:
+	bool TryGiveMoveOrder(ASpace* Destination);
+
 	void RefreshLegalDestinations();
 
 	void RefreshHighlights();
