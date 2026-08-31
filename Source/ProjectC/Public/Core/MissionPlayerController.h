@@ -22,6 +22,7 @@ enum class EInteractionMode : uint8
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHoveredChanged, AActor*, HoveredActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, AActor*, SelectedActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOrderRefused, const FText&, Reason);
 
 UCLASS()
 class PROJECTC_API AMissionPlayerController : public APlayerController
@@ -62,6 +63,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnSelectionChanged OnSelectionChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Selection")
+	FOnOrderRefused OnOrderRefused;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")

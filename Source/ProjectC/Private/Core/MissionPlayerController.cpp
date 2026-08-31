@@ -180,6 +180,7 @@ bool AMissionPlayerController::TryGiveMoveOrder(ASpace* Destination)
 	{
 		UE_LOG(LogProjectCInput, Log, TEXT("Refused: %s is not within reach of %s."),
 			*Destination->GetName(), *SelectedActor->GetName());
+		OnOrderRefused.Broadcast(NSLOCTEXT("ProjectC", "OutOfReach", "Too far: that space is more than one move away."));
 		return true;
 	}
 
@@ -194,6 +195,7 @@ bool AMissionPlayerController::TryGiveMoveOrder(ASpace* Destination)
 	{
 		UE_LOG(LogProjectCInput, Log, TEXT("Refused by the referee: %s cannot move to %s right now."),
 			*SelectedActor->GetName(), *Destination->GetName());
+		OnOrderRefused.Broadcast(NSLOCTEXT("ProjectC", "NoActions", "No actions left this turn."));
 		return true;
 	}
 
@@ -210,6 +212,8 @@ void AMissionPlayerController::HandleEndTurn()
 		UE_LOG(LogProjectCInput, Error, TEXT("There is no AMissionGameMode, so the turn cannot end."));
 		return;
 	}
+
+	UE_LOG(LogProjectCInput, Log, TEXT("End of turn requested by the player."));
 
 	GameMode->EndTurn();
 	RefreshLegalDestinations();
