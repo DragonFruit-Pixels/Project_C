@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Rules/RatchetRules.h"
 
 int32 FRatchetRules::Advance(int32 From, int32 Amount, int32 TrackLength)

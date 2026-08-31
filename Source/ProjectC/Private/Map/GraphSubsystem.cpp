@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Map/GraphSubsystem.h"
 #include "Map/Space.h"
 

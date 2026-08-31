@@ -1,4 +1,4 @@
-#include "Characters/OccupancyComponent.h"
+#include "Components/OccupancyComponent.h"
 #include "Map/Space.h"
 
 UOccupancyComponent::UOccupancyComponent()

@@ -1,11 +1,9 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Core/MissionGameMode.h"
 #include "Core/MissionGameState.h"
-#include "Core/MissionPlayerController.h"
+#include "Controllers/MissionPlayerController.h"
 #include "Core/MissionPlayerState.h"
 #include "GameFramework/Pawn.h"
-#include "Characters/OccupancyComponent.h"
+#include "Components/OccupancyComponent.h"
 #include "Map/GraphSubsystem.h"
 #include "Map/Space.h"
 

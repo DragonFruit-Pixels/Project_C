@@ -1,10 +1,8 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Core/Selectable.h"
+#include "Interfaces/Selectable.h"
 #include "Space.generated.h"
 
 class UBoxComponent;

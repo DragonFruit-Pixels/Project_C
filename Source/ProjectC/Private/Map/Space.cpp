@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Map/Space.h"
 #include "Map/GraphSubsystem.h"
 #include "Core/ProjectCCollision.h"

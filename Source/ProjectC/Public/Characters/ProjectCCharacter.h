@@ -1,10 +1,8 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Core/Selectable.h"
+#include "Interfaces/Selectable.h"
 #include "ProjectCCharacter.generated.h"
 
 class URatchetComponent;

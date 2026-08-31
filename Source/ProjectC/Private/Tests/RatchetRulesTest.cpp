@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Rules/RatchetRules.h"
 #include "Misc/AutomationTest.h"
 

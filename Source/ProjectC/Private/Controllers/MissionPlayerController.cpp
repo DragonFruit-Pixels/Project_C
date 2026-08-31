@@ -1,6 +1,4 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
-#include "Core/MissionPlayerController.h"
+#include "Controllers/MissionPlayerController.h"
 #include "Core/MissionGameMode.h"
 #include "Core/ProjectCCollision.h"
 #include "Map/Space.h"
@@ -180,7 +178,7 @@ bool AMissionPlayerController::TryGiveMoveOrder(ASpace* Destination)
 	{
 		UE_LOG(LogProjectCInput, Log, TEXT("Refused: %s is not within reach of %s."),
 			*Destination->GetName(), *SelectedActor->GetName());
-		OnOrderRefused.Broadcast(NSLOCTEXT("ProjectC", "OutOfReach", "Too far: that space is more than one move away."));
+		OnOrderRefused.Broadcast(NSLOCTEXT("ProjectC", "OutOfReach", "Out of reach: that space is too far for a single move."));
 		return true;
 	}
 

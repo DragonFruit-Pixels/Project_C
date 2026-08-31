@@ -1,8 +1,6 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Characters/ProjectCCharacter.h"
-#include "Characters/RatchetComponent.h"
-#include "Characters/OccupancyComponent.h"
+#include "Components/RatchetComponent.h"
+#include "Components/OccupancyComponent.h"
 #include "Core/ProjectCCollision.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
