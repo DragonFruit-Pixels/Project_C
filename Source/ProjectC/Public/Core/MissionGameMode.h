@@ -42,6 +42,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Mission")
 	TArray<ASpace*> GetLegalDestinations(AActor* Figure) const;
 
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	bool CanMoveFigure(AActor* Figure, ASpace* To) const;
+
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	FVector GetFigurePlacement(AActor* Figure, ASpace* To) const;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Mission")
 	bool TryMoveFigure(AActor* Figure, ASpace* To);
 	virtual bool TryMoveFigure_Implementation(AActor* Figure, ASpace* To);

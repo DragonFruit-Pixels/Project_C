@@ -76,6 +76,25 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 	return Destinations;
 }
 
+bool AMissionGameMode::CanMoveFigure(AActor* Figure, ASpace* To) const
+{
+	return To != nullptr && GetLegalDestinations(Figure).Contains(To);
+}
+
+FVector AMissionGameMode::GetFigurePlacement(AActor* Figure, ASpace* To) const
+{
+	if (Figure == nullptr || To == nullptr)
+	{
+		return FVector::ZeroVector;
+	}
+
+	FVector Origin = FVector::ZeroVector;
+	FVector BoxExtent = FVector::ZeroVector;
+	Figure->GetActorBounds(true, Origin, BoxExtent);
+
+	return To->GetFigureAnchorLocation() + FVector(0.0f, 0.0f, BoxExtent.Z);
+}
+
 void AMissionGameMode::EndTurn_Implementation()
 {
 	UE_LOG(LogProjectCMission, Error,
