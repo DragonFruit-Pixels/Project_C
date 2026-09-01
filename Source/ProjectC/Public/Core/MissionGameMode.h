@@ -23,6 +23,7 @@ enum class EMissionTurnPhase : uint8
 };
 
 class ASpace;
+class AMissionGameState;
 
 UCLASS()
 class PROJECTC_API AMissionGameMode : public AGameModeBase
@@ -53,6 +54,21 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Mission")
 	void EndTurn();
 	virtual void EndTurn_Implementation();
+
+	UFUNCTION(BlueprintCallable, Category = "Mission")
+	void AdvanceTurn();
+
+	UFUNCTION(BlueprintCallable, Category = "Mission")
+	bool TryActivateFigure(AActor* Figure);
+
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	AActor* GetActiveFigure() const;
+
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	int32 GetFiguresLeftThisRound() const;
+
+	UFUNCTION(BlueprintPure, Category = "Mission")
+	int32 GetRound() const;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Mission")
 	EMissionTurnPhase Phase = EMissionTurnPhase::NotStarted;

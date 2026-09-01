@@ -89,6 +89,9 @@ protected:
 	void HandleCancel();
 	void HandleEndTurn();
 
+	UFUNCTION()
+	void HandleActiveFigureChanged(AActor* NewActiveFigure);
+
 private:
 	bool TryGiveMoveOrder(ASpace* Destination);
 

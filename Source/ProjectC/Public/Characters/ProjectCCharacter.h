@@ -27,6 +27,9 @@ public:
 	virtual FText GetSelectableName_Implementation() const override;
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProjectC|Character")
 	TObjectPtr<URatchetComponent> Ratchet;
 

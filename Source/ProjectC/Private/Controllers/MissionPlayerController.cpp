@@ -1,5 +1,6 @@
 #include "Controllers/MissionPlayerController.h"
 #include "Core/MissionGameMode.h"
+#include "Core/MissionGameState.h"
 #include "Core/ProjectCCollision.h"
 #include "Map/Space.h"
 
@@ -23,6 +24,16 @@ void AMissionPlayerController::BeginPlay()
 	SetInputMode(FInputModeGameAndUI()
 		.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock)
 		.SetHideCursorDuringCapture(false));
+
+	if (AMissionGameState* const State = GetWorld() ? GetWorld()->GetGameState<AMissionGameState>() : nullptr)
+	{
+		State->OnActiveFigureChanged.AddUniqueDynamic(this, &AMissionPlayerController::HandleActiveFigureChanged);
+	}
+	else
+	{
+		UE_LOG(LogProjectCInput, Error,
+			TEXT("There is no AMissionGameState, so the selection will not follow the turn."));
+	}
 
 	const ULocalPlayer* const LocalPlayer = GetLocalPlayer();
 	if (LocalPlayer == nullptr)
@@ -218,6 +229,18 @@ void AMissionPlayerController::HandleEndTurn()
 	RefreshHighlights();
 }
 
+void AMissionPlayerController::HandleActiveFigureChanged(AActor* NewActiveFigure)
+{
+	if (NewActiveFigure == nullptr)
+	{
+		ClearSelection();
+		return;
+	}
+
+	RefreshLegalDestinations();
+	RefreshHighlights();
+}
+
 void AMissionPlayerController::HandleCancel()
 {
 	ClearSelection();
@@ -231,6 +254,11 @@ void AMissionPlayerController::SelectActor(AActor* NewSelection)
 	}
 
 	SelectedActor = NewSelection;
+
+	if (AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
+	{
+		GameMode->TryActivateFigure(SelectedActor);
+	}
 
 	RefreshLegalDestinations();
 
