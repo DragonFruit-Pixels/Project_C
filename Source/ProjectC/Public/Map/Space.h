@@ -27,6 +27,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Space")
 	FVector GetFigureAnchorLocation() const;
 
+	UFUNCTION(BlueprintPure, Category = "Space")
+	FVector GetSlotLocation(int32 SlotIndex, int32 SlotCount) const;
+
+	UFUNCTION(BlueprintPure, Category = "Space")
+	FVector GetOccupantLocation(AActor* Occupant) const;
+
+	UFUNCTION(BlueprintPure, Category = "Space")
+	TArray<AActor*> GetOccupants() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Space")
+	void AddOccupant(AActor* Occupant);
+
+	UFUNCTION(BlueprintCallable, Category = "Space")
+	void RemoveOccupant(AActor* Occupant);
+
+	UFUNCTION(BlueprintCallable, Category = "Space")
+	void RefreshOccupantPlacement();
+
 	virtual bool CanBeSelected_Implementation() const override { return true; }
 	virtual FText GetSelectableName_Implementation() const override;
 
@@ -35,4 +53,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Space")
 	TObjectPtr<UBoxComponent> Bounds;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Space", meta = (ClampMin = "1"))
+	float SlotSpacing = 150.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Space")
+	TArray<TObjectPtr<AActor>> Occupants;
 };
