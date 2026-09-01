@@ -2,6 +2,7 @@
 #include "Map/GraphSubsystem.h"
 #include "Core/ProjectCCollision.h"
 #include "Components/BoxComponent.h"
+#include "Rules/SlotLayout.h"
 
 ASpace::ASpace()
 {
@@ -43,16 +44,9 @@ FVector ASpace::GetSlotLocation(int32 SlotIndex, int32 SlotCount) const
 		return Anchor;
 	}
 
-	const int32 Columns = FMath::CeilToInt(FMath::Sqrt(static_cast<float>(SlotCount)));
-	const int32 Rows = FMath::DivideAndRoundUp(SlotCount, Columns);
+	const FVector2D Offset = FSlotLayout::Offset(SlotIndex, SlotCount, SlotSpacing);
 
-	const int32 Column = SlotIndex % Columns;
-	const int32 Row = SlotIndex / Columns;
-
-	const float X = (static_cast<float>(Row) - 0.5f * static_cast<float>(Rows - 1)) * SlotSpacing;
-	const float Y = (static_cast<float>(Column) - 0.5f * static_cast<float>(Columns - 1)) * SlotSpacing;
-
-	return Anchor + Bounds->GetComponentRotation().RotateVector(FVector(X, Y, 0.0f));
+	return Anchor + Bounds->GetComponentRotation().RotateVector(FVector(Offset.X, Offset.Y, 0.0f));
 }
 
 FVector ASpace::GetOccupantLocation(AActor* Occupant) const
