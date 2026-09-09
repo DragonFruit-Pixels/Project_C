@@ -542,7 +542,7 @@ lo era.
 
 **2026-08-27**
 
-`ACameraPawn` tickea para interpolar pan, zoom y orbit. `AMissionPlayerController::PlayerTick`
+`BP_CameraPawn` tickea para interpolar pan, zoom y orbit. `AMissionPlayerController::PlayerTick`
 traza bajo el cursor una vez por frame para el hover. Nada más del proyecto tickea.
 
 **Por qué:** la regla de `01-por-donde-se-empieza.md` es sobre las **reglas** — que ningún estado
@@ -641,6 +641,38 @@ los avisos `C4819` de MSVC en archivos sin BOM.
 lo que se evalúa como texto son los documentos, y esos no se tocaron.
 
 **Dónde se aplica sola:** `.claude/rules/unreal-code.md`, que ya está acotado a `Source/**`.
+
+---
+
+## D-30 — La cámara vive entera en Blueprint
+
+**2026-08-30**
+
+`BP_CameraPawn` dejó de heredar de `ACameraPawn` y pasó a heredar de `APawn`. Los componentes,
+las 15 variables, `BeginPlay`, `Tick` y los tres eventos de Enhanced Input están en el grafo, y
+`CameraPawn.h/.cpp` se borraron junto con los tres handlers que tenía `AMissionPlayerController`.
+**No quedó C++ que calcule nada del encuadre.**
+
+**Por qué:** C++ es la clase 14. Las clases 1 a 13 se ensenñan en Blueprint, así que una cámara
+resuelta en C++ está resuelta donde nadie la va a buscar — lo había marcado
+[`course-alignment.md`](../../course-alignment.md) con esas palabras. Posesión es tema de la
+clase 4 y el input también, y ahora los dos se leen en el mismo grafo: el pawn que el jugador
+posee es el que escucha las teclas, sin controller en el medio y sin interfaz.
+
+De paso arregló un bug que el C++ arrastraba: leía el yaw de vuelta del `SpringArm`, y una
+rotación relativa vuelve normalizada a [-180, 180] mientras el yaw objetivo crece sin límite.
+Orbitando más de media vuelta la cámara barría por el lado largo. Ahora `CurrentYaw` espeja lo
+último que se escribió en vez de leerlo del componente.
+
+**Descarta:** el tipado fuerte y el `Cast<ACameraPawn>` que daba autocompletado desde el
+controller. A cambio, las 8 perillas de `Camera|Tuning` son `Instance Editable` y se tocan en el
+panel de detalles **durante el PIE**, que es exactamente lo que un Blueprint compra y lo que la
+materia quiere ver.
+
+**No contradice [D-13](#d-13):** la arquitectura híbrida sigue en pie. Las reglas —`FGraphMath`,
+`FRatchetRules`, `UGraphSubsystem`— siguen en C++ con sus tests. Lo que se movió es
+presentación, que es dónde dice [`08-presentacion-y-reglas.md`](../08-presentacion-y-reglas.md)
+que tiene que estar.
 
 ---
 

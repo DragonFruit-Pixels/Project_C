@@ -228,7 +228,7 @@ casi todos los malentendidos de esta parte del juego salen de confundirlos.
 
 | Flag | Qué habilita | Cómo se prende |
 |---|---|---|
-| `manifested` | La figura está en el mapa: sigue a los personajes, ataca en la fase de referéndum, suma dados | El marcador entra al **primer espacio marcado** del `Doom Track` **o** se rompe el `Objective` |
+| `manifested` | La figura está en el mapa: sigue a los personajes, ataca en la fase de `Reckoning`, suma dados | El marcador entra al **primer espacio marcado** del `Doom Track` **o** se rompe el `Objective` |
 | `mortal` | Se puede **elegir como objetivo** de `Attack` y acumular heridas | **Solo** romper el `Objective` |
 
 Los dos son irreversibles: una vez prendidos, no se apagan.

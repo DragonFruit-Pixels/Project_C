@@ -18,14 +18,11 @@ AProjectCCharacter::AProjectCCharacter()
 	SelectionBounds->SetupAttachment(GetCapsuleComponent());
 	SelectionBounds->SetCollisionProfileName(ProjectCCollision::FigureProfile());
 
-	// A little wider than the default capsule (34 uu) so clicking does not demand precision.
 	SelectionBounds->SetSphereRadius(60.0f);
 }
 
 bool AProjectCCharacter::CanBeSelected_Implementation() const
 {
-	// A lost character stays in the world until a rule removes it, but can no longer be picked.
-	// See design/gdd/02-personaje/trinquete.md.
 	return Ratchet == nullptr || !Ratchet->IsLost();
 }
 

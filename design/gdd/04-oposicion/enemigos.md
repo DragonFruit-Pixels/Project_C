@@ -33,7 +33,7 @@ Los enemigos de este juego **no piensan**. Su comportamiento entero son tres reg
 **1. Te siguen.** Cuando un personaje sale de un espacio, **todos** los enemigos que
 estaban ahí se mueven con él. Todos, aunque queden otros personajes en el espacio original.
 
-**2. Te atacan.** En la fase de referéndum, si comparten espacio con el personaje activo,
+**2. Te atacan.** En la fase de `Reckoning`, si comparten espacio con el personaje activo,
 cada uno lo ataca una vez.
 
 **3. Los mueven las cartas.** Cualquier reposicionamiento que no sea "seguir" viene de un

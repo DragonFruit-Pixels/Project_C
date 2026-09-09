@@ -14,8 +14,6 @@ void UGraphSubsystem::RegisterSpace(ASpace* Space)
 
 	if (bSealed)
 	{
-		// A Space arriving late means something loaded after sealing -- typically streaming.
-		// That is exactly what D-21 rules out, and it has to be visible.
 		UE_LOG(LogProjectCGraph, Error,
 			TEXT("'%s' registered AFTER the graph was sealed. The graph is incomplete and queries will answer wrong."),
 			*Space->GetName());
@@ -62,8 +60,6 @@ bool UGraphSubsystem::SealGraph()
 				continue;
 			}
 
-			// F8.1 -- symmetry. A one-sided arrow is not a directed edge: it is a badly built
-			// map. The rulebook is explicit (p. 9), so this fails instead of assuming.
 			if (!Neighbour->Neighbours.Contains(Space))
 			{
 				UE_LOG(LogProjectCGraph, Error,
@@ -73,7 +69,6 @@ bool UGraphSubsystem::SealGraph()
 				continue;
 			}
 
-			// F8.2 -- no self-loops.
 			if (NeighbourIndex == Index)
 			{
 				UE_LOG(LogProjectCGraph, Error, TEXT("'%s' lists itself as a neighbour."), *Space->GetName());
@@ -81,7 +76,6 @@ bool UGraphSubsystem::SealGraph()
 				continue;
 			}
 
-			// Each pair is added once: the edges are already bidirectional.
 			if (NeighbourIndex < Index)
 			{
 				continue;
@@ -94,8 +88,6 @@ bool UGraphSubsystem::SealGraph()
 		}
 	}
 
-	// F8.3 -- degree between 1 and 6. A space with no exits splits the map; one with too many
-	// stops the degree from discriminating, and Claustrophobia becomes a constant.
 	for (int32 Index = 0; Index < Spaces.Num(); ++Index)
 	{
 		const int32 Degree = FGraphMath::Degree(Edges, Index, FGraphQuery::ForMovement());
@@ -108,7 +100,6 @@ bool UGraphSubsystem::SealGraph()
 		}
 	}
 
-	// F8.6 -- connectivity ignoring blocks: every Space must be reachable from the first one.
 	if (Spaces.Num() > 0)
 	{
 		FGraphQuery Unblocked = FGraphQuery::ForMovement();

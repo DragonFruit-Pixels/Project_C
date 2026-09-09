@@ -66,7 +66,7 @@ parámetro con consecuencia mecánica real.
 | El personaje activo | todas |
 | Otro personaje, designado al inicio de la partida | *Codependency* |
 | Los espacios adyacentes al tuyo, y su cantidad | *Claustrophobia* |
-| Tu espacio, y qué hay en él | referéndum, `Recover` |
+| Tu espacio, y qué hay en él | `Reckoning`, `Recover` |
 | Tu inventario, y su cantidad | *Hypochondria* |
 | El enemigo más cercano de un tipo, por camino más corto | cartas de presión |
 | Todos los enemigos de un tipo | cartas de presión |

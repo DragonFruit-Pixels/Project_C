@@ -73,7 +73,7 @@ se vuelva una trampa mortal.
 Un espacio está **`Clear`** cuando no hay enemigos en él.
 
 Es un estado calculado, no un flag: se evalúa en el momento en que una regla lo pregunta.
-Dos acciones del juego dependen de él —`Recover` y el referéndum de fin de turno— así que
+Dos acciones del juego dependen de él —`Recover` y el `Reckoning` de fin de turno— así que
 se consulta muchas veces por turno.
 
 ## Puertas

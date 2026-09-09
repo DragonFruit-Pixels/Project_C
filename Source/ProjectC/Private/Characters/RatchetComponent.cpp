@@ -5,7 +5,6 @@
 
 URatchetComponent::URatchetComponent()
 {
-	// A turn-based game has nothing to tick: everything happens because a phase fired it.
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
@@ -27,7 +26,6 @@ void URatchetComponent::AddToll(int32 Amount)
 
 	OnRatchetAdvanced.Broadcast(Position, Delta);
 
-	// A single advance can cross several thresholds, and each one is a build decision of its own.
 	for (const int32 Threshold : FRatchetRules::ThresholdsCrossed(Previous, Position, Config.Thresholds))
 	{
 		++ThresholdsCrossedCount;

@@ -34,7 +34,7 @@ poder. → [`02-personaje/trinquete.md`](../02-personaje/trinquete.md)
 descarte, y ahí el mazo se remezcla. Nunca sabés si el próximo avance viene en 3 turnos o
 en 6. → [`04-oposicion/reloj-y-avance.md`](../04-oposicion/reloj-y-avance.md)
 
-**3. El referéndum de fin de turno.** Todo turno termina en premio o en paliza, según si
+**3. El `Reckoning` de fin de turno.** Todo turno termina en premio o en paliza, según si
 limpiaste tu espacio. Una sola regla que es un loop completo.
 → [`03-resolucion/turno.md`](../03-resolucion/turno.md)
 

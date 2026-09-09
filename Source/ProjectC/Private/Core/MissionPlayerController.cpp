@@ -2,7 +2,6 @@
 
 #include "Core/MissionPlayerController.h"
 #include "Core/MissionGameMode.h"
-#include "Core/CameraPawn.h"
 #include "Core/ProjectCCollision.h"
 #include "Map/Space.h"
 
@@ -10,14 +9,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
-#include "InputActionValue.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogProjectCInput, Log, All);
 
 AMissionPlayerController::AMissionPlayerController()
 {
-	// A board game is played with the mouse in sight. This is not a preference: with no cursor
-	// there is no hover, and with no hover the player cannot tell what they are about to click.
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 }
@@ -26,22 +22,10 @@ void AMissionPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// GameAndUI and not GameOnly: the HUD widgets (class 7) have to be able to receive clicks
-	// without the world losing them. Changing it later means reviewing every widget.
-	//
-	// `SetHideCursorDuringCapture(false)`: GameAndUI puts the viewport in `CaptureDuringMouseDown`,
-	// and by default hides the cursor while the button is held. In a game played entirely with the
-	// cursor that is simply wrong: the player loses sight of what they are about to click at the
-	// exact moment they click it.
 	SetInputMode(FInputModeGameAndUI()
 		.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock)
 		.SetHideCursorDuringCapture(false));
 
-	// The context is added through the LocalPlayer's subsystem, not through the controller: that
-	// is the point the syllabus marks as the Enhanced Input service.
-	// Loud on purpose, in all three branches. The symptom of any of these failures is the same --
-	// "the game does nothing" -- and that symptom does not say where to look. A silent branch here
-	// costs a whole debugging session.
 	const ULocalPlayer* const LocalPlayer = GetLocalPlayer();
 	if (LocalPlayer == nullptr)
 	{
@@ -88,8 +72,6 @@ void AMissionPlayerController::SetupInputComponent()
 		return;
 	}
 
-	// Started and not Triggered for the click: Triggered repeats while the button is held, and a
-	// held click over a legal destination would spend all 3 actions at once.
 	if (SelectAction != nullptr)
 	{
 		Input->BindAction(SelectAction, ETriggerEvent::Started, this, &AMissionPlayerController::HandleSelect);
@@ -108,32 +90,13 @@ void AMissionPlayerController::SetupInputComponent()
 		UE_LOG(LogProjectCInput, Error, TEXT("CancelAction is unassigned: that action will not respond."));
 	}
 
-	// The three camera ones are Triggered: they hold while the key stays pressed.
-	if (CameraPanAction != nullptr)
+	if (EndTurnAction != nullptr)
 	{
-		Input->BindAction(CameraPanAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandlePan);
+		Input->BindAction(EndTurnAction, ETriggerEvent::Started, this, &AMissionPlayerController::HandleEndTurn);
 	}
 	else
 	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraPanAction is unassigned: that action will not respond."));
-	}
-
-	if (CameraZoomAction != nullptr)
-	{
-		Input->BindAction(CameraZoomAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandleZoom);
-	}
-	else
-	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraZoomAction is unassigned: that action will not respond."));
-	}
-
-	if (CameraOrbitAction != nullptr)
-	{
-		Input->BindAction(CameraOrbitAction, ETriggerEvent::Triggered, this, &AMissionPlayerController::HandleOrbit);
-	}
-	else
-	{
-		UE_LOG(LogProjectCInput, Error, TEXT("CameraOrbitAction is unassigned: that action will not respond."));
+		UE_LOG(LogProjectCInput, Error, TEXT("EndTurnAction is unassigned: that action will not respond."));
 	}
 }
 
@@ -152,26 +115,28 @@ void AMissionPlayerController::PlayerTick(float DeltaTime)
 	OnHoveredChanged.Broadcast(HoveredActor);
 }
 
+TArray<TEnumAsByte<EObjectTypeQuery>> AMissionPlayerController::GetSpaceObjectTypes()
+{
+	return { UEngineTypes::ConvertToObjectType(ProjectCCollision::Space) };
+}
+
+TArray<TEnumAsByte<EObjectTypeQuery>> AMissionPlayerController::GetFigureObjectTypes()
+{
+	return { UEngineTypes::ConvertToObjectType(ProjectCCollision::Figure) };
+}
+
 AActor* AMissionPlayerController::TraceSelectableUnderCursor_Implementation()
 {
+	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes =
+		(InteractionMode == EInteractionMode::Move) ? GetSpaceObjectTypes() : GetFigureObjectTypes();
+
 	FHitResult Hit;
-
-	// The `Selectable` channel exists precisely for this: there is no need to filter the result or
-	// ask the actor whether it cared, because only selectable things block it.
-	const bool bHit = GetHitResultUnderCursorByChannel(
-		UEngineTypes::ConvertToTraceType(ProjectCCollision::Selectable),
-		/*bTraceComplex*/ false,
-		Hit);
-
-	if (!bHit)
+	if (!GetHitResultUnderCursorForObjects(ObjectTypes, /*bTraceComplex*/ false, Hit))
 	{
 		return nullptr;
 	}
 
 	AActor* const Actor = Hit.GetActor();
-
-	// Blocking the channel is not enough: the interface is the contract, the channel is only the
-	// filter.
 	return (Actor != nullptr && Actor->Implements<USelectable>()) ? Actor : nullptr;
 }
 
@@ -179,38 +144,21 @@ void AMissionPlayerController::HandleSelect()
 {
 	AActor* const Hit = TraceSelectableUnderCursor();
 
-	// A click is a player event, not a tick: logging it costs nothing and is what turns "nothing
-	// happens" into a line that says why.
 	UE_LOG(LogProjectCInput, Log, TEXT("Click on %s (selected: %s)"),
 		Hit ? *Hit->GetName() : TEXT("nothing"),
 		SelectedActor ? *SelectedActor->GetName() : TEXT("nothing"));
 
 	if (Hit == nullptr)
 	{
-		// Click on empty space: deselect. It is what anyone who has played a tactics game expects.
 		ClearSelection();
 		return;
 	}
 
-	// First, the move order: only if something is selected and the destination was lit. It queries
-	// the same list that was painted; it does not recompute.
-	ASpace* const HitSpace = Cast<ASpace>(Hit);
-	if (SelectedActor != nullptr && HitSpace != nullptr && LegalDestinations.Contains(HitSpace))
+	if (TryGiveMoveOrder(Cast<ASpace>(Hit)))
 	{
-		if (AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
-		{
-			if (GameMode->TryMoveFigure(SelectedActor, HitSpace))
-			{
-				// The figure stays selected: spending one of three actions and having to reselect
-				// for the other two would be tedium, not decision.
-				RefreshLegalDestinations();
-				RefreshHighlights();
-				return;
-			}
-		}
+		return;
 	}
 
-	// If it was not an order, it is a selection attempt.
 	if (ISelectable::Execute_CanBeSelected(Hit))
 	{
 		SelectActor(Hit);
@@ -221,33 +169,60 @@ void AMissionPlayerController::HandleSelect()
 	}
 }
 
+bool AMissionPlayerController::TryGiveMoveOrder(ASpace* Destination)
+{
+	if (SelectedActor == nullptr || Destination == nullptr)
+	{
+		return false;
+	}
+
+	if (!LegalDestinations.Contains(Destination))
+	{
+		UE_LOG(LogProjectCInput, Log, TEXT("Refused: %s is not within reach of %s."),
+			*Destination->GetName(), *SelectedActor->GetName());
+		OnOrderRefused.Broadcast(NSLOCTEXT("ProjectC", "OutOfReach", "Too far: that space is more than one move away."));
+		return true;
+	}
+
+	AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr;
+	if (GameMode == nullptr)
+	{
+		UE_LOG(LogProjectCInput, Error, TEXT("There is no AMissionGameMode, so no order can be given."));
+		return true;
+	}
+
+	if (!GameMode->TryMoveFigure(SelectedActor, Destination))
+	{
+		UE_LOG(LogProjectCInput, Log, TEXT("Refused by the referee: %s cannot move to %s right now."),
+			*SelectedActor->GetName(), *Destination->GetName());
+		OnOrderRefused.Broadcast(NSLOCTEXT("ProjectC", "NoActions", "No actions left this turn."));
+		return true;
+	}
+
+	RefreshLegalDestinations();
+	RefreshHighlights();
+	return true;
+}
+
+void AMissionPlayerController::HandleEndTurn()
+{
+	AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr;
+	if (GameMode == nullptr)
+	{
+		UE_LOG(LogProjectCInput, Error, TEXT("There is no AMissionGameMode, so the turn cannot end."));
+		return;
+	}
+
+	UE_LOG(LogProjectCInput, Log, TEXT("End of turn requested by the player."));
+
+	GameMode->EndTurn();
+	RefreshLegalDestinations();
+	RefreshHighlights();
+}
+
 void AMissionPlayerController::HandleCancel()
 {
 	ClearSelection();
-}
-
-void AMissionPlayerController::HandlePan(const FInputActionValue& Value)
-{
-	if (ACameraPawn* const CameraPawn = Cast<ACameraPawn>(GetPawn()))
-	{
-		CameraPawn->AddPanInput(Value.Get<FVector2D>());
-	}
-}
-
-void AMissionPlayerController::HandleZoom(const FInputActionValue& Value)
-{
-	if (ACameraPawn* const CameraPawn = Cast<ACameraPawn>(GetPawn()))
-	{
-		CameraPawn->AddZoomInput(Value.Get<float>());
-	}
-}
-
-void AMissionPlayerController::HandleOrbit(const FInputActionValue& Value)
-{
-	if (ACameraPawn* const CameraPawn = Cast<ACameraPawn>(GetPawn()))
-	{
-		CameraPawn->AddOrbitInput(Value.Get<float>());
-	}
 }
 
 void AMissionPlayerController::SelectActor(AActor* NewSelection)
@@ -260,6 +235,9 @@ void AMissionPlayerController::SelectActor(AActor* NewSelection)
 	SelectedActor = NewSelection;
 
 	RefreshLegalDestinations();
+
+	InteractionMode = LegalDestinations.IsEmpty() ? EInteractionMode::SelectFigure : EInteractionMode::Move;
+
 	RefreshHighlights();
 
 	OnSelectionChanged.Broadcast(SelectedActor);
@@ -279,8 +257,6 @@ void AMissionPlayerController::RefreshLegalDestinations()
 		return;
 	}
 
-	// Who can move where is the referee's call. If this were computed here there would be two
-	// versions of the same rule, and the one the player sees would be the wrong one.
 	if (const AMissionGameMode* const GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AMissionGameMode>() : nullptr)
 	{
 		for (ASpace* const Destination : GameMode->GetLegalDestinations(SelectedActor))
@@ -292,7 +268,6 @@ void AMissionPlayerController::RefreshLegalDestinations()
 
 void AMissionPlayerController::RefreshHighlights()
 {
-	// Clear everything first. That is what makes an orphaned highlight impossible.
 	for (const TObjectPtr<AActor>& Actor : HighlightedActors)
 	{
 		if (IsValid(Actor) && Actor->Implements<USelectable>())
@@ -302,7 +277,6 @@ void AMissionPlayerController::RefreshHighlights()
 	}
 	HighlightedActors.Reset();
 
-	// Then light up again in increasing order of precedence: the last writer wins.
 	auto Apply = [this](AActor* Actor, ESelectionHighlight Highlight)
 	{
 		if (IsValid(Actor) && Actor->Implements<USelectable>())

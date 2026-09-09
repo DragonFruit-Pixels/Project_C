@@ -14,8 +14,8 @@ public class ProjectC : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
-			"EnhancedInput",   // enabled by default in 5.8, nothing to add to the .uproject
-			"GameplayTags"     // an engine module, not a plugin: available with no setup
+			"EnhancedInput",
+			"GameplayTags"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
