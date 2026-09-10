@@ -1,6 +1,4 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
-#include "Characters/RatchetComponent.h"
+#include "Components/RatchetComponent.h"
 #include "Rules/RatchetRules.h"
 
 URatchetComponent::URatchetComponent()

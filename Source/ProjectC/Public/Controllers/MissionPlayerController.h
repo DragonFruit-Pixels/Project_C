@@ -1,11 +1,9 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/EngineTypes.h"
-#include "Core/Selectable.h"
+#include "Interfaces/Selectable.h"
 #include "MissionPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -90,6 +88,9 @@ protected:
 	void HandleSelect();
 	void HandleCancel();
 	void HandleEndTurn();
+
+	UFUNCTION()
+	void HandleActiveFigureChanged(AActor* NewActiveFigure);
 
 private:
 	bool TryGiveMoveOrder(ASpace* Destination);

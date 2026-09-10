@@ -75,9 +75,9 @@ Estado: ✅ hecho · ◐ parcial · ❌ sin empezar.
 | 1 | **Source Control** | ✅ | git + **LFS** para `.uasset`/`.umap`, `.gitignore`, rama publicada |
 | 1 | Templates, Editor | ✅ | proyecto y `L_Mission_01` desde template |
 | 2 | Qué es un Actor | ✅ en C++ | `ASpace`, `AProjectCCharacter` |
-| 2 | Qué es un Blueprint | ◐ | los 5 Blueprints existen y heredan bien, pero **están vacíos** |
+| 2 | Qué es un Blueprint | ✅ | 7 Blueprints con grafos reales, ~275 nodos entre todos |
 | 2 | Componentes | ✅ en C++ | `URatchetComponent` (ActorComponent), `UBoxComponent` (SceneComponent) |
-| 2 | **Blueprint Workflow** | ❌ | variables, funciones, arrays, loops, casting, macros: **cero nodos** |
+| 2 | **Blueprint Workflow** | ✅ | variables, funciones y casting en `WBP_MissionHUD`, `BP_GameMode_Mission` y `BP_CameraPawn` (4 funciones propias) |
 | 2 | **Depuración de Blueprints** | ❌ | breakpoints y Blueprint Debugger sin usar. Iría sobre el cálculo de distancias del grafo |
 | 2 | Ciclo de vida del Actor | ◐ | `BeginPlay` en `ASpace`, `StartPlay` en GameMode. Falta **Spawn/Destroy**: enemigos en las 3 puertas |
 | 3 | **Gameplay Framework** | ✅✅ | las 6 clases del PDF: `MissionGameMode`, `MissionGameState`, `MissionPlayerController`, `MissionPlayerState`, `ProjectCGameInstance`, `AProjectCCharacter` |
@@ -139,12 +139,11 @@ Estado: ✅ hecho · ◐ parcial · ❌ sin empezar.
 
 Ordenados por urgencia, no por tamaño. La clase 4 cerró uno entero y mordió otro.
 
-1. **Los 8 ejercicios de Blueprint del profe siguen sin hacerse** (clase 2). Son Blueprint puro
-   —variables, arrays, `ForEachLoop`, structs, Actor Components, `Gate` + `Delay`— y todo eso
-   está resuelto en C++, que es más avanzado pero **no es donde lo van a buscar**. Es el hueco
-   más urgente porque el 1er parcial cubre clases 1-7.
+1. ~~**Los 8 ejercicios de Blueprint del profe**~~ — **descartados el 31/8 por decisión de
+   Sebastián.** No se hacen y no vuelven a la lista. El temario de la clase 2 se cubre con el
+   Blueprint que el juego ya tiene, no con ejercicios sueltos.
 
-   Lo que **sí** se cerró: los Blueprints ya no son cascarones. `BP_Space` tiene un grafo real
+   Y lo que el juego ya tiene: los Blueprints ya no son cascarones. `BP_Space` tiene un grafo real
    (override de `SetHighlight`, función `ApplyHighlight` con un switch de 4 ramas que maneja
    parámetros de material), `BP_PlayerController_Mission` tiene sus 6 referencias de Input, y
    `BP_CameraPawn` dejó de ser un cascarón para pasar a ser **la cámara entera** —componentes,

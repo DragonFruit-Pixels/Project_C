@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 using UnrealBuildTool;
 
 public class ProjectC : ModuleRules

@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Map/GraphMath.h"
 #include "Algo/Reverse.h"
 

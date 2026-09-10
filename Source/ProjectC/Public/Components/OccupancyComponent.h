@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -17,6 +15,9 @@ class PROJECTC_API UOccupancyComponent : public UActorComponent
 
 public:
 	UOccupancyComponent();
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintPure, Category = "Occupancy")
 	ASpace* GetSpace() const { return CurrentSpace; }

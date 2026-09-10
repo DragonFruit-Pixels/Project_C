@@ -1,11 +1,9 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "Core/MissionGameMode.h"
 #include "Core/MissionGameState.h"
-#include "Core/MissionPlayerController.h"
+#include "Controllers/MissionPlayerController.h"
 #include "Core/MissionPlayerState.h"
 #include "GameFramework/Pawn.h"
-#include "Characters/OccupancyComponent.h"
+#include "Components/OccupancyComponent.h"
 #include "Map/GraphSubsystem.h"
 #include "Map/Space.h"
 
@@ -67,6 +65,12 @@ TArray<ASpace*> AMissionGameMode::GetLegalDestinations(AActor* Figure) const
 		return Destinations;
 	}
 
+	const AMissionGameState* const State = GetGameState<AMissionGameState>();
+	if (State != nullptr && !State->GetParty().IsEmpty() && State->GetActiveFigure() != Figure)
+	{
+		return Destinations;
+	}
+
 	ASpace* const From = Occupancy->GetSpace();
 
 	Destinations = Graph->GetReachable(From, SpacesPerMove);
@@ -92,7 +96,59 @@ FVector AMissionGameMode::GetFigurePlacement(AActor* Figure, ASpace* To) const
 	FVector BoxExtent = FVector::ZeroVector;
 	Figure->GetActorBounds(true, Origin, BoxExtent);
 
-	return To->GetFigureAnchorLocation() + FVector(0.0f, 0.0f, BoxExtent.Z);
+	return To->GetOccupantLocation(Figure) + FVector(0.0f, 0.0f, BoxExtent.Z);
+}
+
+void AMissionGameMode::AdvanceTurn()
+{
+	AMissionGameState* const State = GetGameState<AMissionGameState>();
+	if (State == nullptr)
+	{
+		UE_LOG(LogProjectCMission, Error,
+			TEXT("There is no AMissionGameState, so the round cannot advance."));
+		return;
+	}
+
+	State->RetireActiveFigure();
+
+	if (!State->GetParty().IsEmpty() && State->GetFiguresLeftThisRound().IsEmpty())
+	{
+		State->BeginRound();
+	}
+}
+
+bool AMissionGameMode::TryActivateFigure(AActor* Figure)
+{
+	AMissionGameState* const State = GetGameState<AMissionGameState>();
+	if (State == nullptr || Figure == nullptr)
+	{
+		return false;
+	}
+
+	if (State->Round == 0)
+	{
+		State->BeginRound();
+	}
+
+	return State->SetActiveFigure(Figure);
+}
+
+AActor* AMissionGameMode::GetActiveFigure() const
+{
+	const AMissionGameState* const State = GetGameState<AMissionGameState>();
+	return State ? State->GetActiveFigure() : nullptr;
+}
+
+int32 AMissionGameMode::GetFiguresLeftThisRound() const
+{
+	const AMissionGameState* const State = GetGameState<AMissionGameState>();
+	return State ? State->GetFiguresLeftCount() : 0;
+}
+
+int32 AMissionGameMode::GetRound() const
+{
+	const AMissionGameState* const State = GetGameState<AMissionGameState>();
+	return State ? State->Round : 0;
 }
 
 void AMissionGameMode::EndTurn_Implementation()

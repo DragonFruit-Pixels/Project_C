@@ -1,5 +1,3 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #include "ProjectC.h"
 #include "Modules/ModuleManager.h"
 

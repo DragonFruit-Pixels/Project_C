@@ -1,10 +1,8 @@
-// Copyright DragonFruit Pixels. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Core/Selectable.h"
+#include "Interfaces/Selectable.h"
 #include "ProjectCCharacter.generated.h"
 
 class URatchetComponent;
@@ -29,6 +27,9 @@ public:
 	virtual FText GetSelectableName_Implementation() const override;
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ProjectC|Character")
 	TObjectPtr<URatchetComponent> Ratchet;
 
