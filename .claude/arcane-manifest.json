@@ -1,5 +1,5 @@
 {
-  "arcane_version": "447ca245b538",
+  "arcane_version": "984665981482",
   "cli": "npm",
   "profile_command": "unreal-dev+unity-design+statusline+meshy+clickup",
   "profiles": [
@@ -12,7 +12,7 @@
   ],
   "installed_at": "2026-08-19T21:55:50Z",
   "total_skills": 86,
-  "total_rules": 14,
+  "total_rules": 15,
   "installed_skills": [
     "commit",
     "create-pr",
@@ -106,6 +106,7 @@
     "prototype-code",
     "test-standards",
     "implementation-workflow",
+    "code-comments",
     "meshy-assets",
     "unreal-code",
     "gameplay-code",
@@ -123,13 +124,13 @@
     "product/ux-lead"
   ],
   "source": "C:\\Users\\sebas\\.arcane\\cache\\d82d50b5cf17",
-  "source_version": "447ca245b538",
-  "updated_at": "2026-08-28T16:53:34Z",
+  "source_version": "984665981482",
+  "updated_at": "2026-09-09T12:43:06Z",
   "content_hashes": {
     "skills": {
       "accessibility": "0fd6ef128bcd60d2285e04ffaefc43354b523832b883e2fb37a7672e019d2cf0",
-      "arcane-add": "e2122bd5e20cef5ab3ed9c50c920700acc09e1a7ccb480767180dd4916bf0f74",
-      "arcane-clean": "f0ad14835085574ad406d91c4cb25b2107daa28d31afa61ebc1618962d4227ca",
+      "arcane-add": "72e51856c707266d4d220df208f76343469464510eee4c11b4313216199d3db9",
+      "arcane-clean": "e95b1d7a72425ee43056d5f9a5b78657d53045cbf2c3e1684199d44641b48595",
       "arcane-list": "0c920e180849fa8518ab04549cc87977b60358418f9f681f5edf3b286a96749d",
       "arcane-remove": "3a121b2c3ffca72e30d2ee163d7bb0c58743723dd0aa2fa5b2ea5a662b1967f3",
       "arcane-status": "20b9f1c7baca36908f2d589f0cb28f3ebc253519ed7da6744e6bcca78283fccf",
@@ -159,7 +160,7 @@
       "game-docs": "b7367b59e2fae8e0f89c8e017817be9829f6452db6b59b51bc8b970a1440f075",
       "help": "c857159938350437ad526e969ac6973ed33a43b94a24b5753aec0362e5cf13ec",
       "hotfix": "4bba5160e35a3450ae3c07846f30a28af10f2e9cfa66381f0e3bd6b54cfd6802",
-      "install-mcp": "4d715879d08ff9864501b4da9aaec8949137ed10ff3b803211e7dbeb94bd4d32",
+      "install-mcp": "6d64ca43954e51bc2b829d74d9dfad6124336fd7787f59619884a87c70df349f",
       "kickoff": "7fd49443f13cf2d84fddcd6bc5d5643de803658fb8b1bde23063ca3d20453eb0",
       "map-systems": "9b626ced9a2739c2bd46953862b2fbf8c397dfc33c8e53ec2ace26b2c02c1351",
       "meshy-derive": "de33599c3f94553ea116a3cb0af75e059981fc2b873daf2307971ffad50fb2ca",
@@ -216,26 +217,28 @@
     },
     "rules": {
       "ai-code.md": "77724351c28907af87630f98b6e38dcdbcabb4d74e02a4df17874b1cc1276a0b",
-      "data-files.md": "e0f5ca44b833fae2b793ae23c433d873e4f97f36b3399c0392a56ebf20ff4385",
+      "code-comments.md": "6c2b103851c4cf2328b88de4a119d100a14498d4a31fe70f5db1e32651a3e260",
+      "data-files.md": "b063b2e8cced39a566f0446f43086bdbdcc6d7fc4fdc4dfb6a808de8652bfcc2",
       "design-docs.md": "8e3ea21cd637f39b2fbca4ec1d660c97e0143f1b211466c7b03cf6447a59bfb4",
-      "engine-code.md": "c4b2210d0947781735b2b456e73e370494a3403306ca320c7ae403d92c0ebee8",
-      "gameplay-code.md": "1525887b6c84a877b8b6b00a03f89d288014ccacb78d22d80987541fac9bf00e",
+      "engine-code.md": "38100b7efdf9cefa8028abc96344992460fd9d9cd4c8c9cdcf46c443dd626956",
+      "gameplay-code.md": "4face0d95006608dfe4620f19924a2381406b36458a317664565852ce419ebec",
       "implementation-workflow.md": "e0ddb6a2c425445750767270c216fe43957b4f59dafc44ff9e35f1bc8380d844",
       "meshy-assets.md": "7470649d3e83a7863d65ea4c1838ba1bf9528ce90104b468c5291ccdcb807afa",
       "narrative.md": "be8925e4d9a6242eb7db40fd918bdc94aa6f40e498f9e3aa8d7ffe27ede4a819",
       "network-code.md": "e75454f6ea2e3892521ab6500865190fe74b28ce90b604e78a7d74a6c08e675e",
       "prototype-code.md": "67cf516d0febcb9829407386b4d16b773ea38cc21012fdeb03a53943cc6ed5bd",
-      "shader-code.md": "586b28e737ae39d0a78c34a8b2edc88ae3275671eadf25add222a5f33bc512e1",
+      "shader-code.md": "fa0bea756a8f9c3881d9faea5b8fef621c23715f50f2a34f34f820af0f2a617b",
       "test-standards.md": "80eaedbd6032e306cb677bc77df064ec801efc0113932956f6d9557fa05e7839",
       "ui-code.md": "be45904c33e72c717ac56ba2ee760d5a5ec1435a3b84ad4365ca513c91a7a68b",
       "unreal-code.md": "0522575eaf34d59c921d2ac0b6fca1498e43aca71280c81be6260a4c6a6dfa52"
     },
     "agents": {
-      "game": "5926991f30e0398cb696a33583394188701635801eacc8ea0e5ae121c1903482",
+      "game": "5a03e19faa6e7187d93f8813bbff8d88849271ac9f27f56356ad7c5255d672c0",
+      "product": "67a0c372bfe3c3fdc6a6dbc06e69bec37b44fe29687ec00c678cf122c07836ee",
       "quality": "3045032416acfa4a6195d98af5045ba7d8a1c84cfb9d3109e0d222e4eb114498"
     },
     "hooks": {
-      "check-update.sh": "076050603ab48da7909607fbab41754fad60b26d02c71cd6b39356ed487097f7",
+      "check-update.sh": "74d392d0e57fd85ddcf67603721de629c280cf7fd7394d4858713068cdd6e7d8",
       "detect-division.sh": "2ab203d201d011afa5e426bf2f878d76024ac25bc392a6db909e2f8fb7dc95ce",
       "detect-gaps.sh": "f64f0b796af85c7048f85317c2a2ed4eb2aa67ab29d80213d03d78ef7ea81e64",
       "detect-unreal.sh": "87c58273802bcc98f0fd37de90654024bdb587be9853c8f93cc8f4fd981cbc08",
@@ -246,7 +249,6 @@
       "pre-compact.sh": "d3e015715fbdabac8acb9db42c3868739a5c1776b7eab01e327744eb140ecf0b",
       "session-start.sh": "2875afb86b212448bc2a4d538f44c19b231c9995b663dd21888640b1c9e32e89",
       "session-stop.sh": "261955eaa7249e770c8a75b8c3c26e7b4f76f82519c546729cb35bf14e06d624",
-      "statusline.sh": "3048c41cf030de6daa3dbb9e3a8fdbbdfc3940fb9c2e703fed49593542abaf19",
       "validate-assets.sh": "bb4877adc6ab469005d8db5a37acff89d148a87ed8a50c7e1aad01a3f7c6a151",
       "validate-commit.sh": "83dea0a663e4bc4d09a6a91c41a694e6e35d3dc666b4f6d21836c5e409aec941",
       "validate-push.sh": "86ff656f617e73fc118847f0ecf038c6c11a633d2d96e65676759d96c6defa3f",
