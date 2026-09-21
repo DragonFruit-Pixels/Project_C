@@ -1,0 +1,37 @@
+{
+  "slug": "valve-maul",
+  "kind": "weapon",
+  "for_skill": "Brawling / Bulwark",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights. Single object on a plain flat grey backdrop, no character, no hands, no scenery, side three-quarter view. Biopunk chemical undercity: salvaged heavy industry, no magic, no glowing tech. Muted grimy palette — oxidised steel, tar black, sickly yellow-green residue. A heavy two-handed industrial melee weapon: a long steel valve wrench repurposed as a maul, taped grip, chipped head, rust and chemical staining.",
+  "ai_model": "nano-banana",
+  "stage": "concept-exploration",
+  "tasks": [
+    {
+      "id": "01a08dc5-5159-707a-9d58-5e13846ccaac",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png"
+    },
+    {
+      "id": "01a08de0-29a3-7022-a64e-e5bec288ecaf",
+      "op": "image_to_3d",
+      "credits": 15,
+      "at": "2026-09-11T00:34:39Z",
+      "note": "meshy-t2 smart-topology"
+    }
+  ],
+  "credits_total": 18,
+  "derived": [
+    "master.glb",
+    "targets/game.fbx"
+  ],
+  "ue_path": "/Game/Project_C/Assets/ValveMaul",
+  "ue_assets": [
+    "SM_ValveMaul",
+    "M_ValveMaul",
+    "T_ValveMaul_BC"
+  ],
+  "imported_at": "2026-09-20"
+}

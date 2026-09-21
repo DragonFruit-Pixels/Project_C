@@ -1,0 +1,44 @@
+{
+  "slug": "ram",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "Pit fighter who took the dose to win fights and is proud of it. No mask, bare face and shoulders, wrapped knuckles, torn fight trousers, red sash at the waist. Swollen yellow mutagen grown through the flesh of one arm and shoulder. Signature colour: raw red.",
+  "ai_model": "nano-banana",
+  "stage": "concept-exploration",
+  "tasks": [
+    {
+      "id": "01a08d91-30e0-7777-a966-5f970bc56916",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-10T22:55:00Z",
+      "result": "concept-v1-realistic-rejected.png",
+      "note": "photorealistic render, rejected: style did not match the roster"
+    },
+    {
+      "id": "01a08d9c-0ba0-73ad-b0f0-f963759f4678",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-10T23:18:33Z",
+      "result": "concept.png"
+    },
+    {
+      "id": "01a08dc5-1ba3-7153-b430-13cab120de40",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png",
+      "note": "A-pose, sin props, regla de silueta"
+    },
+    {
+      "id": "01a08dd0-d88a-75e5-bea8-bd5f90ff9100",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:16:11Z",
+      "result": "concept.png",
+      "note": "pasada de identidad: oficio propio + color de firma, una sola mascara de gas en el roster"
+    }
+  ],
+  "credits_total": 12,
+  "derived": [],
+  "identity": "Peleador de pozo que se dosifico para ganar",
+  "signature_colour": "raw red"
+}

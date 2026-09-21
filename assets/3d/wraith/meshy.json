@@ -1,0 +1,170 @@
+{
+  "slug": "wraith",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "A cartel chemist who self-dosed, hiding what it did to the skin: deep hood, cloth mask, short cropped vest ending at the waist, nothing below the hip, glass vials on a chest strap, narrow wraps bound tight to arms and legs, nothing hanging. Slim silhouette. Signature colour: acid green.",
+  "ai_model": "meshy-7",
+  "stage": "concept-exploration",
+  "tasks": [
+    {
+      "id": "01a08dbd-4db4-73ff-a5d9-c6fd9f7ea33e",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-10T23:54:25Z",
+      "result": "concept.png",
+      "version": "v1",
+      "status": "SUPERSEDED",
+      "note": "v1: la cuenta que la creo ya no responde, la tarea no existe en la API. Archivos preservados en _v1/."
+    },
+    {
+      "id": "01a08dc5-0f0d-76c0-bca4-fdcd55a4c914",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png",
+      "note": "A-pose, sin props, regla de silueta | v1: la cuenta que la creo ya no responde, la tarea no existe en la API. Archivos preservados en _v1/.",
+      "version": "v1",
+      "status": "SUPERSEDED"
+    },
+    {
+      "id": "01a08dcf-ddf8-7011-9fed-78038fd8220f",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:16:11Z",
+      "result": "concept.png",
+      "note": "pasada de identidad: oficio propio + color de firma, una sola mascara de gas en el roster | v1: la cuenta que la creo ya no responde, la tarea no existe en la API. Archivos preservados en _v1/.",
+      "version": "v1",
+      "status": "SUPERSEDED"
+    },
+    {
+      "id": "01a08dd7-18f9-7110-8c95-0a983c506da8",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:22:28Z",
+      "result": "concept.png",
+      "note": "sin guardapolvo: Blender esta fuera de alcance, el faldon no se puede arreglar despues | v1: la cuenta que la creo ya no responde, la tarea no existe en la API. Archivos preservados en _v1/.",
+      "version": "v1",
+      "status": "SUPERSEDED"
+    },
+    {
+      "id": "01a08ddb-7475-7329-892a-fd9ca82a60ce",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-09-11T00:34:39Z",
+      "note": "meshy-7 quad 20k PBR a-pose | v1: la cuenta que la creo ya no responde, la tarea no existe en la API. Archivos preservados en _v1/.",
+      "version": "v1",
+      "status": "SUPERSEDED"
+    },
+    {
+      "id": "01a08de8-64c7-73eb-b3b6-4c6b06640cdb",
+      "op": "rig",
+      "credits": 5,
+      "at": "2026-09-11T00:42:19Z",
+      "note": "auto-rig sobre malla en A-pose (la herramienta recomienda t-pose). Incluye walking y running gratis. El esqueleto NO es el mannequin de UE5: requiere IK Retargeter. | v1: la cuenta que la creo ya no responde, la tarea no existe en la API. Archivos preservados en _v1/.",
+      "version": "v1",
+      "status": "SUPERSEDED"
+    },
+    {
+      "id": "01a0c139-b1e7-770a-ac04-aa90e485f406",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-09-20T23:49:40Z",
+      "version": "v2",
+      "note": "meshy-7, quad, 20k, PBR, T-POSE. Reuso de concept.png (sin concept nuevo). T-pose y no A-pose porque se abandono el objetivo mannequin: meshy_rig riggea mejor sobre T."
+    },
+    {
+      "id": "01a0c13c-dfbf-735d-9fe7-2f6b1f309b4b",
+      "op": "rig",
+      "credits": 5,
+      "at": "2026-09-20T23:52:00Z",
+      "version": "v2",
+      "note": "auto-rig sobre T-pose. Incluye walking y running gratis. 24 huesos estilo Mixamo (Hips/Spine/RightHand). NO es el mannequin de UE5."
+    },
+    {
+      "id": "01a0c13e-07f9-7108-a435-1b17adbd47dc",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-09-20T23:53:00Z",
+      "version": "v2",
+      "action_id": 0,
+      "action": "Idle"
+    },
+    {
+      "id": "01a0c13e-0fbd-71a4-8b2e-7cbfacccb4a3",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-09-20T23:53:00Z",
+      "version": "v2",
+      "action_id": 219,
+      "action": "Right_Hand_Sword_Slash",
+      "note": "mano derecha: calza con WeaponSocket_R sobre RightHand"
+    },
+    {
+      "id": "01a0c13e-2368-73c4-87cc-ac4bad17aba7",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-09-20T23:53:00Z",
+      "version": "v2",
+      "action_id": 178,
+      "action": "Hit_Reaction"
+    },
+    {
+      "id": "01a0c13e-76b5-71a4-88c3-f12782a61238",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-09-20T23:53:00Z",
+      "version": "v2",
+      "action_id": 8,
+      "action": "Dead"
+    }
+  ],
+  "credits_total": 94,
+  "derived": [
+    "master.glb",
+    "master_textures/",
+    "targets/rigged.fbx",
+    "targets/anim_idle.fbx",
+    "targets/anim_walking.fbx",
+    "targets/anim_running.fbx",
+    "targets/anim_attack.fbx",
+    "targets/anim_hit.fbx",
+    "targets/anim_death.fbx"
+  ],
+  "identity": "Quimico del cartel que se autodosifico",
+  "signature_colour": "acid green",
+  "ue_path": "/Game/Project_C/Assets/Wraith",
+  "ue_assets": [
+    "SK_Wraith",
+    "SKEL_Wraith",
+    "PHYS_Wraith",
+    "MI_Wraith",
+    "T_Wraith_BC",
+    "T_Wraith_N",
+    "T_Wraith_R",
+    "T_Wraith_M",
+    "AS_Wraith_Idle",
+    "AS_Wraith_Walk",
+    "AS_Wraith_Run",
+    "AS_Wraith_Attack",
+    "AS_Wraith_Hit",
+    "AS_Wraith_Death"
+  ],
+  "imported_at": "2026-09-20",
+  "version": "v2",
+  "pose_mode": "t-pose",
+  "credits_v1": 47,
+  "credits_v2": 47,
+  "credits_verified": "balance 1650 -> 1603 el 2026-09-20 (delta 47, coincide con lo estimado)",
+  "superseded": "_v1/ (malla A-pose de la tanda del 2026-09-11) se borro el 2026-09-21 por decision del dueno del proyecto: 55 MB de LFS por una malla descartada. Los 6 tasks de esa tanda quedan abajo con status SUPERSEDED y son el unico registro que sobrevive. La malla NO se puede regenerar: Meshy no es determinista y esos task_id ya no responden en la cuenta actual.",
+  "ue_blueprint": "/Game/Project_C/Characters/BP_Wraith",
+  "ue_socket": "WeaponSocket_R sobre el hueso RightHand (transform identidad: falta ajuste visual)",
+  "weapon": "scrap-blade",
+  "retarget_note": "Para animaciones de Mixamo hace falta un IK Retargeter: Mixamo usa Spine1/Spine2/Neck/HeadTop_End y este rig usa Spine01/Spine02/neck/head_end.",
+  "ue_shared": {
+    "parent_material": "/Game/Project_C/Assets/_Shared/M_Character",
+    "neutral_textures": [
+      "/Game/Project_C/Assets/_Shared/T_Neutral_Black",
+      "/Game/Project_C/Assets/_Shared/T_Neutral_Grey"
+    ],
+    "note": "M_Wraith (Material suelto) se reemplazo por MI_Wraith, un Material Instance de M_Character, el 2026-09-21. Un solo shader compilado para todo el roster; cada personaje nuevo es un instance y cinco campos. Los parametros son BaseColor, Normal, Roughness, Metallic, AccentMask, SignatureTint y el static switch UseAccentMask (arranca en false, asi que el Lerp del acento no se compila)."
+  }
+}
