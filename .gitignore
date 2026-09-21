@@ -47,6 +47,12 @@ production/session-state/*.log
 .env
 .env.local
 
+# ── Media extraida de los FBX ───────────────────────────────────
+# El SDK de FBX desempaqueta las texturas embebidas en <nombre>.fbm/ al
+# importar. Es una copia byte a byte de lo que ya viaja dentro del .fbx: se
+# regenera sola en cada import y no guarda informacion propia. Eran 54 MB.
+*.fbm/
+
 # ── Explicitly versioned ────────────────────────────────────────
 # Listed for the next person reading this file, not because git needs it:
 #   *.uproject, Config/, Content/, Source/, Plugins/*/Source/, docs/
