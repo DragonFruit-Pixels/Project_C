@@ -62,16 +62,29 @@ existir en el BP **con el mismo nombre**, o el HUD se rompe igual.
    siguen resolviendo `/Script/ProjectC.EMissionTurnPhase` y no hay que rewirear ni un nodo.
    `ESelectionHighlight` ya vive en `Selectable.h`, que tambien sobrevive.
 
-3. **Hay cuatro assets duplicados byte a byte**, no dos:
-   `Core/BP_Character` = `Characters/Player/BP_Character`, y
-   `Map/Space/BP_Space` = `Placeables/BP_Space`. Fuera de alcance de esta migracion, pero
-   conviene resolverlo: hoy se migran dos veces las mismas dos clases.
+3. **No hay assets duplicados: hay dos redirectors.** `Core/BP_Character` y
+   `Placeables/BP_Space` son `ObjectRedirector` — el rastro que deja mover un asset en el
+   editor sin correr el fixup. Apuntan a los assets reales, que son
+   `Characters/Player/BP_Character` y `Map/Space/BP_Space`, y son esos dos los que usa
+   `L_Mission_01`.
 
-4. **Cuatro bindings a `OnOrderRefused`** en `BP_PlayerController_Mission`
+   Lo habia leido como duplicacion porque `read_graph_dsl` devolvia contenido identico por
+   los dos caminos; era identico porque los dos resolvian al mismo objeto.
+   **Son 6 Blueprints reales, no 8**, y no hay trabajo duplicado en la Fase 2.
+
+4. **Los Class Defaults del GameMode ya estan puestos en el Blueprint.**
+   `BP_GameMode_Mission` referencia `BP_GameState_Mission`, `BP_PlayerController_Mission` y
+   `BP_CameraPawn`, o sea que ya sobrescribe lo que pone el constructor en C++. Y
+   `GameStateClass`, `PlayerControllerClass` y `DefaultPawnClass` estan declaradas en
+   `AGameModeBase`, no en `AMissionGameMode`: **sobreviven al reparent**. Lo unico que se
+   pierde es lo declarado en la clase C++ propia — `ActionsPerTurn`, `SpacesPerMove` y
+   `Phase`.
+
+5. **Cuatro bindings a `OnOrderRefused`** en `BP_PlayerController_Mission`
    (`_Event`, `_Event_0`, `_Event_1`, `_Event_2`). Solo `_Event` tiene cuerpo; los otros tres
    son stubs vacios de clickear el `+` de mas. Se colapsan a uno.
 
-5. **`BP_GameState_Mission` tiene `ReceiveTick` implementado** (vacio) y el GameState C++ no
+6. **`BP_GameState_Mission` tiene `ReceiveTick` implementado** (vacio) y el GameState C++ no
    tickea. Resto de una prueba; no se porta.
 
 ## Baseline de tests
@@ -114,3 +127,45 @@ blob de unity, que es la misma clase de trampa.
 
 **Consecuencia para validar:** un build donde esos archivos esten sucios en git **no prueba el
 fix**, porque compilan solos. Hay que commitear y recompilar para que vuelvan al blob.
+
+## Trampas del DSL de Blueprint (encontradas escribiendo, no documentadas)
+
+`read_graph_dsl` / `write_graph_dsl` hacen round-trip, pero el writer normaliza y en el camino
+hay cosas que muerden. Todas estas salieron de fallas reales.
+
+1. **Los eventos se llaman por su titulo, no por su UFUNCTION.** `list_events` devuelve
+   `ReceiveBeginPlay`, pero el DSL quiere **`EventBeginPlay`**. Con `ReceiveBeginPlay` tira
+   `AddEvent|ReceiveBeginPlay does not exist`. Igual con `EventEndPlay`, `EventTick`.
+
+2. **Las llamadas a funciones propias y a dispatchers exponen un pin `self` como primer
+   posicional.** `(CallFunction|MiFuncion a b)` conecta `a` a `self` y falla con
+   *"Could not connect pin X to self"*. Usar **keyword args**:
+   `(CallFunction|MiFuncion :self self :Param1 a :Param2 b)`. Lo mismo para
+   `(Default|CallMiDispatcher :self self :Param x)`.
+
+3. **`bind` dentro del cuerpo de un `for` se hoistea afuera del loop.** Esto es el peor,
+   porque **compila y da el resultado equivocado en silencio**. Escribiendo
+   `(for _th arr (bind _c (- _th _pos)) ...)` el `bind` sale del loop y queda colgado de un
+   `ForEachLoop` suelto: `_c` no varia por iteracion. La expresion hay que **inlinearla** para
+   que quede atada a la variable del loop, aunque eso duplique un nodo puro.
+
+4. **Variables locales de funcion:** `add_variable` con el parametro `graph` las crea en ese
+   grafo en vez de en la clase. Se acceden como `Variables|Default|GetX` / `SetX`. Sirve para
+   acumuladores de loop sin ensuciar el estado de la clase.
+
+5. **Los nodos multi-exec cortan el flujo.** `Utilities|IsValid` (pines `Is Valid` /
+   `Is Not Valid`) termina el exec del cuerpo que lo contiene: lo que venga despues no corre.
+   Dos chequeos seguidos al mismo nivel no se pueden. La salida limpia es una funcion chica por
+   chequeo — que ademas es el patron anti-spaghetti que queremos.
+
+6. **Tipos que acepta `add_variable`:** `bool, int, float, byte, name, string, text, Vector,
+   Rotator, Transform, Vector2D, LinearColor`. `int32`, `integer` y `double` se rechazan.
+
+7. **Los nombres de propiedad del CDO son camelCase**, no PascalCase: `trackLength`,
+   `primaryComponentTick`. Y los dos tools no coinciden en la forma:
+   `set_properties` toma `values` como **string JSON**, `get_properties` toma `properties`
+   como **array de strings**.
+
+8. **El path de un Blueprint para estos tools es `Paquete.Objeto`**
+   (`/Game/.../BP_X.BP_X`), y el del CDO es `/Game/.../BP_X.Default__BP_X_C`. El path de
+   paquete solo no sirve: *"is not a valid object path"*.
