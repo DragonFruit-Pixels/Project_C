@@ -169,3 +169,53 @@ hay cosas que muerden. Todas estas salieron de fallas reales.
 8. **El path de un Blueprint para estos tools es `Paquete.Objeto`**
    (`/Game/.../BP_X.BP_X`), y el del CDO es `/Game/.../BP_X.Default__BP_X_C`. El path de
    paquete solo no sirve: *"is not a valid object path"*.
+
+## Lo que el MCP no puede hacer (requiere el editor a mano)
+
+Dos cosas, las dos chicas, las dos verificadas contra los 53 tools de `BlueprintTools`:
+
+1. **Agregar una interfaz a un Blueprint.** Los tools solo *leen* interfaces
+   (`list_events` / `list_functions` las mencionan). `ImplementedInterfaces` tampoco se
+   alcanza por `ObjectTools`: el path `/Game/.../BP_X.BP_X` resuelve a la clase generada, no
+   al `UBlueprint`. Afecta solo a **`BP_Character`**, que al reparentar a `Character` deja de
+   implementar `ISelectable` — y de eso dependen el trace del cursor, los highlights y
+   `CanActThisRound`.
+
+2. **Crear una variable de tipo enum.** `add_variable` acepta solo
+   `bool/int/float/byte/name/string/text/Vector/Rotator/Transform/Vector2D/LinearColor`;
+   rechaza tanto `EMissionTurnPhase` como `/Script/ProjectC.EMissionTurnPhase`.
+   `add_struct_variable` tampoco: *"is not valid ScriptStruct"*. Afecta a **`Phase`** en
+   `BP_GameMode_Mission`, y por lo tanto al cuerpo de `EnterPhase`, que quedo vacio.
+
+## Mas trampas del DSL
+
+9. **`write_graph_dsl` no limpia el grafo de forma confiable.** Si una escritura falla a
+   mitad, los nodos que alcanzo a crear **quedan**. Una segunda escritura agrega otra cadena
+   completa en paralelo colgada del mismo pin de entrada, y el resultado es una funcion que
+   hace todo dos veces. En `BP_GameMode_Mission` quedaron 8 nodos huerfanos repartidos en tres
+   grafos, incluidos getters de propiedades C++ que ya no existian; cada compile los reportaba
+   sin decir en que grafo estaban. Se encuentran con `find_nodes` + `get_node_infos` filtrando
+   por `type_id`, y se borran con `delete_node`.
+
+10. **`read_graph_dsl` mal-etiqueta nodos que comparten nombre con algo del engine.** Mi
+    `IsSet` se lee como `TypedElementFramework|Handle|IsSet`, mi `EndTurn` como
+    `Online|TurnBased|EndTurn`, y `Class|BPCOccupancy|SetSpace` como
+    `Class|MotionExtractorModifier|SetSpace`. El nodo real es el correcto — lo confirma que el
+    Blueprint compile y que el error al borrar la funcion diga
+    *"Could not find a function named IsSet in BP_GameState_Mission_C"*. **La etiqueta del
+    read-back no es autoridad; el compile y la inspeccion de pines si.**
+
+11. **El read-back colapsa nodos multi-salida y queda ambiguo.**
+    `(bind (_origin _extent) (Collision|GetActorBounds ...))` + `(.z _extent)` se lee como
+    `(.z (Collision|GetActorBounds Figure true))`, que no dice cual de las dos salidas se uso.
+    Hay que mirar `connected_pins` por pin: en `GetFigurePlacement` quedo
+    `Origin conn=0 / BoxExtent conn=1`, que es lo correcto.
+
+12. **Reparentar convierte los eventos del padre en custom events huerfanos** con sufijo `_1`.
+    `OnMissionReady` y `EndTurn` quedaron como `OnMissionReady_1` y `EndTurn_1`, con su cuerpo
+    intacto y sin nadie que los dispare. Se borran con `delete_node`.
+
+13. **Las propiedades declaradas en el padre de engine sobreviven el reparent.**
+    `GameStateClass`, `PlayerControllerClass` y `DefaultPawnClass` estan en `AGameModeBase`, y
+    los valores que el Blueprint les habia puesto quedaron intactos. Solo se pierde lo
+    declarado en la clase C++ propia.
