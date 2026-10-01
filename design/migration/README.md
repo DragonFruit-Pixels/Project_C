@@ -87,7 +87,30 @@ de empezar).
 | `ProjectC.Rules.Ratchet.AdvanceAndLoss` | si |
 | `ProjectC.Rules.Ratchet.Thresholds` | si |
 | `ProjectC.Rules.Slots.Layout` | si |
-| `ProjectC.Rules.Move.Legality` | **no** — prueba `AMissionGameMode` |
-| `ProjectC.Rules.Turn.Order` | **no** — prueba `AMissionGameState` |
+| `ProjectC.Rules.Move.Legality` | si — solo incluye `Map/GraphMath.h`, no toca el GameMode |
+| `ProjectC.Rules.Turn.Order` | **no** — instancia `AMissionGameState` |
 
-Al terminar tienen que quedar **6/6**. Si quedan menos, algo se rompio en el C++ que se queda.
+Al terminar tienen que quedar **7/7**. Si quedan menos, algo se rompio en el C++ que se queda.
+
+La unica baja es `TurnOrderTest.cpp` (86 lineas). `MoveLegalityTest.cpp` parecia condenado por el
+nombre pero prueba `FGraphMath::Reachable` con una constante local, no el GameMode: sobrevive.
+
+## La trampa del unity build
+
+`GraphMathTest.cpp` y `MoveLegalityTest.cpp` definian el **mismo** `ExampleGraph()` y el mismo
+`enum { S1..NodeCount }`, byte por byte, cada uno en un namespace **anonimo**. Un anonimo da
+linkage interno, asi que por archivo no colisiona — pero UBT concatena `.cpp` en blobs de unity,
+y ahi los dos anonimos caen en la misma unidad de traduccion y el nombre queda ambiguo.
+
+No estallaba porque UBT usa **adaptive unity**: calcula el working set con `git status` y saca
+del blob los archivos que estas editando. Mientras esos dos estuvieran limpios y en buckets
+distintos, nadie lo veia. Agregar `ProjectCTypes.h` y `ProjectCRulesLibrary` invalido el makefile
+("source file added"), reordeno los buckets, y los junto por primera vez.
+
+El fixture quedo una sola vez en `Private/Tests/TestGraphs.h`, en `namespace ProjectCTest` (con
+nombre) y `inline`. Los dos tests lo incluyen y hacen `using namespace ProjectCTest;` **dentro de
+cada `RunTest`**, no a nivel de archivo: a nivel de archivo el using se filtraria al resto del
+blob de unity, que es la misma clase de trampa.
+
+**Consecuencia para validar:** un build donde esos archivos esten sucios en git **no prueba el
+fix**, porque compilan solos. Hay que commitear y recompilar para que vuelvan al blob.

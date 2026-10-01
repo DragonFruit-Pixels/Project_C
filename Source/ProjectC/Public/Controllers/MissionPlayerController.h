@@ -4,19 +4,12 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/EngineTypes.h"
 #include "Interfaces/Selectable.h"
+#include "Core/ProjectCTypes.h"
 #include "MissionPlayerController.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
 class ASpace;
-
-UENUM(BlueprintType)
-enum class EInteractionMode : uint8
-{
-	SelectFigure,
-	Move,
-	Attack
-};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHoveredChanged, AActor*, HoveredActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, AActor*, SelectedActor);

@@ -2,25 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Core/ProjectCTypes.h"
 #include "MissionGameMode.generated.h"
-
-UENUM(BlueprintType)
-enum class EMissionTurnPhase : uint8
-{
-	NotStarted,
-	StartOfRound,
-	CharacterTurn,
-	Actions,
-	PressureCard,
-	Reckoning,
-	EndOfTurnEffects,
-	Hazard,
-	ClockCheck,
-	ManifestationCheck,
-	AdversaryEndOfTurn,
-	EndOfRound,
-	Finished
-};
 
 class ASpace;
 class AMissionGameState;

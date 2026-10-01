@@ -1,25 +1,11 @@
 #include "Map/GraphMath.h"
 #include "Misc/AutomationTest.h"
+#include "Tests/TestGraphs.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
 namespace
 {
-	enum : int32 { S1 = 0, S2, S3, S4, S5, S6, S7, NodeCount };
-
-	TArray<FGraphEdge> ExampleGraph()
-	{
-		return {
-			FGraphEdge(S1, S2, /*bBlocked*/ true),
-			FGraphEdge(S2, S3),
-			FGraphEdge(S3, S4),
-			FGraphEdge(S4, S5),
-			FGraphEdge(S1, S6),
-			FGraphEdge(S6, S7),
-			FGraphEdge(S1, S4),
-		};
-	}
-
 	constexpr int32 SpacesPerMove = 3;
 }
 
@@ -30,6 +16,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FMoveLegalityTest::RunTest(const FString& Parameters)
 {
+	using namespace ProjectCTest;
+
 	const TArray<FGraphEdge> Edges = ExampleGraph();
 	const FGraphQuery Movement = FGraphQuery::ForMovement();
 
