@@ -316,12 +316,64 @@ ocurrencias por `type_id` y compararlas contra el DSL leido.
 
 ## Deuda conocida que queda
 
-- **`BP_GameMode_Mission:TryMoveFigure` tiene la cadena duplicada**: 39 nodos donde el DSL
-  describe unos 15. `|CanMoveFigure` x3, `Variables|Self-Reference` x3. Son restos de un write
-  fallido mio. Compila limpio y se poda, pero es exactamente el spaghetti que la migracion
-  queria evitar. El camino confiable es `remove_function_graph` + recrear firma + reescribir
-  del DSL, que esta guardado.
+- ~~`BP_GameMode_Mission:TryMoveFigure` tiene la cadena duplicada~~ **resuelto**: los
+  duplicados no eran un write fallido, eran el artefacto del override de `BlueprintNativeEvent`
+  (ver trampa 28). Recrear el grafo los elimino: 39 nodos -> 18, cada tipo una sola vez.
 - **Los helpers `IsSet` por clase** deberian plegarse dentro de `ProjectCRulesLibrary` en el
   proximo build de C++.
 - **`BPC_Ratchet.IsLost` y las otras queries deberian ser pure**, para que usarlas inline no
   sea una trampa. Es un cambio a mano en el editor.
+
+## Trampa 28, la que casi rompe la Fase 3 en silencio
+
+**Un override de `BlueprintNativeEvent` sobrevive al reparent como grafo, pero se queda con la
+firma declarada en C++.** Esto es lo que mas cerca estuvo de pasar desapercibido, porque todas
+las senales apuntaban a que no habia problema:
+
+- `BP_GameMode_Mission` ya estaba reparentado a `GameModeBase` desde el commit 369a1fb.
+- `list_functions` mostraba `TryMoveFigure` como `bIsImplemented: true`, junto a las otras 15.
+- `read_graph_dsl` lo leia como `(fn TryMoveFigure (Figure To) ...)`, identico en forma a
+  cualquier funcion Blueprint.
+- Compilaba limpio con `warnings_as_errors`, antes y despues del reparent.
+
+Razone desde eso que el reparent lo habia convertido en funcion Blueprint normal. No: los pines
+`Figure`, `To` y el `Return Value` los seguia declarando el `UFUNCTION` de `AMissionGameMode`.
+Al borrar la clase en la Fase 3 el nodo de entrada perdio los tres y aparecio
+
+    In use pin  Figure  no longer exists on node  TryMoveFigure
+    Return nodes don't match each other
+    Function 'TryMoveFigure' called from  TryMoveFigure  should not be called from a Blueprint
+
+el ultimo desde `BP_PlayerController_Mission`, que lo llamaba por el stub.
+
+Lo unico que lo destapo fue **recompilar los Blueprints con el editor reabierto despues de
+borrar el C++**. El build de C++ y los 7 tests pasaron igual: no tocan Blueprints. Un barrido de
+compilacion despues de la Fase 3 no es opcional.
+
+### Como se arregla
+
+1. `remove_function_graph`.
+2. **`compile_blueprint` en el medio**, si no el nombre sigue reservado y `add_function_graph`
+   devuelve `TryMoveFigure_0`.
+3. `add_function_graph`, y la firma a mano con `add_object_function_param` x2 (`Figure` ->
+   `/Script/Engine.Actor`, `To` -> `/Script/ProjectC.Space`) y `add_function_param`
+   (`ReturnValue`, `bool`, `input_param: False`).
+4. `write_graph_dsl` del backup, con los `(return false)` restaurados: el grafo roto los leia
+   como `(return)` porque habia perdido el pin.
+5. En el consumidor, cambiar la llamada implicita por la explicita:
+   `Class|BPGameModeMission|TryMoveFigure`. Se verifica mirando que el pin `self` del nodo diga
+   `BP Game Mode Mission Object Reference`.
+
+`EndTurn` era tambien `BlueprintNativeEvent` y **no** se rompio, porque no tiene parametros ni
+retorno: no habia firma que perder. Y `HandleEndTurn` en el PlayerController ya lo llamaba por
+`Class|BPGameModeMission|EndTurn`, la forma explicita, que es justamente la que aguanta.
+
+### Falsa alarma, para no volver a perseguirla
+
+Los tres eventos de Enhanced Input leen **sin cuerpo** en el DSL:
+
+    (event EnhancedInputActionIA_Select (ActionValue ElapsedSeconds TriggeredSeconds InputAction))
+
+No estan desconectados. El lector del DSL no sabe seguir las conexiones de esos nodos, igual que
+no sabe crearlos (trampa 14). Se verifica con `find_nodes` + `get_node_infos` mirando el pin
+`Started`: los tres lo tienen conectado.
