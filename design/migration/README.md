@@ -219,3 +219,44 @@ Dos cosas, las dos chicas, las dos verificadas contra los 53 tools de `Blueprint
     `GameStateClass`, `PlayerControllerClass` y `DefaultPawnClass` estan en `AGameModeBase`, y
     los valores que el Blueprint les habia puesto quedaron intactos. Solo se pierde lo
     declarado en la clase C++ propia.
+
+## Trampas del DSL, segunda tanda (del PlayerController)
+
+14. **Los eventos de Enhanced Input no se pueden crear con el DSL.**
+    `Input|EnhancedActionEvents|IA_Select` existe como `type_id`, pero no hay
+    `AddEvent|EnhancedInputActionIA_Select`, asi que la forma `(event ...)` falla con
+    *"does not exist"*. Se crean con `create_node` y se cablean con `connect_pins`. El pin que
+    hay que conectar es **`Started`**, no `Triggered`: es el `ETriggerEvent` que usaba el C++.
+
+15. **`write_graph_dsl` reemplaza el grafo entero, incluido lo que pusiste a mano.** Si en un
+    grafo convive DSL con nodos creados por `create_node`, el orden es **DSL primero, nodos
+    despues**. Reescribir el EventGraph del PlayerController despues de crear los input events
+    los habria borrado a los tres.
+
+16. **`bind` sobre un nodo puro multi-salida toma la PRIMERA salida, no la que querias.**
+    `(bind _actor (Collision|BreakHitResult _hr))` ataba `bBlockingHit` y fallaba al conectarlo
+    a un pin de objeto. `HitActor` es la salida 10 de 18, asi que hay que usar la forma
+    posicional: `(bind (_b _io _t _d _loc _ip _n _in _pm _actor) (Collision|BreakHitResult _hr))`.
+    Al menos este falla ruidosamente; el de `IsValid` no.
+
+17. **`EventDispatchers|CreateEvent` necesita su `OutputDelegate` conectado ANTES de elegir la
+    funcion.** Con el pin suelto, `set_create_event_function` responde
+    *"Valid functions: []"*, porque sin el delegate no conoce la firma. El orden es: conectar
+    `OutputDelegate` -> `Delegate` del nodo de bind, y recien despues
+    `set_create_event_function`.
+
+18. **El nodo de bind de un dispatcher Blueprint es `Default|BindEventto<Nombre>`.** El
+    `Mission|BindEventtoOnActiveFigureChanged` que aparece al lado tiene el `self` tipado
+    `Mission Game State` — es el del dispatcher **C++**, que todavia existe. El de mi Blueprint
+    pide `BP Game State Mission`. Dos nodos con el mismo nombre visible y distinto target: hay
+    que mirar el tipo del pin `self` para saber cual es cual.
+
+19. **No se pueden escribir propiedades del CDO hasta compilar.** Despues de
+    `add_object_variable`, `set_properties` falla con *"the following properties could not be
+    set"* porque el CDO todavia no tiene el campo. Compilar primero, setear despues.
+
+20. **Las referencias a assets guardadas sobre propiedades C++ se pierden en el reparent, en
+    silencio.** `BP_PlayerController_Mission` tenia `IMC_Mission`, `IA_Select`, `IA_Cancel` y
+    `IA_EndTurn` como overrides de `UPROPERTY(EditDefaultsOnly)`. Hay que **leerlas antes** de
+    reparentar (`get_properties` sobre el CDO) y reponerlas despues. Nada avisa: el Blueprint
+    compila igual y el juego simplemente no responde al input.
