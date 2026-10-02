@@ -260,3 +260,68 @@ Dos cosas, las dos chicas, las dos verificadas contra los 53 tools de `Blueprint
     `IA_EndTurn` como overrides de `UPROPERTY(EditDefaultsOnly)`. Hay que **leerlas antes** de
     reparentar (`get_properties` sobre el CDO) y reponerlas despues. Nada avisa: el Blueprint
     compila igual y el juego simplemente no responde al input.
+
+## Trampas del DSL, tercera tanda (del Character)
+
+**21. El reparent se come una interfaz implementada a mano, si el padre viejo la implementaba
+en C++.** Es la peor de todas porque invita a hacer el paso manual en el momento equivocado.
+`BP_Character` tenia `Selectable` agregada explicitamente — verificado en el `.uasset`, que
+llevaba un `BPInterfaceDescription` que `BP_Space` y `BP_CameraPawn` no tienen. Al reparentar
+de `AProjectCCharacter` a `Character`, Unreal conforma `ImplementedInterfaces` y descarta la
+entrada como duplicada del padre. Resultado: `CanBeSelected` y `GetSelectableName` desaparecen
+de la lista de funciones y `SetHighlight` queda como evento huerfano `SetHighlight_1`.
+**La interfaz se agrega despues del reparent, nunca antes.**
+
+**22. `get_node_type_pins` crea nodos de verdad en el grafo.** No es una consulta: sondear
+cuatro tipos deja cuatro `K2Node_CallFunction_N` colgados. Sondear en un grafo que se va a
+reescribir entero, o barrer despues.
+
+**23. Un prefijo de categoria puede resolver a la clase C++ en vez del Blueprint.**
+`Mission|RegisterFigure` y `Ratchet|IsLost` apuntan a `AMissionGameState` y
+`URatchetComponent`; `Class|BPGameStateMission|RegisterFigure` y `Class|BPCRatchet|IsLost`
+apuntan a los Blueprints. `find_node_types` devuelve las dos variantes y no dice cual es cual:
+hay que mirar el tipo del pin `self` con `get_node_type_pins`. Si se elige mal, el write falla
+con `Could not connect pin X to self` — que es el caso bueno, porque falla fuerte.
+
+Para auditar si un grafo ya escrito quedo apuntando al C++: `find_nodes` + `get_node_infos`
+y mirar el `type_id` del pin `self`. Los 15 grafos del GameMode dieron
+`BP Game State Mission Object Reference` en todas las llamadas, o sea bien.
+
+**24. Una funcion Blueprint no es pure salvo que se la declare, asi que un `BlueprintPure` de
+C++ portado a BP gana pines de exec y se poda en silencio.** `URatchetComponent::IsLost()` era
+`BlueprintPure`; `BPC_Ratchet.IsLost` no. Usada inline en
+`(return (not (Class|BPCRatchet|IsLost ...)))` se podo, se leyo como `false`, y
+`CanBeSelected` devolvia `true` para **toda** figura, incluso una perdida. Compilaba limpio sin
+`warnings_as_errors`. El fix es el `bind` explicito. No hay tool para marcar una funcion como
+pure: o `bind`, o se hace a mano en el editor.
+
+**25. `write_graph_dsl` no borra el evento huerfano que dejo el reparent.** El
+`Custom|SetHighlight_1` sobrevivio a reescribir el EventGraph completo y hubo que borrarlo por
+nodo. Y al borrarlo quedo huerfano el `ApplyHighlight` que colgaba de el: hace falta un segundo
+barrido.
+
+**26. `collisionProfileName` no se puede leer ni escribir directo, y el nombre del perfil no
+resuelve el canal.** `set_properties` sobre `collisionProfileName` avisa
+`properties could not be set`. Va por `bodyInstance.collisionProfileName`. Pero eso solo deja
+el `objectType` en `ECC_WorldDynamic`, porque no dispara el `LoadProfileData` que el panel de
+detalles si dispara: hay que escribir tambien `bodyInstance.objectType`. Referencia buena para
+comparar: el `Bounds` de `BP_Space`, que lo puso el constructor C++, queda en
+`Space / ECC_GameTraceChannel1 / QueryOnly`.
+
+**27. `get_connected_subgraph` es componente conexo, no alcanzabilidad por exec.** No sirve
+para encontrar cadenas duplicadas: las copias comparten los nodos de entrada (el
+`Variables|Self-Reference`, los pines de parametro) y por eso cuentan como un solo componente.
+`TryMoveFigure` da 39 de 39 "alcanzables" con unos 15 nodos vivos. La deteccion real es contar
+ocurrencias por `type_id` y compararlas contra el DSL leido.
+
+## Deuda conocida que queda
+
+- **`BP_GameMode_Mission:TryMoveFigure` tiene la cadena duplicada**: 39 nodos donde el DSL
+  describe unos 15. `|CanMoveFigure` x3, `Variables|Self-Reference` x3. Son restos de un write
+  fallido mio. Compila limpio y se poda, pero es exactamente el spaghetti que la migracion
+  queria evitar. El camino confiable es `remove_function_graph` + recrear firma + reescribir
+  del DSL, que esta guardado.
+- **Los helpers `IsSet` por clase** deberian plegarse dentro de `ProjectCRulesLibrary` en el
+  proximo build de C++.
+- **`BPC_Ratchet.IsLost` y las otras queries deberian ser pure**, para que usarlas inline no
+  sea una trampa. Es un cambio a mano en el editor.
