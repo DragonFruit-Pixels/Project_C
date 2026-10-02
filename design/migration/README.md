@@ -436,3 +436,111 @@ cero, asi que la camara no se movia y Q/E (que van por `ConsumeOrbit`) si funcio
 Un cable, y venia de antes de la migracion. Vale como recordatorio de que el DSL lo mostraba
 como `(Math|Vector2D|BreakVector2D 0)` — ese `0` no es un literal del autor, es un pin de
 entrada sin conectar.
+
+## Trampa 30, el wildcard de `Make Array` no se resuelve hacia atras
+
+`write_graph_dsl` no tiene sintaxis de array literal, asi que un array literal se arma con
+`Utilities|Array|MakeArray`. Sus pines nacen `Wildcard` y hay dos formas de fallar:
+
+```lisp
+; FALLA al conectar: el literal fuerza el pin a String y el array ya no es
+; compatible con ObjectTypes.
+(Utilities|Array|MakeArray "ObjectTypeQuery7")
+
+; COMPILA CON ERROR: "The type of Array is undetermined."
+(Utilities|Array|MakeArray)
+```
+
+El `MakeArray` vacio tampoco se resuelve aunque su salida termine en un pin concreto, porque
+el escritor conecta de adentro hacia afuera: cuando `MakeArray -> Select` se conecta, el
+`Select` todavia es wildcard, y cuando despues `Select -> ObjectTypes` lo resuelve, la
+resolucion **no se propaga aguas arriba**. El `Select` queda
+`Array of EObjectTypeQuery Enums` y el `MakeArray` queda `Array of Wildcards`.
+
+La secuencia que funciona, despues del `write_graph_dsl` con el `MakeArray` vacio:
+
+1. `break_pins` el link `MakeArray.Array -> Select.Option N`
+2. `connect_pins` el mismo link otra vez — ahora el destino ya es concreto y el `MakeArray`
+   hereda el tipo
+3. `set_pin_value` sobre el pin `[0]`, que recien ahora acepta el nombre del enum
+
+`break_pins` y `connect_pins` toman `output_pin` + `input_pin`, de a un link por llamada.
+
+## Trampa 31, el DSL de un getter de variable no hace round-trip
+
+`read_graph_dsl` imprime los getters como `Variables|<Categoria>|Get<Nombre>`, pero la
+categoria que imprime **no siempre es la de la variable**. El getter de la variable
+`TraceDistance` (categoria `Selection`) se lee como:
+
+```lisp
+(Variables|MouseInterface|GetTraceDistance)
+```
+
+`MouseInterface` es la categoria de `APlayerController::HitResultTraceDistance`, una propiedad
+heredada del padre. Copiar ese texto de vuelta a `write_graph_dsl` **resuelve a la propiedad
+del engine**, no a la variable del Blueprint: el grafo compila limpio, lee 100000 por
+coincidencia de default, y queda apuntando a otra cosa.
+
+Se detecta por el tipo del pin: la propiedad del engine es `float` (single-precision), una
+variable float de Blueprint es double-precision.
+
+Para escribir un getter sin ambiguedad, usar `create_node` con la categoria real
+(`get_variable_category` la dice) y verificar con `get_node_infos` que el pin de salida se
+llame como la variable.
+
+## `TraceSelectableUnderCursor`, forma final
+
+Sin `GetHitResultUnderCursor*` y sin helpers de C++: el rayo se arma a mano y los
+`ObjectTypes` son dos arrays literales en el grafo.
+
+```lisp
+(fn TraceSelectableUnderCursor ()
+  (bind _self self)
+  (bind _legal (Variables|Selection|GetLegalDestinations))
+  (bind _hay (> (Utilities|Array|Length _legal) 0))
+  (bind _espacios (Utilities|Array|MakeArray))   ; [0] = ObjectTypeQuery7  (Space)
+  (bind _figuras  (Utilities|Array|MakeArray))   ; [0] = ObjectTypeQuery8  (Figure)
+  (bind _tipos (select _hay _espacios _figuras))
+  (bind (_mx _my _okmouse) (Game|Player|GetMousePosition _self))
+  (bind (_origen _direccion _okdeproj)
+        (Camera|DeprojectScreenToWorld :Player _self
+                                       :ScreenPosition (Math|Vector2D|MakeVector2D _mx _my)))
+  (bind _fin (+ _origen (* _direccion <getter de TraceDistance, ver trampa 31>)))
+  (bind (_hit _pego) (Collision|LineTraceForObjects
+                       :Start _origen :End _fin :ObjectTypes _tipos
+                       :bTraceComplex false :bIgnoreSelf true
+                       :DrawDebugType "ForDuration" :DrawTime 0.1))
+  (bind (_b _io _t _d _loc _ip _n _in _pm _actor) (Collision|BreakHitResult _hit))
+  (Utilities|Casting|CastToSelectable _actor
+    (:then (return _actor))
+    (:CastFailed (return 0))))
+```
+
+20 nodos, cada tipo una sola vez (dos `FunctionResult`).
+
+### De donde salen `ObjectTypeQuery7` y `ObjectTypeQuery8`
+
+`EObjectTypeQuery` es un enum de 32 entradas todas `UMETA(Hidden)`: el indice no es el canal,
+es la **posicion dentro de `UCollisionProfile::ObjectTypeMapping`**, que se arma en
+`CollisionProfile.cpp` con los canales de objeto (los que no son trace) en orden de canal.
+
+| Indice | Entrada | Canal |
+|---|---|---|
+| 0 | `ObjectTypeQuery1` | `WorldStatic` |
+| 1 | `ObjectTypeQuery2` | `WorldDynamic` |
+| 2 | `ObjectTypeQuery3` | `Pawn` |
+| 3 | `ObjectTypeQuery4` | `PhysicsBody` |
+| 4 | `ObjectTypeQuery5` | `Vehicle` |
+| 5 | `ObjectTypeQuery6` | `Destructible` |
+| 6 | `ObjectTypeQuery7` | `GameTraceChannel1` = **Space** |
+| 7 | `ObjectTypeQuery8` | `GameTraceChannel2` = **Figure** |
+
+`Visibility` y `Camera` no entran porque son trace channels, y `GameTraceChannel3`
+(`Selectable`) tampoco: tiene `bTraceType=True` y va a `TraceTypeMapping`.
+
+**Esto es fragil a proposito y hay que saberlo:** agregar un canal de objeto nuevo en
+`DefaultEngine.ini` *antes* de `GameTraceChannel1` corre los indices y los dos literales
+pasan a apuntar al canal equivocado sin un solo warning. Era justo lo que
+`GetSpaceObjectTypes` / `GetFigureObjectTypes` ocultaban, resolviendo el indice en runtime
+desde `ProjectCCollision::Space`. Se cambio a literales por pedido explicito: nada de la capa
+de seleccion en una library de C++.
