@@ -377,3 +377,62 @@ Los tres eventos de Enhanced Input leen **sin cuerpo** en el DSL:
 No estan desconectados. El lector del DSL no sabe seguir las conexiones de esos nodos, igual que
 no sabe crearlos (trampa 14). Se verifica con `find_nodes` + `get_node_infos` mirando el pin
 `Started`: los tres lo tienen conectado.
+
+## Trampa 29, la que rompio el juego sin romper ninguna compilacion
+
+**Lo que hacia el constructor de C++ sobre un componente no sobrevive como default de la
+plantilla, para los actores que ya estan puestos en un nivel.**
+
+`AProjectCCharacter()` hacia `SelectionBounds->SetCollisionProfileName(Figure)` y
+`SetSphereRadius(60)`. El constructor corre para cada instancia, asi que las cuatro figuras de
+`L_Mission_01` lo tenian. Al pasar a Blueprint eso quedo como valores de la plantilla del SCS,
+y las figuras que ya existian en el nivel **no los tomaron**: se quedaron con
+`OverlapAllDynamic`, `ECC_WorldDynamic` y radio 32.
+
+`GetHitResultUnderCursorForObjects` traza por **object type**, no por canal de trace. Con el
+objeto en `WorldDynamic` en vez de `ECC_GameTraceChannel2`, el trace no pegaba en nada: sin
+hover, sin seleccion, sin partida. Los 11 Blueprints compilaban limpio, `pruned` daba 0 y los
+7 tests estaban en verde.
+
+### Por que mi verificacion no lo vio
+
+Lei el CDO, lo vi correcto (`Figure` / `ECC_GameTraceChannel2` / `Selectable: ECR_Block`) y di
+por hecho que las instancias lo heredaban. El CDO era la respuesta correcta a la pregunta
+equivocada. **Para cualquier cosa que el constructor C++ hacia sobre un componente, hay que
+leer la instancia del nivel, no el CDO.**
+
+### Y por que el ConstructionScript no alcanzo
+
+Moverlo al ConstructionScript parecia el reemplazo natural del constructor, y a medias lo es:
+`SetSphereRadius` ahi si se aplico (lo verifique poniendo 77 y leyendo 77 en PIE). Pero
+`SetCollisionObjectType` y `SetCollisionProfileName` no: **los overrides por instancia que el
+nivel tiene guardados se re-aplican despues de correr el ConstructionScript** y pisan lo que
+este haya seteado.
+
+La solucion es **BeginPlay**, donde ya no queda nada que lo pise:
+
+```lisp
+(event EventBeginPlay
+  (bind _bounds (Variables|Default|GetSelectionBounds))
+  (Collision|SetCollisionEnabled :self _bounds :NewType "QueryOnly")
+  (Collision|SetCollisionObjectType :self _bounds :Channel "ECC_GameTraceChannel2")
+  (Collision|SetCollisionResponsetoChannel :self _bounds :Channel "ECC_GameTraceChannel3" :NewResponse "ECR_Block")
+  ...)
+```
+
+Ojo tambien con la lectura: `set_properties` sobre `collisionProfileName` avisa
+`could not be set`, y leer `bodyInstance.collisionProfileName` despues de un
+`SetCollisionProfileName` sigue devolviendo el valor viejo. `objectType` si refleja el cambio.
+Lo unico confiable para saber si una escritura entro es poner un valor inconfundible y leerlo
+de la instancia viva en PIE.
+
+## Un bug de la camara que no era de la migracion
+
+`BP_CameraPawn:ConsumePan` rompia un `Vector2D` **vacio** en vez de `PendingPan`: el pin
+`InVec` del `BreakVector2D` estaba desconectado y en todo el grafo no existia un nodo
+`GetPendingPan`. `HandlePan` acumulaba bien el input de WASD, pero el consumidor leia siempre
+cero, asi que la camara no se movia y Q/E (que van por `ConsumeOrbit`) si funcionaban.
+
+Un cable, y venia de antes de la migracion. Vale como recordatorio de que el DSL lo mostraba
+como `(Math|Vector2D|BreakVector2D 0)` — ese `0` no es un literal del autor, es un pin de
+entrada sin conectar.
