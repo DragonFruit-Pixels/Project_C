@@ -544,3 +544,86 @@ pasan a apuntar al canal equivocado sin un solo warning. Era justo lo que
 `GetSpaceObjectTypes` / `GetFigureObjectTypes` ocultaban, resolviendo el indice en runtime
 desde `ProjectCCollision::Space`. Se cambio a literales por pedido explicito: nada de la capa
 de seleccion en una library de C++.
+
+# Segunda migracion: sacar el modulo de C++ entero
+
+## Trampa 32, `write_graph_dsl` sobre un grafo existente AGREGA
+
+Reescribir una funcion que ya tiene nodos **no siempre reemplaza el grafo**. En
+`BPC_Ratchet:AddToll` el write dejo la version vieja y la nueva conviviendo: 53 nodos donde
+habia 27, con el nodo de `ProjectCRulesLibrary` todavia alimentando media cadena de exec.
+
+**Y compilaba limpio con `warnings_as_errors`.** No hay ningun warning que delate esto.
+
+En `TraceSelectableUnderCursor` el mismo tool si habia reemplazado (20 nodos antes, 20
+despues), asi que no se puede confiar en ninguno de los dos comportamientos. La diferencia
+parece estar en los `MacroInstance` (los macros de `or` y de ForEach): cuando el grafo viejo
+tiene macros, el writer no los reconcilia.
+
+La unica deteccion es **contar nodos antes y despues**:
+
+```
+find_nodes(graph, title="", name_filter="")   ->  len()
+```
+
+Si el numero crece cuando esperabas que se mantuviera, el grafo tiene las dos versiones. La
+receta que si funciona es la misma de la trampa 28:
+
+1. `remove_function_graph`
+2. **`compile_blueprint`** en el medio — sin esto el nombre queda reservado y la funcion
+   vuelve como `AddToll_0`
+3. `add_function_graph`
+4. `add_function_param` por cada parametro
+5. `write_graph_dsl`
+
+## Trampa 33, el lector inlinea la llamada en cada consumidor
+
+`read_graph_dsl` imprime la expresion completa del nodo productor **en cada lugar donde se
+consume su salida**, no una sola vez. Un nodo con dos consumidores se lee como dos llamadas:
+
+```lisp
+;; esto es UN solo nodo Advance, leido dos veces
+(bind _returnvalue (- (CallFunction|Advance self _position Amount ...) _position))
+(bind _returnvalue_1 (CallFunction|Advance _self _position Amount ...))
+```
+
+Lo mismo pasa con `Camera|DeprojectScreenToWorld`, que aparece tres veces en
+`TraceSelectableUnderCursor` siendo un nodo con tres pines de salida.
+
+Conclusion practica: **el DSL leido no sirve para contar nodos.** Para eso esta `find_nodes`.
+Y no se puede diagnosticar duplicacion leyendo el DSL, que es exactamente el error que casi
+cometi dos veces.
+
+## Lo que el MCP no puede hacer en esta migracion
+
+Medido, no supuesto:
+
+| Operacion | Estado |
+|---|---|
+| `BlueprintTools.create` | **cuelga el editor**: abre un modal y el game thread queda bloqueado hasta que alguien le da Escape a mano. Todas las llamadas del MCP corren en ese thread, asi que ni un screenshot sale. Pasa con la carpeta existiendo o no. |
+| crear un `UserDefinedEnum` | no hay tool |
+| editar las entradas de un enum | no hay tool. `list_properties` sobre un enum duplicado expone **una sola** propiedad: `enumDescription` |
+| crear o editar los campos de un `UserDefinedStruct` | no hay tool |
+| un parametro de funcion de tipo enum | no hay tool: `add_function_param` solo acepta `bool int float byte string name text Vector Rotator Transform Vector2D LinearColor`, y `add_struct_variable` necesita que el struct ya exista |
+
+**El camino que si funciona para crear assets es `AssetTools.duplicate`**, que no pasa por
+ninguna factory y no abre modal. `BPI_Selectable` salio de duplicar
+`/Landmass/.../Landmass_Interface` (la unica Blueprint Interface del contenido del engine),
+borrarle sus 6 funciones y ponerle las 3 de `ISelectable`. `BPC_Graph` salio de duplicar
+`BPC_Occupancy` y vaciarlo. Verificado en el binario que no sobrevive ni "Landmass" ni
+"CurrentSpace".
+
+Para vaciar un duplicado: `remove_function_graph` por funcion, `remove_variable` (el param se
+llama `name`, no `variable_name`), y **los nodos del EventGraph hay que borrarlos de a uno con
+`delete_node`** — `write_graph_dsl` con el codigo vacio es un no-op y los deja.
+
+## Trampa 34, grepear el binario por el type_id del DSL da falsos negativos
+
+El `.uasset` guarda el nombre real de la `UFunction`, no la ruta de la paleta. Buscar
+`SortIntegerArray` en el binario devuelve NO aunque el nodo este puesto y funcionando. Para
+verificar que un nodo esta, usar `read_graph_dsl` o `find_nodes`; el grep del binario sirve
+para nombres de clase y de propiedad (`/Script/ProjectC`, `ProjectCRulesLibrary`,
+`ObjectTypeQuery7`), no para nodos de funcion de engine.
+
+Ojo tambien con los falsos **positivos** por substring: buscar `RatchetAdvance` da SI porque
+el dispatcher se llama `OnRatchetAdvanced`.
