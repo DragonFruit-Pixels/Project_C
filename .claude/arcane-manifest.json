@@ -1,5 +1,5 @@
 {
-  "arcane_version": "984665981482",
+  "arcane_version": "007c7e6f4518",
   "cli": "npm",
   "profile_command": "unreal-dev+unity-design+statusline+meshy+clickup",
   "profiles": [
@@ -124,8 +124,8 @@
     "product/ux-lead"
   ],
   "source": "C:\\Users\\sebas\\.arcane\\cache\\d82d50b5cf17",
-  "source_version": "984665981482",
-  "updated_at": "2026-09-09T12:43:06Z",
+  "source_version": "007c7e6f4518",
+  "updated_at": "2026-09-13T19:53:25Z",
   "content_hashes": {
     "skills": {
       "accessibility": "0fd6ef128bcd60d2285e04ffaefc43354b523832b883e2fb37a7672e019d2cf0",
