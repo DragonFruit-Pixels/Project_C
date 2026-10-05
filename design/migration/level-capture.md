@@ -20,45 +20,36 @@ Paths completos: `/Game/Project_C/Maps/L_Mission_01.L_Mission_01:PersistentLevel
 
 ## Enemigos, agregados el 2026-10-05
 
-Dos instancias mas de `BP_Character`, con `IsEnemy = true`. Mismo riesgo que la tabla de
-arriba: `Occupancy.CurrentSpace` y las tres variables de combate son **por instancia** y
-viven en el `.umap`.
+Los enemigos son instancias de **`BP_Enemy`**, hija de `BP_Character` con **cero nodos**:
+toda la logica vive en el padre, la hija solo lleva numeros en su CDO.
 
-| Actor | Espacio | `IsEnemy` | `MaxHealth` | `AttackDamage` |
-|---|---|---|---|---|
-| `BP_Character_C_4` | `BP_Space_C_4` | `true` | 2 | 1 |
-| `BP_Character_C_5` | `BP_Space_C_7` | `true` | 2 | 1 |
-
-Y las cuatro figuras del jugador, con los valores que hay que reponer si se pierden:
-
-| Actor | `IsEnemy` | `MaxHealth` | `AttackDamage` |
-|---|---|---|---|
-| `BP_Character_C_0` .. `_3` | `false` | 5 | 1 |
-
-**Por que estan escritos aca y no solo en el CDO:** `MaxHealth`, `AttackDamage` e `IsEnemy`
-son *Instance Editable*. Una propiedad nueva marcada asi **no hereda el default del CDO en
-las instancias que ya estaban serializadas**: las cuatro figuras del jugador aparecieron con
-`AttackDamage = 0` despues de agregar la variable, y hubo que setearlas una por una.
-`Health` **no** es Instance Editable a proposito, justamente por eso: es estado de runtime y
-`BP_Character:EventBeginPlay` lo inicializa con `Health = MaxHealth`.
-
-## Componentes a recrear en el Blueprint
-
-`Body` **no** esta aca: es un componente agregado en el Blueprint, no en C++, y sobrevive al
-reparent. Se anota igual para poder verificar que no cambio.
-
-| Componente | Clase nueva | Valores |
+| Actor | Clase | Espacio |
 |---|---|---|
-| `Ratchet` | `BPC_Ratchet` | `TrackLength=20`, `Thresholds=[4,8,12,15,18,19]`, `Position=0`, `ThresholdsCrossedCount=0` — todos default |
-| `Occupancy` | `BPC_Occupancy` | `CurrentSpace` vacio en el CDO, por instancia segun la tabla de arriba |
-| `SelectionBounds` | `SphereComponent` | `SphereRadius=60`, relativo `(0,0,0)`, attach al `CapsuleComponent`, perfil de colision `Figure` |
-| `Body` (ya existe) | `StaticMeshComponent` | `/Engine/BasicShapes/Cylinder`, relativo `(0,0,0)`, escala `(0.68, 0.68, 1.76)` |
+| `BP_Enemy_C_0` | `BP_Enemy` | `BP_Space_C_4` |
+| `BP_Enemy_C_1` | `BP_Enemy` | `BP_Space_C_7` |
 
-El perfil `Figure` esta definido en `Config/DefaultEngine.ini:101` — `QueryOnly`,
-objeto `Figure`, bloquea `Selectable`, ignora `Space` y `Camera`. Hay que setearlo a mano en
-el componente nuevo: el constructor C++ que lo hacia desaparece.
+Lo unico por instancia es `Occupancy.CurrentSpace` (es colocacion, no puede ser de otra
+forma). `IsEnemy`, `MaxHealth` y `AttackDamage` salen del CDO de `BP_Enemy`
+(`true`, 2, 1) y **no** estan en el `.umap`.
 
-## Las cuatro instancias son identicas salvo el espacio
+## Variables de combate: donde vive cada una, y por que
 
-Ninguna tiene tags, ninguna override la config del ratchet, las cuatro usan el mismo mesh y la
-misma escala. Lo unico irrecuperable por inspeccion es la columna de espacios.
+| Variable | Instance Editable | Donde vive el valor |
+|---|---|---|
+| `IsEnemy` | **No** | CDO de la clase. `BP_Character` false, `BP_Enemy` true |
+| `MaxHealth` | Si | Por instancia. Jugadores 5, enemigos 2 (del CDO de `BP_Enemy`) |
+| `AttackDamage` | Si | Por instancia. 1 en todos |
+| `Health` | **No** | Runtime. `BP_Character:EventBeginPlay` hace `Health = MaxHealth` |
+
+**`IsEnemy` dejo de ser Instance Editable a proposito.** De que bando sos es un hecho de la
+clase, no un tilde en el nivel: como checkbox por instancia vivia en el `.umap`, que es
+exactamente donde este proyecto ya perdio datos dos veces (`Neighbours` y `CurrentSpace`),
+y un tilde olvidado daba una figura del jugador peleando para el otro bando sin un solo error.
+
+**`Health` tampoco es Instance Editable, y por otra razon:** una propiedad nueva marcada
+Instance Editable **no hereda el default del CDO en instancias ya serializadas**. Al agregar
+las variables, las cuatro figuras del jugador aparecieron con `Health = 0` y
+`AttackDamage = 0` y hubo que setearlas una por una. `MaxHealth` y `AttackDamage` siguen por
+instancia porque son perillas de balance reales (ver
+[`07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md)); los
+valores de los jugadores son `MaxHealth = 5`, `AttackDamage = 1` en las cuatro.
