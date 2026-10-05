@@ -20,6 +20,9 @@ Paths completos: `/Game/Project_C/Maps/L_Mission_01.L_Mission_01:PersistentLevel
 
 ## Las figuras del nivel, despues de partir la jerarquia (2026-10-05)
 
+Rutas: `Characters/BP_Character` (la base), `Characters/Player/BP_Player`,
+`Characters/Enemies/BP_Enemy`. La base **no** vive en `Player/`: es de los dos bandos.
+
 ```
 BP_Character                 base compartida, SIN instancias en el nivel
   |                          Body, Occupancy, SelectionBounds, Ratchet
