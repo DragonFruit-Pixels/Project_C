@@ -18,6 +18,30 @@ error. Este archivo es la unica forma de restaurarlas.
 
 Paths completos: `/Game/Project_C/Maps/L_Mission_01.L_Mission_01:PersistentLevel.<nombre>`.
 
+## Enemigos, agregados el 2026-10-05
+
+Dos instancias mas de `BP_Character`, con `IsEnemy = true`. Mismo riesgo que la tabla de
+arriba: `Occupancy.CurrentSpace` y las tres variables de combate son **por instancia** y
+viven en el `.umap`.
+
+| Actor | Espacio | `IsEnemy` | `MaxHealth` | `AttackDamage` |
+|---|---|---|---|---|
+| `BP_Character_C_4` | `BP_Space_C_4` | `true` | 2 | 1 |
+| `BP_Character_C_5` | `BP_Space_C_7` | `true` | 2 | 1 |
+
+Y las cuatro figuras del jugador, con los valores que hay que reponer si se pierden:
+
+| Actor | `IsEnemy` | `MaxHealth` | `AttackDamage` |
+|---|---|---|---|
+| `BP_Character_C_0` .. `_3` | `false` | 5 | 1 |
+
+**Por que estan escritos aca y no solo en el CDO:** `MaxHealth`, `AttackDamage` e `IsEnemy`
+son *Instance Editable*. Una propiedad nueva marcada asi **no hereda el default del CDO en
+las instancias que ya estaban serializadas**: las cuatro figuras del jugador aparecieron con
+`AttackDamage = 0` despues de agregar la variable, y hubo que setearlas una por una.
+`Health` **no** es Instance Editable a proposito, justamente por eso: es estado de runtime y
+`BP_Character:EventBeginPlay` lo inicializa con `Health = MaxHealth`.
+
 ## Componentes a recrear en el Blueprint
 
 `Body` **no** esta aca: es un componente agregado en el Blueprint, no en C++, y sobrevive al
