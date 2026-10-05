@@ -18,38 +18,85 @@ error. Este archivo es la unica forma de restaurarlas.
 
 Paths completos: `/Game/Project_C/Maps/L_Mission_01.L_Mission_01:PersistentLevel.<nombre>`.
 
-## Enemigos, agregados el 2026-10-05
+## Las figuras del nivel, despues de partir la jerarquia (2026-10-05)
 
-Los enemigos son instancias de **`BP_Enemy`**, hija de `BP_Character` con **cero nodos**:
-toda la logica vive en el padre, la hija solo lleva numeros en su CDO.
+```
+BP_Character                 base compartida, SIN instancias en el nivel
+  |                          Body, Occupancy, SelectionBounds, Ratchet
+  |                          Health, MaxHealth, AttackDamage
+  |                          ApplyDamage, Die, GetSelectableName, ApplyHighlight
+  |                          IsHostile -> false,  CanBeSelected -> Health > 0
+  |                          BeginPlay -> OnSpawned,  EndPlay -> OnDespawned
+  |
+  +-- BP_Player              OnSpawned  -> RegisterFigure en el Party
+  |                          OnDespawned-> UnregisterFigure
+  |                          CanBeSelected -> Health > 0 y no Ratchet.IsLost
+  |                          CDO: MaxHealth 5, AttackDamage 1
+  |
+  +-- BP_Enemy               OnSpawned  -> tinte rojo
+                             IsHostile  -> true
+                             CanBeSelected -> false
+                             CDO: MaxHealth 2, AttackDamage 1
+```
 
 | Actor | Clase | Espacio |
 |---|---|---|
+| `BP_Player_C_0` | `BP_Player` | `BP_Space_C_0` |
+| `BP_Player_C_1` | `BP_Player` | `BP_Space_C_2` |
+| `BP_Player_C_2` | `BP_Player` | `BP_Space_C_6` |
+| `BP_Player_C_3` | `BP_Player` | `BP_Space_C_8` |
 | `BP_Enemy_C_0` | `BP_Enemy` | `BP_Space_C_4` |
 | `BP_Enemy_C_1` | `BP_Enemy` | `BP_Space_C_7` |
 
-Lo unico por instancia es `Occupancy.CurrentSpace` (es colocacion, no puede ser de otra
-forma). `IsEnemy`, `MaxHealth` y `AttackDamage` salen del CDO de `BP_Enemy`
-(`true`, 2, 1) y **no** estan en el `.umap`.
+Transforms: Z = 108 en las cuatro del jugador, Z = 220 en los enemigos, rotacion 0, escala 1.
+X/Y segun el espacio, grilla de 500 (ver [`space-graph-capture.md`](space-graph-capture.md)).
 
-## Variables de combate: donde vive cada una, y por que
+**Lo unico que queda por instancia en el `.umap` es `Occupancy.CurrentSpace`**, y es
+inevitable: es colocacion en el tablero. Todo lo demas sale del CDO de la clase.
+
+### `IsEnemy` ya no existe
+
+Era un bool *Instance Editable*, o sea un tilde por instancia viviendo en el `.umap` — el
+mismo lugar donde este proyecto ya perdio `Neighbours` y `CurrentSpace`. Un tilde olvidado
+daba una figura del jugador peleando para el otro bando sin un solo error. Lo reemplaza
+`IsHostile()`, una funcion de la clase: `false` en la base, `true` en `BP_Enemy`. No se
+puede equivocar por instancia porque no hay nada que tildar.
+
+### Por que hay hooks `OnSpawned` / `OnDespawned` y no un `BeginPlay` por hija
+
+En Blueprint, si una hija pone su propio `Event BeginPlay`, **el del padre no corre** salvo
+que haya un nodo `Parent: BeginPlay`, y ese nodo **no existe en el MCP**. Sobreescribir
+`BeginPlay` en las hijas se habria comido en silencio el init de vida, la colision y el
+material. El padre conserva el unico `BeginPlay` y al final llama `OnSpawned`, que cada hija
+sobreescribe. Las dos son "event-shape" (sin retorno ni parametros), asi que en la hija se
+sobreescriben como **evento**, no como grafo de funcion: `add_function_graph` lo rechaza y
+hay que usar `add_event`.
+
+### Deuda conocida: el `Ratchet` sigue en la base
+
+Deberia estar en `BP_Player` — el GDD no le da ratchet a los enemigos — pero **el MCP no
+puede agregar un componente a un Blueprint sin Construction Script**, y ni `BP_Player` ni
+`BP_Enemy` tienen uno, porque se crearon duplicando `BP_GameInstance` (que no es un Actor) y
+reparentando. Ese camino se eligio porque `BlueprintTools.create` abre un modal y cuelga el
+editor.
+
+Arreglo a mano, 2 clicks: en `BP_Player`, Add Component -> `BPC_Ratchet`, nombrarlo
+`Ratchet`; en `BP_Character`, borrar el componente `Ratchet`. El `CanBeSelected` de
+`BP_Player` ya lo referencia y resuelve solo.
+
+Costo de dejarlo: cada enemigo arrastra 4 enteros que nadie lee. Cero costo de runtime.
+
+### Variables de combate: donde vive cada una, y por que
 
 | Variable | Instance Editable | Donde vive el valor |
 |---|---|---|
-| `IsEnemy` | **No** | CDO de la clase. `BP_Character` false, `BP_Enemy` true |
-| `MaxHealth` | Si | Por instancia. Jugadores 5, enemigos 2 (del CDO de `BP_Enemy`) |
-| `AttackDamage` | Si | Por instancia. 1 en todos |
+| `MaxHealth` | Si | CDO de la clase; editable por instancia para balance |
+| `AttackDamage` | Si | idem |
 | `Health` | **No** | Runtime. `BP_Character:EventBeginPlay` hace `Health = MaxHealth` |
 
-**`IsEnemy` dejo de ser Instance Editable a proposito.** De que bando sos es un hecho de la
-clase, no un tilde en el nivel: como checkbox por instancia vivia en el `.umap`, que es
-exactamente donde este proyecto ya perdio datos dos veces (`Neighbours` y `CurrentSpace`),
-y un tilde olvidado daba una figura del jugador peleando para el otro bando sin un solo error.
-
-**`Health` tampoco es Instance Editable, y por otra razon:** una propiedad nueva marcada
-Instance Editable **no hereda el default del CDO en instancias ya serializadas**. Al agregar
-las variables, las cuatro figuras del jugador aparecieron con `Health = 0` y
-`AttackDamage = 0` y hubo que setearlas una por una. `MaxHealth` y `AttackDamage` siguen por
-instancia porque son perillas de balance reales (ver
-[`07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md)); los
-valores de los jugadores son `MaxHealth = 5`, `AttackDamage = 1` en las cuatro.
+**`Health` no es Instance Editable a proposito:** una propiedad nueva marcada Instance
+Editable **no hereda el default del CDO en instancias ya serializadas**. Al agregar las
+variables, las cuatro figuras del jugador aparecieron con `Health = 0` y `AttackDamage = 0`
+y hubo que setearlas una por una. `MaxHealth` y `AttackDamage` siguen por instancia porque
+son perillas de balance reales (ver
+[`07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md)).
