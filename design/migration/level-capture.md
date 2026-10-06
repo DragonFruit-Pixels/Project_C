@@ -150,3 +150,63 @@ Escribir la primera compila limpio y el trace anda, con la distancia equivocada.
 distinguirlas sin ambiguedad es `get_node_infos`: mirar el **nombre del pin** de salida
 (`TraceDistance` vs `HitResultTraceDistance`) y la precision. `read_graph_dsl` las imprime
 igual a las dos, asi que la lectura del DSL **no** sirve para verificar esto.
+
+### El color de reposo es una funcion overrideable, no una variable
+
+Sintoma: los enemigos perdian el rojo apenas pasabas el mouse por encima. Causa: habia
+**tres** respuestas distintas a "de que color es esta figura en reposo".
+
+| Momento | Que pintaba | Resultado |
+|---|---|---|
+| `BeginPlay` | `SetMaterial(Body, M_Space)` y nada mas | el `Colour` default del material |
+| `BP_Enemy.OnSpawned` | rojo, una sola vez al spawnear | enemigo rojo |
+| `ApplyHighlight(None)` | el literal `(0.8, 0.8, 0.85)` | gris claro, ni lo uno ni lo otro |
+
+`RefreshHighlights` arranca mandando a `None` todo lo que estaba resaltado, asi que el primer
+hover sobre un enemigo le pisaba el rojo **para siempre**. El estado `None` estaba
+implementado como "pinta este literal" en vez de "volve a tu color".
+
+Ahora `BP_Character.GetBaseColour()` devuelve el color y `BP_Enemy` la **overridea**. Los
+estados `None` y `Legal` de `ApplyHighlight` la llaman en vez de tener el literal, y
+`BeginPlay` llama `ApplyHighlight(None)` despues del `SetMaterial`, asi que el color de reposo
+vale desde el primer frame y es el mismo que se restaura despues de cada highlight.
+`BP_Enemy.OnSpawned` **se borro**: ya no hace falta. Es el mismo patron que `IsHostile()`.
+
+**Por que una funcion y no una variable.** Lo intente primero con una variable `BaseColour`
+(Vector) y el valor en el CDO de cada hija. Compilo limpio, y en PIE las cuatro figuras
+salieron **negras**: el CDO tenia `(0.8, 0.8, 0.85)` y las instancias del nivel `(0, 0, 0)`.
+
+> Agregar una variable nueva a un Blueprint que **ya tiene instancias serializadas en el
+> `.umap`** deja esas instancias en el valor cero, y esto pasa **aunque la variable no sea
+> Instance Editable**. Es la misma trampa que con `Health` y `MaxHealth`.
+
+Una funcion vive en la clase y no se serializa por instancia, asi que es inmune. Regla para
+este proyecto: **una constante que varia por clase va como funcion overrideable, nunca como
+variable con el valor en el CDO**, mientras el nivel tenga instancias ya guardadas.
+
+`BP_Space.ApplyHighlight` se dejo con sus literales: no tiene subclases y nunca tuvo el bug.
+Los estados `Hovered` y `Selected` siguen duplicados entre `BP_Space` y `BP_Character` (dos
+literales iguales en cada uno). Unificarlos de verdad pide una clase base comun o una function
+library, que es mas estructura de la que justifican dos colores.
+
+### `read_graph_dsl` no sabe representar flujo convergente
+
+Si dos ramas de un `Branch` caen en el **mismo** nodo, el lector imprime la segunda como
+`(else _)`, o sea vacia. Paso con `TryActivateFigure`, que se lee asi:
+
+```lisp
+(elif (<= (GetRound _state) 0)
+  (BeginRound _state)
+  (SetActiveFigure _state Figure)
+  (return _changed)
+  (else _))                      ; <- parece un else vacio
+```
+
+y parece decir que `SetActiveFigure` solo corre cuando `Round <= 0`, o sea que ninguna figura
+se activaria nunca despues de la primera ronda. **Es mentira.** `get_node_infos` sobre el
+`Branch` muestra que `then` va a `BeginRound` y `else` va directo a `SetActiveFigure`, y que
+`BeginRound` tambien sigue a `SetActiveFigure`: el nodo es comun a las dos ramas y la funcion
+esta bien.
+
+**Nunca reescribir una funcion por lo que dice el DSL si aparece un `(else _)`.** Verificar
+con `get_node_infos` sobre el `Branch` primero. Casi reescribo una funcion correcta por esto.
