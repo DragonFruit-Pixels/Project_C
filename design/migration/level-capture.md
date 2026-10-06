@@ -210,3 +210,73 @@ esta bien.
 
 **Nunca reescribir una funcion por lo que dice el DSL si aparece un `(else _)`.** Verificar
 con `get_node_infos` sobre el `Branch` primero. Casi reescribo una funcion correcta por esto.
+
+### Los nodos puros se reevaluan donde se usan, no donde parecen atados
+
+El bug mas caro de la sesion. Sintoma: mover una figura **arrastraba otras figuras con ella**
+a la misma casilla.
+
+`BPC_Occupancy.SetSpace` tenia este orden de ejecucion real (leido con `get_node_infos`, no
+con el DSL):
+
+```
+1. SetCurrentSpace(NewSpace)          VariableSet
+2. LeaveSpace(Target <- GetCurrentSpace)   CallFunction, Target cableado al GETTER
+```
+
+`GetCurrentSpace` es un nodo **puro**. Blueprint no cachea un nodo puro donde "parece" atado:
+lo reevalua **en el momento en que el consumidor lee el pin**. Para cuando `LeaveSpace` lee su
+`Target`, `CurrentSpace` ya vale el espacio **nuevo**.
+
+```
+LeaveSpace(espacio NUEVO) -> RemoveOccupant(nuevo, figura)
+                          -> la figura todavia no esta ahi -> no hace nada
+EnterSpace(espacio NUEVO) -> AddOccupant -> se agrega
+  => el espacio VIEJO se queda con la figura, para siempre
+```
+
+Las figuras se acumulan en cada casilla que pisaron. Y `AddOccupant` llama
+`RefreshOccupantPlacement()` (`Source/ProjectC/Private/Map/Space.cpp:99`), que hace
+`SetActorLocation` sobre **todos** los actores del array. Entrar a una casilla teletransporta
+ahi a todos sus fantasmas.
+
+Evidencia en PIE, despues de tres turnos jugados:
+
+| | |
+|---|---|
+| `BP_Space_C_1.Occupants` | `[Player_0, Player_1, Player_2]` |
+| `Player_0.Occupancy.CurrentSpace` | `BP_Space_C_4` |
+| `Player_1.Occupancy.CurrentSpace` | `BP_Space_C_0` |
+| Posicion real de `Player_0` | `(425, -75)`, o sea un slot de `BP_Space_C_1` |
+
+Ninguno de los tres estaba logicamente en Space_1, y aun asi Space_1 los reposicionaba.
+
+**El arreglo**: una variable `PreviousSpace` en `BPC_Occupancy`. Se escribe **antes** de pisar
+`CurrentSpace`, y `LeaveSpace`, el dispatcher `OnSpaceChanged` y el return leen esa variable.
+Una escritura de variable es impura, asi que el valor queda congelado y no se reevalua.
+
+```
+SetPreviousSpace(GetCurrentSpace)   <- captura
+SetCurrentSpace(NewSpace)
+LeaveSpace(GetPreviousSpace)        <- el viejo, de verdad
+EnterSpace(NewSpace)
+OnSpaceChanged(GetPreviousSpace, NewSpace)
+return GetPreviousSpace
+```
+
+**Regla**: si un valor se lee *despues* de que algo pudo haberlo cambiado, no alcanza con
+leerlo "antes" en el DSL. O se guarda en una variable, o se reordena para que la lectura pase
+antes de la escritura. Esto no lo detecta el compilador y no sale en los logs.
+
+Y una trampa mas del lector: el DSL imprime esto como
+
+```lisp
+(bind _currentspace (Variables|Occupancy|GetCurrentSpace))
+(if ... (Variables|Occupancy|SetCurrentSpace NewSpace)
+        (CallFunction|LeaveSpace _self _currentspace _returnvalue))
+```
+
+o sea **como si el valor estuviera capturado en un `bind` previo**. No lo esta: ese `bind` es
+una comodidad del lector para no repetir la expresion. Sumado al `(else _)` de los flujos
+convergentes, van dos formas distintas en que `read_graph_dsl` miente sobre la semantica. Para
+cualquier cosa que dependa de orden de ejecucion, `get_node_infos` es la unica fuente.
