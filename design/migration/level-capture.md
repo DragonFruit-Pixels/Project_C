@@ -103,3 +103,50 @@ variables, las cuatro figuras del jugador aparecieron con `Health = 0` y `Attack
 y hubo que setearlas una por una. `MaxHealth` y `AttackDamage` siguen por instancia porque
 son perillas de balance reales (ver
 [`07-balance/perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md)).
+
+### La caja del espacio se come a las figuras: por que el trace del cursor va en dos pasos
+
+Las Z no son decorativas, deciden que se puede clickear. Los numeros, de este archivo y de
+[`space-graph-capture.md`](space-graph-capture.md):
+
+| Volumen | Z centro | Media altura | Rango en Z |
+|---|---|---|---|
+| `BP_Space.Bounds` (BoxComponent, root) | 120 | 100 | **20 -> 220** |
+| `SelectionBounds` de una figura jugador (esfera r=60) | 108 | 60 | **48 -> 168** |
+| `SelectionBounds` de un enemigo (esfera r=60) | 220 | 60 | **160 -> 280** |
+
+La caja del espacio **envuelve por completo** la esfera de una figura del jugador. La camara
+mira desde arriba y `LineTraceForObjects` devuelve el hit mas cercano al origen del rayo, asi
+que con los dos object types en un mismo `Make Array` el tile gana siempre y **la figura del
+jugador es inclickeable**. El enemigo asoma 60 unidades por encima de la tapa (280 > 220) y
+ese si gana: la asimetria no es un bug del codigo, es la geometria.
+
+Conclusion que cuesta re-descubrir: **un solo trace con `[Space, Figure]` no puede funcionar
+en este tablero.** `TraceSelectableUnderCursor` hace dos traces:
+
+1. Solo `ObjectTypeQuery8` (Figure). Si pega, devuelve esa figura.
+2. Si no pego **y hay algo seleccionado**, solo `ObjectTypeQuery7` (Space). Si pega, el tile.
+3. Si no hay seleccion y no pego una figura, devuelve null: sin un personaje elegido, los
+   tiles se ignoran.
+
+Asi sale el flujo que se pidio: sin seleccion clickeas un player y lo elegis (un enemigo
+tambien devuelve, pero su `CanBeSelected` es false, o sea se ignora solo); con un player
+elegido, el tile libre te mueve y el enemigo te deja atacar.
+
+**No** se resolvio aprovechando que el enemigo asoma, aunque sale mas barato en nodos: eso
+ataria el ataque a que el mesh del enemigo quede mas alto que la tapa del tile, y los modelos
+de Meshy van a cambiar esas alturas. La prioridad va explicita en el grafo.
+
+### `TraceDistance`: hay dos variables con ese nombre y una es del motor
+
+`APlayerController` trae heredada `HitResultTraceDistance` (categoria **MouseInterface**,
+`Float single-precision`). El Blueprint tiene su propia `TraceDistance` (categoria
+**Selection**, `Float double-precision`). En el DSL los especificadores son casi iguales:
+
+- `Variables|MouseInterface|GetTraceDistance` -> la del **motor**, no es la que queremos
+- `Variables|Selection|GetTraceDistance` -> la del **Blueprint**, es esta
+
+Escribir la primera compila limpio y el trace anda, con la distancia equivocada. La forma de
+distinguirlas sin ambiguedad es `get_node_infos`: mirar el **nombre del pin** de salida
+(`TraceDistance` vs `HitResultTraceDistance`) y la precision. `read_graph_dsl` las imprime
+igual a las dos, asi que la lectura del DSL **no** sirve para verificar esto.
