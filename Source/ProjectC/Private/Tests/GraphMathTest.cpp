@@ -1,25 +1,9 @@
 #include "Map/GraphMath.h"
 #include "Misc/AutomationTest.h"
+#include "Tests/TestGraphs.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-namespace
-{
-	enum : int32 { S1 = 0, S2, S3, S4, S5, S6, S7, NodeCount };
-
-	TArray<FGraphEdge> ExampleGraph()
-	{
-		return {
-			FGraphEdge(S1, S2, /*bBlocked*/ true),
-			FGraphEdge(S2, S3),
-			FGraphEdge(S3, S4),
-			FGraphEdge(S4, S5),
-			FGraphEdge(S1, S6),
-			FGraphEdge(S6, S7),
-			FGraphEdge(S1, S4),
-		};
-	}
-}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FGraphDistancesTest,
@@ -28,6 +12,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FGraphDistancesTest::RunTest(const FString& Parameters)
 {
+	using namespace ProjectCTest;
+
 	const TArray<FGraphEdge> Edges = ExampleGraph();
 
 	const TArray<int32> Respecting = FGraphMath::Distances(NodeCount, Edges, S1, FGraphQuery::ForDistance());
@@ -68,6 +54,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FGraphUnreachableAndDegreeTest::RunTest(const FString& Parameters)
 {
+	using namespace ProjectCTest;
+
 	const TArray<FGraphEdge> Edges = ExampleGraph();
 
 	TestEqual(TEXT("degree(S5) = 1"), FGraphMath::Degree(Edges, S5, FGraphQuery::ForDistance()), 1);
@@ -103,6 +91,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FGraphPushAndTiesTest::RunTest(const FString& Parameters)
 {
+	using namespace ProjectCTest;
+
 	const TArray<FGraphEdge> Edges = ExampleGraph();
 	const FGraphQuery Q = FGraphQuery::ForDistance();
 
