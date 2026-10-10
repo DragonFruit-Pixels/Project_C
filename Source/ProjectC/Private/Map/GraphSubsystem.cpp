@@ -1,9 +1,8 @@
 #include "Map/GraphSubsystem.h"
-#include "Map/Space.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogProjectCGraph, Log, All);
 
-void UGraphSubsystem::RegisterSpace(ASpace* Space)
+void UGraphSubsystem::RegisterSpace(AActor* Space, const TArray<AActor*>& Neighbours, const TArray<AActor*>& BlockedTowards)
 {
 	if (!IsValid(Space))
 	{
@@ -18,7 +17,19 @@ void UGraphSubsystem::RegisterSpace(ASpace* Space)
 		return;
 	}
 
-	Spaces.AddUnique(Space);
+	FSpaceLinks NewLinks;
+	NewLinks.Neighbours.Append(Neighbours);
+	NewLinks.BlockedTowards.Append(BlockedTowards);
+
+	const int32 Existing = IndexOf(Space);
+	if (Existing != INDEX_NONE)
+	{
+		Links[Existing] = MoveTemp(NewLinks);
+		return;
+	}
+
+	Spaces.Add(Space);
+	Links.Add(MoveTemp(NewLinks));
 }
 
 bool UGraphSubsystem::SealGraph()
@@ -33,14 +44,15 @@ bool UGraphSubsystem::SealGraph()
 
 	for (int32 Index = 0; Index < Spaces.Num(); ++Index)
 	{
-		ASpace* Space = Spaces[Index];
+		AActor* Space = Spaces[Index];
 		if (!IsValid(Space))
 		{
 			continue;
 		}
 
-		for (ASpace* Neighbour : Space->Neighbours)
+		for (const TWeakObjectPtr<AActor>& NeighbourPtr : Links[Index].Neighbours)
 		{
+			AActor* Neighbour = NeighbourPtr.Get();
 			if (!IsValid(Neighbour))
 			{
 				UE_LOG(LogProjectCGraph, Error, TEXT("'%s' lists a null neighbour."), *Space->GetName());
@@ -58,7 +70,7 @@ bool UGraphSubsystem::SealGraph()
 				continue;
 			}
 
-			if (!Neighbour->Neighbours.Contains(Space))
+			if (!Links[NeighbourIndex].Neighbours.Contains(Space))
 			{
 				UE_LOG(LogProjectCGraph, Error,
 					TEXT("Asymmetric adjacency: '%s' lists '%s', but not the other way round."),
@@ -80,7 +92,7 @@ bool UGraphSubsystem::SealGraph()
 			}
 
 			const bool bBlocked =
-				Space->BlockedTowards.Contains(Neighbour) || Neighbour->BlockedTowards.Contains(Space);
+				Links[Index].BlockedTowards.Contains(Neighbour) || Links[NeighbourIndex].BlockedTowards.Contains(Space);
 
 			Edges.Emplace(Index, NeighbourIndex, bBlocked);
 		}
@@ -137,7 +149,7 @@ bool UGraphSubsystem::EnsureSealed(const TCHAR* Context) const
 	return false;
 }
 
-int32 UGraphSubsystem::IndexOf(const ASpace* Space) const
+int32 UGraphSubsystem::IndexOf(const AActor* Space) const
 {
 	if (Space == nullptr)
 	{
@@ -155,9 +167,9 @@ int32 UGraphSubsystem::IndexOf(const ASpace* Space) const
 	return INDEX_NONE;
 }
 
-TArray<ASpace*> UGraphSubsystem::ToSpaces(const TArray<int32>& Indices) const
+TArray<AActor*> UGraphSubsystem::ToSpaces(const TArray<int32>& Indices) const
 {
-	TArray<ASpace*> Result;
+	TArray<AActor*> Result;
 	Result.Reserve(Indices.Num());
 	for (const int32 Index : Indices)
 	{
@@ -169,7 +181,7 @@ TArray<ASpace*> UGraphSubsystem::ToSpaces(const TArray<int32>& Indices) const
 	return Result;
 }
 
-int32 UGraphSubsystem::GetDistance(const ASpace* From, const ASpace* To) const
+int32 UGraphSubsystem::GetDistance(const AActor* From, const AActor* To) const
 {
 	if (!EnsureSealed(TEXT("GetDistance")))
 	{
@@ -187,7 +199,7 @@ int32 UGraphSubsystem::GetDistance(const ASpace* From, const ASpace* To) const
 	return D == FGraphMath::Unreachable ? INDEX_NONE : D;
 }
 
-int32 UGraphSubsystem::GetDegree(const ASpace* Space) const
+int32 UGraphSubsystem::GetDegree(const AActor* Space) const
 {
 	if (!EnsureSealed(TEXT("GetDegree")))
 	{
@@ -198,55 +210,55 @@ int32 UGraphSubsystem::GetDegree(const ASpace* Space) const
 	return Index == INDEX_NONE ? 0 : FGraphMath::Degree(Edges, Index, FGraphQuery::ForMovement());
 }
 
-TArray<ASpace*> UGraphSubsystem::GetReachable(const ASpace* From, int32 MaxSteps) const
+TArray<AActor*> UGraphSubsystem::GetReachable(const AActor* From, int32 MaxSteps) const
 {
 	if (!EnsureSealed(TEXT("GetReachable")))
 	{
-		return TArray<ASpace*>();
+		return TArray<AActor*>();
 	}
 
 	const int32 A = IndexOf(From);
 	if (A == INDEX_NONE)
 	{
-		return TArray<ASpace*>();
+		return TArray<AActor*>();
 	}
 
 	return ToSpaces(FGraphMath::Reachable(Spaces.Num(), Edges, A, MaxSteps, FGraphQuery::ForMovement()));
 }
 
-TArray<ASpace*> UGraphSubsystem::GetShortestPath(const ASpace* From, const ASpace* To) const
+TArray<AActor*> UGraphSubsystem::GetShortestPath(const AActor* From, const AActor* To) const
 {
 	if (!EnsureSealed(TEXT("GetShortestPath")))
 	{
-		return TArray<ASpace*>();
+		return TArray<AActor*>();
 	}
 
 	const int32 A = IndexOf(From);
 	const int32 B = IndexOf(To);
 	if (A == INDEX_NONE || B == INDEX_NONE)
 	{
-		return TArray<ASpace*>();
+		return TArray<AActor*>();
 	}
 
 	return ToSpaces(FGraphMath::ShortestPath(Spaces.Num(), Edges, A, B, FGraphQuery::ForDistance()));
 }
 
-TArray<ASpace*> UGraphSubsystem::GetNearest(const ASpace* From, const TArray<ASpace*>& Candidates) const
+TArray<AActor*> UGraphSubsystem::GetNearest(const AActor* From, const TArray<AActor*>& Candidates) const
 {
 	if (!EnsureSealed(TEXT("GetNearest")))
 	{
-		return TArray<ASpace*>();
+		return TArray<AActor*>();
 	}
 
 	const int32 A = IndexOf(From);
 	if (A == INDEX_NONE)
 	{
-		return TArray<ASpace*>();
+		return TArray<AActor*>();
 	}
 
 	TArray<int32> CandidateIndices;
 	CandidateIndices.Reserve(Candidates.Num());
-	for (const ASpace* Candidate : Candidates)
+	for (const AActor* Candidate : Candidates)
 	{
 		const int32 Index = IndexOf(Candidate);
 		if (Index != INDEX_NONE)

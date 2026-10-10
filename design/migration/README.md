@@ -627,3 +627,48 @@ para nombres de clase y de propiedad (`/Script/ProjectC`, `ProjectCRulesLibrary`
 
 Ojo tambien con los falsos **positivos** por substring: buscar `RatchetAdvance` da SI porque
 el dispatcher se llama `OnRatchetAdvanced`.
+
+## Fase 4: C++ = solo el grafo (2026-10-10)
+
+En `Source/` quedan `GraphMath`, `GraphSubsystem`, el modulo y 4 tests (`ProjectC.Rules.Graph.*` y
+`Move.Legality`, 4/4 en verde). Se fueron `ASpace`, `SlotLayout`, `ISelectable`,
+`ESelectionHighlight`, `EMissionTurnPhase`, `EInteractionMode`, `ProjectCCollision`,
+`RatchetRules` y `ProjectCRulesLibrary`.
+
+| Se fue | Lo reemplaza |
+|---|---|
+| `ASpace` | `BP_Space` (padre `Actor`) con `Neighbours`, `BlockedTowards`, `Occupants`, `SlotSpacing` y las funciones de ocupantes. Se registra con `GraphSubsystem.RegisterSpace(self, Neighbours, BlockedTowards)` en `BeginPlay` |
+| `ISelectable` | `BPI_Selectable` |
+| `EMissionTurnPhase` / `ESelectionHighlight` | `E_TurnPhase` / `E_SelectionHighlight` (Blueprint, mismos valores y orden) |
+| `SlotLayout` | `BP_Space.GetSlotLocation`, misma grilla `ceil(sqrt(n))` centrada |
+
+**El atajo que ahorro re-tipar ~45 nodos:** un `ClassRedirect` en `DefaultEngine.ini`,
+`/Script/ProjectC.Space` -> `/Game/Project_C/Map/Space/BP_Space.BP_Space_C`. Al cargar sin la
+clase C++, todos los pins, casts y llamadas tipados `Space` se re-apuntaron solos a `BP_Space`.
+Requiere que las funciones de `BP_Space` tengan **el mismo nombre y los mismos parametros** que
+las de C++. Las que eran `BlueprintPure` en C++ quedan impuras en BP (el MCP no puede marcar
+Pure): sus dos llamadores (`ResolveReckoning`, `GetFigurePlacement`) se re-cablearon con exec.
+
+**Sin `Bounds`:** el MCP no agrega componentes a un Blueprint. `Tile` quedo como root; el
+Construction Script le pone escala `(4.8, 3.8, 0.2)` y el profile `Space`, y las 9 instancias
+bajaron a Z = 10. `GetFigureAnchorLocation` = actor + (0, 0, 10), la cara de arriba del tile.
+
+**Datos per-instancia que el reparent borro y se restauraron:** los `Neighbours` de los 9
+espacios (suma de grados 22) y el `CurrentSpace` de las 6 figuras. Es la cuarta vez que se
+pierde `CurrentSpace`.
+
+### Trampas nuevas
+
+35. **Borrar el `FunctionResult` de una funcion le borra las salidas.** Vaciar un grafo
+    dejando solo `K2Node_FunctionEntry_0` hace que la funcion pierda sus outputs, y despues
+    `(return x)` no tiene a donde ir. Vaciar conservando `FunctionEntry` **y** `FunctionResult`.
+36. **Cambiar el tipo de una variable o un enum desconecta en silencio.** `remove_variable`
+    borra todos sus getters/setters, y los nodos wildcard (`Clear`, `ForEach`, `Contains`,
+    `Equal(Enum)`) quedan fijados al tipo viejo y rechazan el nuevo. El BP puede compilar igual
+    con la comparacion desconectada (`Equal(Enum)` contra `NotStarted` por defecto). Hay que
+    recrear esos nodos y re-cablearlos.
+37. **`find_node_types` con el nombre de una variable devuelve primero la funcion homonima de
+    otra clase** (`Class|BPGameModeMission|GetLegalDestinations` antes que
+    `Variables|Default|GetLegalDestinations`). Filtrar por el prefijo `Variables|`.
+38. **Git Bash reescribe `/Game/...` en los argumentos de un proceso nativo** (lo convierte en
+    `C:/Program Files/Git/Game/...`). Correr los scripts con `MSYS_NO_PATHCONV=1`.

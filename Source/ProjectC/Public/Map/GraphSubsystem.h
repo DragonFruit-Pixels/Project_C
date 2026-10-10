@@ -5,15 +5,14 @@
 #include "Map/GraphMath.h"
 #include "GraphSubsystem.generated.h"
 
-class ASpace;
-
 UCLASS()
 class PROJECTC_API UGraphSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	void RegisterSpace(ASpace* Space);
+	UFUNCTION(BlueprintCallable, Category = "Graph")
+	void RegisterSpace(AActor* Space, const TArray<AActor*>& Neighbours, const TArray<AActor*>& BlockedTowards);
 
 	UFUNCTION(BlueprintCallable, Category = "Graph")
 	bool SealGraph();
@@ -25,29 +24,37 @@ public:
 	int32 GetSpaceCount() const { return Spaces.Num(); }
 
 	UFUNCTION(BlueprintPure, Category = "Graph")
-	int32 GetDistance(const ASpace* From, const ASpace* To) const;
+	int32 GetDistance(const AActor* From, const AActor* To) const;
 
 	UFUNCTION(BlueprintPure, Category = "Graph")
-	int32 GetDegree(const ASpace* Space) const;
+	int32 GetDegree(const AActor* Space) const;
 
 	UFUNCTION(BlueprintPure, Category = "Graph")
-	TArray<ASpace*> GetReachable(const ASpace* From, int32 MaxSteps) const;
+	TArray<AActor*> GetReachable(const AActor* From, int32 MaxSteps) const;
 
 	UFUNCTION(BlueprintPure, Category = "Graph")
-	TArray<ASpace*> GetShortestPath(const ASpace* From, const ASpace* To) const;
+	TArray<AActor*> GetShortestPath(const AActor* From, const AActor* To) const;
 
 	UFUNCTION(BlueprintPure, Category = "Graph")
-	TArray<ASpace*> GetNearest(const ASpace* From, const TArray<ASpace*>& Candidates) const;
+	TArray<AActor*> GetNearest(const AActor* From, const TArray<AActor*>& Candidates) const;
 
-	int32 IndexOf(const ASpace* Space) const;
+	int32 IndexOf(const AActor* Space) const;
 
 private:
+	struct FSpaceLinks
+	{
+		TArray<TWeakObjectPtr<AActor>> Neighbours;
+		TArray<TWeakObjectPtr<AActor>> BlockedTowards;
+	};
+
 	bool EnsureSealed(const TCHAR* Context) const;
 
-	TArray<ASpace*> ToSpaces(const TArray<int32>& Indices) const;
+	TArray<AActor*> ToSpaces(const TArray<int32>& Indices) const;
 
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<ASpace>> Spaces;
+	TArray<TObjectPtr<AActor>> Spaces;
+
+	TArray<FSpaceLinks> Links;
 
 	TArray<FGraphEdge> Edges;
 
