@@ -1,0 +1,51 @@
+{
+  "slug": "bulwark",
+  "prompt": "Veteran refinery diver, twenty years in bad air: heavy sealed rubber work suit with riveted steel plates, full-face respirator with twin filters mounted flush on the mask, no hoses, no tubes, nothing hanging. Thick gauntlets, wide blocky silhouette. Signature colour: safety orange.",
+  "ai_model": "nano-banana",
+  "stage": "concept-only",
+  "tasks": [
+    {
+      "id": "01a08d8d-a471-7069-b6d6-40add028e7ee",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-10T23:02:09Z"
+    },
+    {
+      "id": "01a08dc4-f5e6-731c-884d-64ca644df43d",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png",
+      "note": "A-pose, sin props, regla de silueta"
+    },
+    {
+      "id": "01a08dcf-c7e0-755d-94d5-e76ce4e6b231",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:16:11Z",
+      "result": "concept.png",
+      "note": "pasada de identidad: oficio propio + color de firma, una sola mascara de gas en el roster"
+    },
+    {
+      "id": "01a08dd7-516c-7178-a553-4a9fdd1d9910",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:22:28Z",
+      "result": "concept.png",
+      "note": "sin mangueras: geometria fina en bucle que image-to-3d no resuelve y sin Blender no se limpia"
+    },
+    {
+      "id": "01a08dda-c166-73df-8722-97a46c4f8325",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-09-11T00:34:39Z",
+      "note": "tarea inexistente en la API al 2026-09-20: list_tasks y list_models devuelven cero para esta key. El historial de la cuenta que la creo no es recuperable. No esperar este resultado: para tener la malla hay que regenerar y volver a pagar.",
+      "status": "LOST"
+    }
+  ],
+  "credits_total": 42,
+  "derived": [],
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "identity": "Buzo de refineria veterano",
+  "signature_colour": "industrial safety orange"
+}

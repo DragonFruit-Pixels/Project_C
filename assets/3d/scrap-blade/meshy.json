@@ -1,0 +1,37 @@
+{
+  "slug": "scrap-blade",
+  "kind": "weapon",
+  "for_skill": "Stealth / Wraith",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights. Single object on a plain flat grey backdrop, no character, no hands, no scenery, side three-quarter view. Biopunk chemical undercity: salvaged heavy industry, no magic, no glowing tech. Muted grimy palette — oxidised steel, tar black, sickly yellow-green residue. A short scrap blade: ground down from a broken industrial saw, cloth-wrapped handle, dull uneven edge, no guard.",
+  "ai_model": "nano-banana",
+  "stage": "concept-exploration",
+  "tasks": [
+    {
+      "id": "01a08dc5-613f-7191-bca6-b35a8fd39181",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png"
+    },
+    {
+      "id": "01a08de0-3287-7511-b8f9-6217ef351ef4",
+      "op": "image_to_3d",
+      "credits": 15,
+      "at": "2026-09-11T00:34:39Z",
+      "note": "meshy-t2 smart-topology"
+    }
+  ],
+  "credits_total": 18,
+  "derived": [
+    "master.glb",
+    "targets/game.fbx"
+  ],
+  "ue_path": "/Game/Project_C/Assets/ScrapBlade",
+  "ue_assets": [
+    "SM_ScrapBlade",
+    "M_ScrapBlade",
+    "T_ScrapBlade_BC"
+  ],
+  "imported_at": "2026-09-20"
+}

@@ -1,0 +1,20 @@
+{
+  "slug": "salvaged-rifle",
+  "kind": "weapon",
+  "for_skill": "Marksman / Hunter",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights. Single object on a plain flat grey backdrop, no character, no hands, no scenery, side three-quarter view. Biopunk chemical undercity: salvaged heavy industry, no magic, no glowing tech. Muted grimy palette — oxidised steel, tar black, sickly yellow-green residue. A long salvaged marksman rifle: scavenged industrial parts, welded receiver, taped wooden stock, simple iron sights and a scratched scope, worn leather sling.",
+  "ai_model": "nano-banana",
+  "stage": "concept-exploration",
+  "tasks": [
+    {
+      "id": "01a08dc5-44ec-73b6-a7cc-81daa19371b8",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png"
+    }
+  ],
+  "credits_total": 3,
+  "derived": []
+}

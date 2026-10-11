@@ -1,0 +1,44 @@
+{
+  "slug": "hunter",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "Young drain culler who hunts what climbs out of the pipes. Face bare and visible, goggles pushed up on the forehead, scarf at the neck, close-fitting patched climbing gear strapped tight. Tall narrow vertical silhouette. Signature colour: deep petrol blue.",
+  "ai_model": "nano-banana",
+  "stage": "concept-only",
+  "tasks": [
+    {
+      "id": "01a08dbd-4352-717a-af40-a1a46edd84a3",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-10T23:54:25Z",
+      "result": "concept.png"
+    },
+    {
+      "id": "01a08dc5-041d-76e9-8ae1-9cbe6ab8794d",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:06:01Z",
+      "result": "concept.png",
+      "note": "A-pose, sin props, regla de silueta"
+    },
+    {
+      "id": "01a08dd0-1827-7267-ae08-f1fc850f3c59",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-09-11T00:16:11Z",
+      "result": "concept.png",
+      "note": "pasada de identidad: oficio propio + color de firma, una sola mascara de gas en el roster"
+    },
+    {
+      "id": "01a08ddb-28c5-75b4-880c-67a48b27871a",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-09-11T00:34:39Z",
+      "note": "tarea inexistente en la API al 2026-09-20: list_tasks y list_models devuelven cero para esta key. El historial de la cuenta que la creo no es recuperable. No esperar este resultado: para tener la malla hay que regenerar y volver a pagar.",
+      "status": "LOST"
+    }
+  ],
+  "credits_total": 39,
+  "derived": [],
+  "identity": "Cazador de drenajes joven",
+  "signature_colour": "deep petrol blue"
+}

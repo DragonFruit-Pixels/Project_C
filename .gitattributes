@@ -74,6 +74,11 @@
 *.stl     filter=lfs diff=lfs merge=lfs -text
 *.3mf     filter=lfs diff=lfs merge=lfs -text
 
+# The line above about thumb.png was a lie until 2026-09-21: `*.png` on line 21
+# swept them into LFS and nothing ever took them back out. These do it.
+thumb.png                       -filter -diff -merge -text
+assets/textures/neutral/*.png   -filter -diff -merge -text
+
 # ── Reference documents → LFS ───────────────────────────────────
 # Rulebooks and design PDFs are large binaries; keeping them out of the
 # regular object store keeps clones fast and history small.
