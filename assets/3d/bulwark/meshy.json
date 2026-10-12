@@ -2,7 +2,7 @@
   "slug": "bulwark",
   "prompt": "Veteran refinery diver, twenty years in bad air: heavy sealed rubber work suit with riveted steel plates, full-face respirator with twin filters mounted flush on the mask, no hoses, no tubes, nothing hanging. Thick gauntlets, wide blocky silhouette. Signature colour: safety orange.",
   "ai_model": "nano-banana",
-  "stage": "concept-only",
+  "stage": "in-engine",
   "tasks": [
     {
       "id": "01a08d8d-a471-7069-b6d6-40add028e7ee",
@@ -41,11 +41,127 @@
       "at": "2026-09-11T00:34:39Z",
       "note": "tarea inexistente en la API al 2026-09-20: list_tasks y list_models devuelven cero para esta key. El historial de la cuenta que la creo no es recuperable. No esperar este resultado: para tener la malla hay que regenerar y volver a pagar.",
       "status": "LOST"
+    },
+    {
+      "id": "01a12c29-bcae-7070-acce-755117524c6a",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-10-11T18:11:45Z",
+      "version": "v2",
+      "note": "meshy-7.1, quad, 20k, PBR, T-POSE, 2k. Reuso de concept.png. Reemplaza al image_to_3d LOST del 2026-09-11.",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12c2f-7a1a-75c2-b627-6de4dfe3de1e",
+      "op": "rig",
+      "credits": 5,
+      "at": "2026-10-11T18:18:00Z",
+      "version": "v2",
+      "note": "auto-rig sobre T-pose, height 1.8 m. Incluye walking y running gratis.",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12c31-6ab1-7161-a47e-bfbdca6735c6",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T18:20:05Z",
+      "version": "v2",
+      "action_id": 0,
+      "action": "Idle",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12c31-6caf-7691-91ac-b461bea37213",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T18:20:05Z",
+      "version": "v2",
+      "action_id": 128,
+      "action": "Heavy_Hammer_Swing",
+      "note": "golpe pesado a dos manos para valve-maul",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12c31-6e38-77fd-9a86-7e601689e01d",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T18:20:05Z",
+      "version": "v2",
+      "action_id": 178,
+      "action": "Hit_Reaction",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12c31-6fdd-7315-9555-bbae1f751058",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T18:20:05Z",
+      "version": "v2",
+      "action_id": 8,
+      "action": "Dead",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12d33-7269-7075-bde0-dfdb784d9ec0",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T22:05:00Z",
+      "action_id": 336,
+      "action": "Long_Breathe_and_Look_Around",
+      "note": "idle propio del personaje",
+      "status": "SUCCEEDED"
     }
   ],
-  "credits_total": 42,
-  "derived": [],
+  "credits_total": 92,
+  "derived": [
+    "master.glb",
+    "master_textures/",
+    "targets/game.fbx",
+    "targets/rigged.fbx",
+    "targets/anim_idle.fbx",
+    "targets/anim_walking.fbx",
+    "targets/anim_running.fbx",
+    "targets/anim_attack.fbx",
+    "targets/anim_hit.fbx",
+    "targets/anim_death.fbx",
+    "targets/anim_idle_stance.fbx",
+    "targets/anim_idle_stance_fixed.fbx"
+  ],
   "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
   "identity": "Buzo de refineria veterano",
-  "signature_colour": "industrial safety orange"
+  "signature_colour": "industrial safety orange",
+  "ai_model_3d": "meshy-7.1",
+  "pose_mode": "t-pose",
+  "weapon": "valve-maul",
+  "ue_path": "/Game/Project_C/Assets/Bulwark",
+  "ue_assets": [
+    "SK_Bulwark",
+    "SKEL_Bulwark",
+    "PHYS_Bulwark",
+    "MI_Bulwark",
+    "T_Bulwark_BC",
+    "T_Bulwark_N",
+    "T_Bulwark_R",
+    "T_Bulwark_M",
+    "AS_Bulwark_Idle",
+    "AS_Bulwark_Walk",
+    "AS_Bulwark_Run",
+    "AS_Bulwark_Attack",
+    "AS_Bulwark_Hit",
+    "AS_Bulwark_Death",
+    "AS_Bulwark_IdleStance"
+  ],
+  "ue_blueprint": "/Game/Project_C/Characters/BP_Bulwark",
+  "ue_socket": "WeaponSocket_R sobre RightHand (transform identidad: falta ajuste visual)",
+  "imported_at": "2026-10-11",
+  "rig_note": "24 huesos estilo Mixamo, mismos nombres que SKEL_Wraith (Spine01/Spine02/neck/head_end).",
+  "default_idle": "AS_Bulwark_IdleStance",
+  "idle_fix": {
+    "source": "targets/anim_idle_stance.fbx",
+    "output": "targets/anim_idle_stance_fixed.fbx",
+    "ue_asset": "AS_Bulwark_IdleStance",
+    "how": "curvas Lcl Rotation reescritas en el FBX binario (scratchpad fbxpatch.py); el export de Blender rompe el root en UE",
+    "change": "RightHand/LeftHand fijadas a la pose media de anim_idle (slerp 1.0)",
+    "at": "2026-10-11"
+  }
 }

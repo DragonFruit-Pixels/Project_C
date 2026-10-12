@@ -3,7 +3,7 @@
   "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
   "prompt": "Young drain culler who hunts what climbs out of the pipes. Face bare and visible, goggles pushed up on the forehead, scarf at the neck, close-fitting patched climbing gear strapped tight. Tall narrow vertical silhouette. Signature colour: deep petrol blue.",
   "ai_model": "nano-banana",
-  "stage": "concept-only",
+  "stage": "in-engine",
   "tasks": [
     {
       "id": "01a08dbd-4352-717a-af40-a1a46edd84a3",
@@ -35,10 +35,125 @@
       "at": "2026-09-11T00:34:39Z",
       "note": "tarea inexistente en la API al 2026-09-20: list_tasks y list_models devuelven cero para esta key. El historial de la cuenta que la creo no es recuperable. No esperar este resultado: para tener la malla hay que regenerar y volver a pagar.",
       "status": "LOST"
+    },
+    {
+      "id": "01a12ca5-b352-76a4-aee1-be20196eaa9b",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-10-11T19:30:00Z",
+      "version": "v2",
+      "note": "meshy-7.1, quad, 20k, PBR, T-POSE, 2k. Reuso de concept.png. Reemplaza al image_to_3d LOST del 2026-09-11.",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12cac-3451-7217-88c3-589ad0a36b33",
+      "op": "rig",
+      "credits": 5,
+      "at": "2026-10-11T19:40:00Z",
+      "version": "v2",
+      "note": "auto-rig sobre T-pose, height 1.75 m. Incluye walking y running gratis.",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12cae-f436-77c7-a439-da9de29778c2",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T19:44:00Z",
+      "version": "v2",
+      "action_id": 0,
+      "action": "Idle",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12cae-f5df-72de-81ed-861c6aeb71c9",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T19:44:00Z",
+      "version": "v2",
+      "action_id": 690,
+      "action": "Walk_Forward_While_Shooting_inplace",
+      "status": "SUCCEEDED",
+      "note": "disparo de rifle; el catalogo no tiene disparo parado"
+    },
+    {
+      "id": "01a12cae-f743-7749-829d-ee7194b0bbaa",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T19:44:00Z",
+      "version": "v2",
+      "action_id": 178,
+      "action": "Hit_Reaction",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12cae-f8c4-7574-a3a2-1578ac3b634f",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T19:44:00Z",
+      "version": "v2",
+      "action_id": 8,
+      "action": "Dead",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a12d33-74ab-7002-ba64-557dbc78e8c6",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T22:05:00Z",
+      "action_id": 2,
+      "action": "Alert",
+      "note": "idle propio del personaje",
+      "status": "SUCCEEDED"
     }
   ],
-  "credits_total": 39,
-  "derived": [],
+  "credits_total": 89,
+  "derived": [
+    "master.glb",
+    "master_textures/",
+    "thumb.png",
+    "targets/rigged.fbx",
+    "targets/anim_walking.fbx",
+    "targets/anim_running.fbx",
+    "targets/anim_idle.fbx",
+    "targets/anim_attack.fbx",
+    "targets/anim_hit.fbx",
+    "targets/anim_death.fbx",
+    "targets/anim_idle_stance.fbx",
+    "targets/anim_idle_stance_fixed.fbx"
+  ],
   "identity": "Cazador de drenajes joven",
-  "signature_colour": "deep petrol blue"
+  "signature_colour": "deep petrol blue",
+  "ai_model_3d": "meshy-7.1",
+  "pose_mode": "t-pose",
+  "weapon": "salvaged-rifle",
+  "ue_path": "/Game/Project_C/Assets/Hunter",
+  "ue_assets": [
+    "SK_Hunter",
+    "SKEL_Hunter",
+    "PHYS_Hunter",
+    "MI_Hunter",
+    "T_Hunter_BC",
+    "T_Hunter_N",
+    "T_Hunter_R",
+    "T_Hunter_M",
+    "AS_Hunter_Idle",
+    "AS_Hunter_Walk",
+    "AS_Hunter_Run",
+    "AS_Hunter_Attack",
+    "AS_Hunter_Hit",
+    "AS_Hunter_Death",
+    "AS_Hunter_IdleStance"
+  ],
+  "ue_blueprint": "/Game/Project_C/Characters/BP_Hunter",
+  "ue_socket": "WeaponSocket_R sobre RightHand (transform identidad: falta ajuste visual)",
+  "imported_at": "2026-10-11",
+  "default_idle": "AS_Hunter_IdleStance",
+  "idle_fix": {
+    "source": "targets/anim_idle_stance.fbx",
+    "output": "targets/anim_idle_stance_fixed.fbx",
+    "ue_asset": "AS_Hunter_IdleStance",
+    "how": "curvas Lcl Rotation reescritas en el FBX binario (scratchpad fbxpatch.py); el export de Blender rompe el root en UE",
+    "change": "RightHand/LeftHand fijadas a la pose media de anim_idle (slerp 1.0)",
+    "at": "2026-10-11"
+  }
 }
