@@ -55,12 +55,9 @@ Reglas de distancia que salen del manual y hay que respetar:
 todo efecto**, incluido el cálculo de distancias. En el grafo son simplemente una arista
 más. Si el token que las genera se remueve, la arista desaparece.
 
-**Paredes destructibles.** Romper una **agrega una arista permanente** al grafo. Eso cambia
-de golpe todas las distancias, las rutas de escape y quién es el enemigo más cercano.
-
-Esto convierte la destrucción en **una mecánica, no en un efecto visual**. Quién puede
-romper qué sigue abierto: candidatos son el adversario al cambiar de stage, una criatura
-pesada, o una de las 2 acciones propias de la misión.
+**Las paredes no se rompen.** El grafo de pasajes es fijo durante toda la partida: la
+única arista que aparece o desaparece es la de un token de escalera o túnel
+([D-31](../06-decisiones/registro.md#d-31--no-hay-paredes-destructibles)).
 
 ## Ocupación
 
@@ -105,7 +102,6 @@ cualquiera de las dos.
 | Pared | Ausencia de arista |
 | Sala | Subgrafo + SubLevel |
 | Escalera / túnel | Arista extra, removible |
-| Pared destructible | Arista que se agrega en runtime |
 | Distancia | BFS respetando bloqueos |
 | `Clear` | Consulta, no estado guardado |
 | `Gate` | 3 nodos marcados, posición fija |
@@ -124,7 +120,6 @@ Notación común a todas las fórmulas:
 | `V` | Conjunto de `Space` del mapa | 16–48 nodos (16 tiles del manual × 1–3 espacios por tile, p. 9). El total real de la misión **no está en el manual**: lo define la carta de episodio |
 | `E_p` | Aristas de pasaje (autoría, estáticas) | del orden de 2.5 × cantidad de nodos |
 | `E_t` | Aristas por par de tokens (escalera / túnel) | 0–2 (el manual trae 2 tokens de escalera y 2 de túnel = como máximo 2 pares, p. 2) |
-| `E_r` | Aristas creadas en runtime (paredes destructibles) | **0 en el manual** — la mecánica no existe ahí, es propuesta del GDD (A-07) |
 | `E_c` | Adyacencias condicionales de un `Trinket` | 0..n, lo define la carta |
 | `B` | Pasajes bloqueados en este instante | 0 hasta la cantidad total de aristas; lo define la misión |
 | `f` | La figura para la que se evalúa | — |
@@ -151,8 +146,8 @@ adyacentes** ni para moverse ni para contar distancia.
 ### F2 — Conjunto de aristas efectivo y adyacencia
 
 ```
-E_mov(f)  = (E_p ∪ E_t ∪ E_r ∪ E_c) menos { e ∈ B : NO IgnoraBloqueo(f, e) }
-E_dist(f) = (E_p ∪ E_t ∪ E_r)       menos { e ∈ B : NO IgnoraBloqueo(f, e) }
+E_mov(f)  = (E_p ∪ E_t ∪ E_c) menos { e ∈ B : NO IgnoraBloqueo(f, e) }
+E_dist(f) = (E_p ∪ E_t)       menos { e ∈ B : NO IgnoraBloqueo(f, e) }
 
 Adyacente(a, b, f) = (a, b) ∈ E_mov(f)
 ```
@@ -365,8 +360,6 @@ par de tokens que cruce las secciones.
 | 4 `Character` + 6 `Creature` + el `Adversary` en un mismo `Space` | Legal. **No hay límite de ocupación** (manual p. 9). Ninguna figura se rechaza; el problema es de cámara y de layout de figuras, no de reglas |
 | Un `Move` que vuelve al espacio de origen | Legal, y consume pasos igual. Cada salida vuelve a disparar "te siguen" y `Hazard`. El manual lo usa como ejemplo al explicar `Stealth` (p. 24) |
 | Un efecto que **coloca** al personaje en otro espacio | No es movimiento: no arrastra enemigos y no agarra `Hazard`. Es la única excepción de la nota del manual (p. 13). En el grafo es un teleport que ignora aristas |
-| Pared destructible | **No existe en el manual.** Es propuesta del GDD y sigue abierta (A-07). Definido acá: romperla agrega una arista permanente e invalida todo cache de distancia del frame |
-| Se rompe una pared a mitad de una acción `Move` | El manual no lo cubre porque la mecánica no existe ahí. **Regla propuesta:** los pasos ya confirmados quedan como están y los pasos restantes se recalculan sobre el grafo nuevo |
 | Spawn en una `Gate` que ya tiene 5 enemigos | Se apila sin problema. La única razón para que un spawn falle es que no haya figura en el pool → [`04-oposicion/enemigos.md`](../04-oposicion/enemigos.md) |
 | El espacio se limpia a mitad de la fase 3 | Los enemigos dejan de atacar, pero **no** se roba recompensa: lo que decide es el estado al **empezar** la fase (manual p. 16) |
 | `Adversary` todavía en el `Doom Track`, no manifestado | No cuenta como enemigo → el espacio puede estar `Clear` (manual p. 7) |
@@ -393,7 +386,6 @@ par de tokens que cruce las secciones.
 | Presupuesto de pasos de `Move` | 3 (manual p. 13) | 2–4 | Todo. A 4 el kiting se vuelve viable, los enemigos no alcanzan nunca y el tope blando de dificultad por pools deja de morder; a 2 no llegás al objetivo antes de que termine el reloj |
 | Pares de aristas por token (escalera / túnel) | Hasta 2 (manual p. 2: 2 tokens de cada tipo) | 0–3 | El diámetro efectivo del mapa. **Cada par colapsa distancias de forma global**, no local: agregar uno recalcula quién es "el más cercano" en medio mapa |
 | Bloqueos simultáneos activos | **No está en el manual** (lo define la misión) | 0–3 | Cuánto se puede canalizar el movimiento. Arriba de 3, el riesgo de violar el invariante F8.7 —objetivo inalcanzable— se vuelve alto |
-| Paredes destructibles por partida | **0: no existen en el manual** (A-07) | 0–3 | Si la destrucción es mecánica o decorado. Cada una invalida caches de distancia y cambia rutas de escape a mitad de partida. Arriba de 3, el mapa deja de ser memorizable y planificar pierde valor |
 | Límite de figuras por `Space` | Sin límite (manual p. 9) | Sin límite, o 8 como mínimo si se pone uno | Si un espacio puede volverse una trampa mortal. **Poner un límite rompe dos sistemas**: "te siguen" no tendría a dónde meter a los enemigos, y el spawn necesitaría una regla de overflow que el manual no tiene |
 | Secciones del mapa | 2, superficie y subterráneo (decisión del GDD, no del manual) | 2–3 | Producción antes que juego: cada sección es un set de iluminación y de meshes. Como juego, define cuántos cuellos de botella obligatorios hay en la ruta al objetivo |
 

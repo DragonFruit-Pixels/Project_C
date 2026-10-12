@@ -1,44 +1,172 @@
 {
-  "slug": "ram",
-  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
-  "prompt": "Pit fighter who took the dose to win fights and is proud of it. No mask, bare face and shoulders, wrapped knuckles, torn fight trousers, red sash at the waist. Swollen yellow mutagen grown through the flesh of one arm and shoulder. Signature colour: raw red.",
-  "ai_model": "nano-banana",
-  "stage": "concept-exploration",
-  "tasks": [
-    {
-      "id": "01a08d91-30e0-7777-a966-5f970bc56916",
-      "op": "text_to_image",
-      "credits": 3,
-      "at": "2026-09-10T22:55:00Z",
-      "result": "concept-v1-realistic-rejected.png",
-      "note": "photorealistic render, rejected: style did not match the roster"
-    },
-    {
-      "id": "01a08d9c-0ba0-73ad-b0f0-f963759f4678",
-      "op": "text_to_image",
-      "credits": 3,
-      "at": "2026-09-10T23:18:33Z",
-      "result": "concept.png"
-    },
-    {
-      "id": "01a08dc5-1ba3-7153-b430-13cab120de40",
-      "op": "text_to_image",
-      "credits": 3,
-      "at": "2026-09-11T00:06:01Z",
-      "result": "concept.png",
-      "note": "A-pose, sin props, regla de silueta"
-    },
-    {
-      "id": "01a08dd0-d88a-75e5-bea8-bd5f90ff9100",
-      "op": "text_to_image",
-      "credits": 3,
-      "at": "2026-09-11T00:16:11Z",
-      "result": "concept.png",
-      "note": "pasada de identidad: oficio propio + color de firma, una sola mascara de gas en el roster"
-    }
-  ],
-  "credits_total": 12,
-  "derived": [],
-  "identity": "Peleador de pozo que se dosifico para ganar",
-  "signature_colour": "raw red"
+ "slug": "ram",
+ "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+ "prompt": "Pit fighter who took the dose to win fights and is proud of it. No mask, bare face and shoulders, wrapped knuckles, torn fight trousers, red sash at the waist. Swollen yellow mutagen grown through the flesh of one arm and shoulder. Signature colour: raw red.",
+ "ai_model": "nano-banana",
+ "stage": "in-engine",
+ "tasks": [
+  {
+   "id": "01a08d91-30e0-7777-a966-5f970bc56916",
+   "op": "text_to_image",
+   "credits": 3,
+   "at": "2026-09-10T22:55:00Z",
+   "result": "concept-v1-realistic-rejected.png",
+   "note": "photorealistic render, rejected: style did not match the roster"
+  },
+  {
+   "id": "01a08d9c-0ba0-73ad-b0f0-f963759f4678",
+   "op": "text_to_image",
+   "credits": 3,
+   "at": "2026-09-10T23:18:33Z",
+   "result": "concept.png"
+  },
+  {
+   "id": "01a08dc5-1ba3-7153-b430-13cab120de40",
+   "op": "text_to_image",
+   "credits": 3,
+   "at": "2026-09-11T00:06:01Z",
+   "result": "concept.png",
+   "note": "A-pose, sin props, regla de silueta"
+  },
+  {
+   "id": "01a08dd0-d88a-75e5-bea8-bd5f90ff9100",
+   "op": "text_to_image",
+   "credits": 3,
+   "at": "2026-09-11T00:16:11Z",
+   "result": "concept.png",
+   "note": "pasada de identidad: oficio propio + color de firma, una sola mascara de gas en el roster"
+  },
+  {
+   "id": "01a12ced-b6e8-74d9-a97b-faf739832ebf",
+   "op": "image_to_3d",
+   "credits": 30,
+   "at": "2026-10-11T20:50:00Z",
+   "version": "v1",
+   "note": "meshy-7.1, quad, 20k, PBR, T-POSE, 2k. Desde concept.png.",
+   "status": "SUCCEEDED"
+  },
+  {
+   "id": "01a12cf1-2aa7-73ae-9a84-3d76bf1614ff",
+   "op": "rig",
+   "credits": 5,
+   "at": "2026-10-11T20:55:00Z",
+   "version": "v1",
+   "note": "auto-rig sobre T-pose, height 1.8 m. Incluye walking y running gratis.",
+   "status": "SUCCEEDED"
+  },
+  {
+   "id": "01a12cf3-5163-77f2-a861-c6618229eb62",
+   "op": "animate",
+   "credits": 3,
+   "at": "2026-10-11T20:58:00Z",
+   "version": "v1",
+   "action_id": 0,
+   "action": "Idle",
+   "status": "SUCCEEDED"
+  },
+  {
+   "id": "01a12cf3-5335-7575-8519-9a5d64c9592e",
+   "op": "animate",
+   "credits": 3,
+   "at": "2026-10-11T20:58:00Z",
+   "version": "v1",
+   "action_id": 198,
+   "action": "Punch_Combo",
+   "status": "SUCCEEDED"
+  },
+  {
+   "id": "01a12cf3-54e1-768c-9916-ac5a9d8faf3f",
+   "op": "animate",
+   "credits": 3,
+   "at": "2026-10-11T20:58:00Z",
+   "version": "v1",
+   "action_id": 178,
+   "action": "Hit_Reaction",
+   "status": "SUCCEEDED"
+  },
+  {
+   "id": "01a12cf3-5692-7446-bddb-9baa5840e1e5",
+   "op": "animate",
+   "credits": 3,
+   "at": "2026-10-11T20:58:00Z",
+   "version": "v1",
+   "action_id": 8,
+   "action": "Dead",
+   "status": "SUCCEEDED"
+  },
+  {
+   "id": "01a12d33-7720-7618-99cd-c32ab2986f58",
+   "op": "animate",
+   "credits": 3,
+   "at": "2026-10-11T22:05:00Z",
+   "action_id": 385,
+   "action": "Boxing_Warmup",
+   "note": "idle propio del personaje",
+   "status": "SUCCEEDED"
+  }
+ ],
+ "credits_total": 62,
+ "derived": [
+  "master.glb",
+  "master_textures/",
+  "thumb.png",
+  "targets/rigged.fbx",
+  "targets/anim_walking.fbx",
+  "targets/anim_running.fbx",
+  "targets/anim_idle.fbx",
+  "targets/anim_attack.fbx",
+  "targets/anim_hit.fbx",
+  "targets/anim_death.fbx",
+  "targets/anim_idle_stance.fbx",
+  "targets/anim_idle_stance_fixed.fbx",
+  "targets/rigged_fist.fbx"
+ ],
+ "identity": "Peleador de pozo que se dosifico para ganar",
+ "signature_colour": "raw red",
+ "ai_model_3d": "meshy-7.1",
+ "pose_mode": "t-pose",
+ "weapon": "none (punos)",
+ "ue_path": "/Game/Project_C/Assets/Ram",
+ "ue_assets": [
+  "SK_Ram",
+  "SKEL_Ram",
+  "PHYS_Ram",
+  "MI_Ram",
+  "T_Ram_BC",
+  "T_Ram_N",
+  "T_Ram_R",
+  "T_Ram_M",
+  "AS_Ram_Idle",
+  "AS_Ram_Walk",
+  "AS_Ram_Run",
+  "AS_Ram_Attack",
+  "AS_Ram_Hit",
+  "AS_Ram_Death",
+  "AS_Ram_IdleStance"
+ ],
+ "ue_blueprint": "/Game/Project_C/Characters/BP_Ram",
+ "ue_socket": "WeaponSocket_R sobre RightHand (sin uso: pelea a puno)",
+ "imported_at": "2026-10-11",
+ "default_idle": "AS_Ram_IdleStance",
+ "idle_fix": {
+  "source": "targets/anim_idle_stance.fbx",
+  "output": "targets/anim_idle_stance_fixed.fbx",
+  "ue_asset": "AS_Ram_IdleStance",
+  "how": "curvas Lcl Rotation reescritas en el FBX binario (scratchpad fbxpatch.py); el export de Blender rompe el root en UE",
+  "change": "Left/RightShoulder 60% hacia la pose media de anim_idle; manos 100%",
+  "at": "2026-10-11"
+ },
+ "fist_fix": {
+  "at": "2026-10-12",
+  "result": "targets/rigged_fist.fbx",
+  "ue_asset": "/Game/Project_C/Assets/Ram/SK_Ram_Fist",
+  "credits": 0,
+  "method": "El rig de Meshy no tiene huesos de dedos. Se reescribio solo el array Vertices (y Normals recalculadas en esos vertices) del rigged.fbx original: los dedos (x>84 cm, z<2.6) se enrollan hacia la palma con un bend de 300 grados alrededor del nudillo (y=140.6) y el pulgar rota 85 grados sobre el eje X. Skin weights, esqueleto y bind pose intactos. SK_Ram queda como respaldo.",
+  "params": {
+   "knuckle_x": 84,
+   "finger_center_y": 140.6,
+   "curl_deg": 300,
+   "thumb_deg": 85
+  }
+ }
 }

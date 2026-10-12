@@ -129,7 +129,7 @@ Los cuatro primeros tests, que se escriben antes que la UI:
 | `ProjectC.Rules.Ratchet.AdvanceAndLoss` | el clamp al final del track, que la casilla 19 no mate y la 20 sí, y que el trinquete **solo suba** | ✅ **pasa** |
 | Distribución del dado | `p(Hit)=0,50`, `p(Toll)=0,33`, y que el dado bonus **no** tenga `Toll` | pendiente, falta el sistema |
 | Costo esperado de una tirada | `E[ΔRatchet] = 3 × 0,33 = 1,0` | pendiente |
-| BFS con aristas bloqueadas | que romper una pared cambie las distancias | pendiente, falta `UGraphSubsystem` |
+| BFS con aristas bloqueadas | que un pasaje bloqueado cambie las distancias | pendiente, falta `UGraphSubsystem` |
 
 Los números salen de
 [`perillas-y-constantes.md`](../gdd/07-balance/perillas-y-constantes.md) y

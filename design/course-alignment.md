@@ -113,7 +113,7 @@ Estado: ✅ hecho · ◐ parcial · ❌ sin empezar.
 | 7 | Sonidos | Dados, impactos, umbral de trinquete, avance del jefe | P1 |
 | 11 | Lights | Iluminación del mapa; cambio de estado al avanzar el jefe | P2 |
 | 11 | **Sequencer** | **Los 4 reveals de stage del jefe.** Encaje directo | P2 |
-| 11 | **Chaos Destruction** | **Paredes destructibles que modifican el grafo de espacios.** Ver abajo | P2 |
+| 11 | Chaos Destruction | Destrucción visual de props, sin efecto en las reglas ([D-31](gdd/06-decisiones/registro.md#d-31--no-hay-paredes-destructibles)) | P2 |
 | 11 | **Landscape** | **La sección de superficie del mapa**, antes de descender. Ver abajo | P2 |
 
 ### Inteligencia Artificial
@@ -175,16 +175,11 @@ Ordenados por urgencia, no por tamaño. La clase 4 cerró uno entero y mordió o
 Como se evalúa la demostración de los temas, estos dos necesitan un destino diseñado y no
 un agregado al final. Los dos tienen una versión que es mecánica en vez de decorativa.
 
-### Chaos Destruction -> paredes destructibles que modifican el grafo
+### Chaos Destruction -> decorado, no mecánica
 
-El mapa es un grafo de espacios, y el manual ya trae el concepto de pasajes bloqueados que
-afectan el cálculo del camino más corto (página 20). Si una pared se puede romper, aparece
-una arista nueva y cambian de golpe todas las distancias, las rutas de huida y quién es "el
-enemigo más cercano".
-
-Eso hace que la destrucción sea **una mecánica**, no un efecto. Quién puede romper qué
-queda por decidir — candidatos: el jefe al cambiar de stage, un monstruo pesado, o una de
-las 2 acciones propias de la misión.
+Se había propuesto que romper paredes agregara aristas al grafo. Se descartó en
+[D-31](gdd/06-decisiones/registro.md#d-31--no-hay-paredes-destructibles): complejizaba las
+reglas sin necesidad. El tema se cubre con props que se rompen y no tocan el grafo.
 
 ### Landscape -> la sección de superficie del mapa
 

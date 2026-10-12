@@ -104,7 +104,7 @@ Lo mismo con dos temas más chicos:
 | 7 | Sonidos | dados, umbral de `Ratchet`, avance del reloj | — | — |
 | 11 | Lights | día arriba / oscuridad abajo; cambia con el reloj | `Maps/` | — |
 | 11 | **Sequencer** | los 4 reveals de stage del `Adversary` | `DA_AdversaryStage` | encaje directo |
-| 11 | **Chaos Destruction** | paredes que **agregan aristas al grafo** en runtime | `UGraphSubsystem` | si el grafo se construye inmutable, la destrucción no puede ser mecánica |
+| 11 | Chaos Destruction | props que se rompen, sin tocar el grafo (D-31) | `Maps/` | — |
 | 11 | **Landscape** | la sección de superficie del mapa | `Maps/` | — |
 
 ### IA, optimización y cierre

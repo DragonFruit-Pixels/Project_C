@@ -77,7 +77,8 @@
       "credits": 5,
       "at": "2026-09-20T23:52:00Z",
       "version": "v2",
-      "note": "auto-rig sobre T-pose. Incluye walking y running gratis. 24 huesos estilo Mixamo (Hips/Spine/RightHand). NO es el mannequin de UE5."
+      "note": "auto-rig sobre T-pose. Incluye walking y running gratis. 24 huesos estilo Mixamo (Hips/Spine/RightHand). NO es el mannequin de UE5.",
+      "status": "LOST"
     },
     {
       "id": "01a0c13e-07f9-7108-a435-1b17adbd47dc",
@@ -115,9 +116,19 @@
       "version": "v2",
       "action_id": 8,
       "action": "Dead"
+    },
+    {
+      "id": "01a12d33-7910-7537-b02a-155c61794866",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-11T22:05:00Z",
+      "action_id": 338,
+      "action": "Short_Breathe_and_Look_Around",
+      "note": "generada sobre el rig del Hunter (01a12cac): el rig v2 del Wraith 01a0c13c ya no existe en la API (2026-10-11). Mismos nombres de huesos; se importa a SKEL_Wraith. RESULTADO: rompe la malla del Wraith (proporciones del Hunter sobre SKEL_Wraith). Borrado AS_Wraith_IdleStance; el Wraith vuelve a AS_Wraith_Idle. No usar el rig de otro personaje para el Wraith.",
+      "status": "REJECTED"
     }
   ],
-  "credits_total": 94,
+  "credits_total": 97,
   "derived": [
     "master.glb",
     "master_textures/",
@@ -127,7 +138,8 @@
     "targets/anim_running.fbx",
     "targets/anim_attack.fbx",
     "targets/anim_hit.fbx",
-    "targets/anim_death.fbx"
+    "targets/anim_death.fbx",
+    "targets/anim_idle_stance.fbx"
   ],
   "identity": "Quimico del cartel que se autodosifico",
   "signature_colour": "acid green",
@@ -166,5 +178,6 @@
       "/Game/Project_C/Assets/_Shared/T_Neutral_Grey"
     ],
     "note": "M_Wraith (Material suelto) se reemplazo por MI_Wraith, un Material Instance de M_Character, el 2026-09-21. Un solo shader compilado para todo el roster; cada personaje nuevo es un instance y cinco campos. Los parametros son BaseColor, Normal, Roughness, Metallic, AccentMask, SignatureTint y el static switch UseAccentMask (arranca en false, asi que el Lerp del acento no se compila)."
-  }
+  },
+  "default_idle": "AS_Wraith_Idle"
 }

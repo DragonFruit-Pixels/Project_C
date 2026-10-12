@@ -79,20 +79,6 @@ de sistemas.
 
 ---
 
-## A-07 — Quién puede romper paredes
-
-**Arrastra:** poco, pero hay que decidirlo antes de construir el mapa.
-
-Candidatos: el adversario al cambiar de stage, una criatura pesada, o una de las 2 acciones
-propias de la misión.
-
-Cada uno da un juego distinto: si rompe el adversario, la destrucción es una amenaza; si
-rompe el jugador, es una herramienta.
-
-→ [`../01-fundamentos/mapa-y-espacios.md`](../01-fundamentos/mapa-y-espacios.md)
-
----
-
 ## A-08 — Qué 4 personajes entran, y qué 2 skills lleva cada uno
 
 **Arrastra:** bloquea `DT_Skills` y las fichas de personaje. No bloquea nada de código.

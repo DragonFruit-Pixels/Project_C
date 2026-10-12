@@ -1,0 +1,109 @@
+{
+  "slug": "cook",
+  "role": "enemy (Servant) - Cook del cartel, una malla compartida por las 10 figuras del pool",
+  "style_clause": "Painted concept art illustration, clean dark outline, flat even lighting, matte surfaces, no photorealism, no glossy highlights.",
+  "prompt": "Full body, plain flat grey backdrop, no scenery. A Cook: cartel refinery worker consumed by the chemical batch he brews. Gaunt emaciated body, sickly grey-green skin, bulging yellow-green veins on bare arms and neck, chemical burns, patchy hair. Knee-length torn bone-white rubber apron soaked in green residue, long black rubber gloves, cracked round goggles, rag over mouth. Human proportions. No weapon, no props, no gas mask.",
+  "ai_model": "nano-banana (concept) / meshy-7.1 (3d)",
+  "stage": "in-engine",
+  "tasks": [
+    {
+      "id": "01a130b3-7a2b-7382-996f-f5d43221adba",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-10-12T15:21:00Z",
+      "pose_mode": "t-pose",
+      "result": "_alt/concept_v1_clean.png",
+      "status": "REJECTED",
+      "note": "Silueta clara (delantal hueso) contra los 4 personajes oscuros. Sin respirador completo: regla de mascara de Bulwark. Riesgo: el delantal llega a las canillas y puede estirarse al caminar. Rechazado: se lee como trabajador sano, no como enemigo."
+    },
+    {
+      "id": "01a130c0-6f23-7124-b4d3-66d34e0713f0",
+      "op": "text_to_image",
+      "credits": 3,
+      "at": "2026-10-12T15:35:00Z",
+      "pose_mode": "t-pose",
+      "result": "concept.png",
+      "status": "SUCCEEDED",
+      "note": "Pasada 'consumido': piel gris-verde, venas del Batch, delantal roto a la rodilla (baja el riesgo de estirarse al caminar)."
+    },
+    {
+      "id": "01a130c2-ec26-7691-a951-e3c213e698e3",
+      "op": "image_to_3d",
+      "credits": 30,
+      "at": "2026-10-12T15:40:00Z",
+      "note": "meshy-7.1, quad, 20k, PBR, T-POSE, 2k, input_task_id = concept 01a130c0. Misma config que Hunter/Ram v2.",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a130ce-ec37-7304-a82b-366679cb5fba",
+      "op": "rig",
+      "credits": 5,
+      "at": "2026-10-12T16:10:00Z",
+      "note": "auto-rig sobre T-pose, height 1.75 m. Incluye walking y running gratis.",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a130d1-e4bd-7473-b23a-73650e4ae5bc",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-12T16:20:00Z",
+      "action_id": 650,
+      "action": "Mummy_Stagger_inplace",
+      "status": "SUCCEEDED",
+      "note": "idle propio: tambaleo de consumido"
+    },
+    {
+      "id": "01a130d1-e667-7289-80b1-265bdb7f13bb",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-12T16:20:00Z",
+      "action_id": 214,
+      "action": "Punch_Forward_with_Both_Fists",
+      "status": "SUCCEEDED",
+      "note": "ataque: embestida con las dos manos, se lee como agarre"
+    },
+    {
+      "id": "01a130d1-e7fc-72f2-9710-9d7a8441f589",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-12T16:20:00Z",
+      "action_id": 178,
+      "action": "Hit_Reaction",
+      "status": "SUCCEEDED"
+    },
+    {
+      "id": "01a130d1-e966-7466-b044-4c20d5d991d7",
+      "op": "animate",
+      "credits": 3,
+      "at": "2026-10-12T16:20:00Z",
+      "action_id": 8,
+      "action": "Dead",
+      "status": "SUCCEEDED"
+    }
+  ],
+  "credits_total": 53,
+  "derived": [
+    "concept.png",
+    "_alt/concept_v1_clean.png",
+    "master.glb",
+    "master_textures/",
+    "thumb.png",
+    "targets/rigged.fbx",
+    "targets/anim_walking.fbx",
+    "targets/anim_running.fbx",
+    "targets/anim_idle.fbx",
+    "targets/anim_attack.fbx",
+    "targets/anim_hit.fbx",
+    "targets/anim_death.fbx"
+  ],
+  "ue_path": "/Game/Project_C/Assets/Cook",
+  "ue_assets": [
+    "SK_Cook",
+    "SKEL_Cook",
+    "PHYS_Cook",
+    "MI_Cook",
+    "T_Cook_BC/N/R/M",
+    "AS_Cook_Idle/Walk/Run/Attack/Hit/Death"
+  ],
+  "ue_usage": "BP_Enemy CDO: SK_Cook + AS_Cook_Idle (AnimationSingleNode), UseBodyAsBase true"
+}
