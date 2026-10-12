@@ -158,8 +158,8 @@ vocabulario se extrae de esa evidencia.
 Son obligatorios porque la materia evalúa la demostración de los temas, así que se les buscó
 un lugar que no fuera decorativo.
 
-- **Chaos Destruction** → paredes destructibles que **agregan aristas al grafo** y cambian
-  todas las distancias del mapa.
+- ~~**Chaos Destruction** → paredes destructibles que **agregan aristas al grafo** y cambian
+  todas las distancias del mapa.~~ Revertido por [D-31](#d-31--no-hay-paredes-destructibles).
 - **Landscape** → la **sección de superficie** del mapa, antes de descender. Le da además
   trabajo real a Lights.
 
@@ -675,6 +675,21 @@ presentación, que es dónde dice [`08-presentacion-y-reglas.md`](../08-presenta
 que tiene que estar.
 
 ---
+
+## D-31 — No hay paredes destructibles
+
+**2026-10-12**
+
+Se saca del GDD la pared destructible y con ella la decisión abierta A-07 (quién la rompe). El
+grafo de pasajes queda fijo toda la partida, como en el manual. Revierte la mitad de Chaos de
+[D-10](#d-10--chaos-destruction-y-landscape-tienen-destino-mecánico).
+
+**Por qué:** complejizaba donde no hacía falta. El manual no la tiene, y sumarla obligaba a
+recalcular distancias a mitad de partida, a una regla nueva para un `Move` interrumpido y a
+decidir quién rompe qué, todo para cubrir un tema de la materia.
+
+**Descarta:** que Chaos Destruction tenga peso en las reglas. Si la materia lo exige, se cubre
+con destrucción visual (props que se rompen), sin tocar el grafo.
 
 ---
 
