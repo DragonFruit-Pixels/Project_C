@@ -12,6 +12,7 @@ technical foundation: source control, asset conventions, and project documentati
 | **Engine** | Unreal Engine **5.8** (launcher build) |
 | **Platform** | Windows, DirectX 12 / Shader Model 6 |
 | **Source control** | Git with [Git LFS](https://git-lfs.com/) — **required** |
+| **Compiler** | Visual Studio 2022 with *Game development with C++* — **required**, the project has a C++ module |
 
 ## Getting started
 
@@ -29,8 +30,13 @@ Already cloned without LFS? Recover with:
 git lfs install && git lfs pull
 ```
 
-Then open `Project_C.uproject`. The first launch compiles shaders and builds the
-derived data cache — expect several minutes before the editor is usable.
+Then open the project with **`Abrir_Project_C.bat`**, always, with the editor closed.
+It compiles the C++ module before launching: `Binaries/` is not in git, and the editor
+silently loads a stale DLL after a pull that changed `Source/`, which breaks every
+Blueprint that uses it. With no C++ changes the build is incremental and takes seconds.
+
+The first launch compiles shaders and builds the derived data cache — expect several
+minutes before the editor is usable.
 
 ## Rendering
 
