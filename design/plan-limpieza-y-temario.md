@@ -76,9 +76,11 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
 - [ ] **No se borran** `BP_PlayerState_Mission` ni `BP_GameInstance`: se usan en la Parte B.
 
 ### A8 · C++
-- [ ] Se mantiene `UGraphSubsystem` ("Implementación con C++" está en el programa).
-- [ ] Sacar `BlockedTowards`, que quedó sin uso desde D-31.
-- [ ] `GetNearest` y `GetShortestPath` se quedan: los va a usar la IA enemiga (B · Clase 3).
+- [x] Se mantiene `UGraphSubsystem` ("Implementación con C++" está en el programa).
+- [x] ~~Sacar `BlockedTowards`~~ **Se queda.** D-31 sacó las paredes *destructibles*, pero los
+      pasajes bloqueados siguen siendo regla del GDD (`mapa-y-espacios.md`: los define cada
+      misión y el BFS los respeta). Hoy están vacíos en `L_Mission_01`; el segundo nivel puede usarlos.
+- [x] `GetNearest` y `GetShortestPath` se quedan: los va a usar la IA enemiga (B · Clase 3).
 
 ### A9 · Documentación
 - [ ] Marcar `design/architecture/` como histórica: describe clases de C++ que ya no existen y su
