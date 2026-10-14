@@ -1,5 +1,13 @@
 # 🏗️ Arquitectura
 
+> **⚠️ Histórico desde 2026-10-13.** Esta carpeta describe la arquitectura híbrida planeada en
+> agosto: clases de C++ que ya no existen (`UWoundsComponent`, `UDeck`, `UEffectSubsystem`…) y
+> la regla 2 ("nunca `Cast`"). Desde `4d26d17` solo el grafo del tablero vive en C++, y el
+> estilo de Blueprint es el de la materia: `Cast` y referencias tipadas donde alcanzan, y
+> dispatchers e interfaces donde hay un problema real que resolver.
+> **El estado vigente y lo que falta están en [`../plan-limpieza-y-temario.md`](../plan-limpieza-y-temario.md).**
+> No usar estos documentos para decidir cómo construir algo nuevo.
+
 Cómo se construye Project_C en Unreal Engine 5.8, con **arquitectura híbrida C++ + Blueprint**
 ([D-13](../gdd/06-decisiones/registro.md)). **Esta carpeta responde
 "con qué se hace", el [GDD](../gdd/README.md) responde "qué se hace".** Si un documento de acá

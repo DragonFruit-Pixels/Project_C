@@ -2,7 +2,7 @@
 
 ## What is Arcane?
 
-Arcane is a configuration harness for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). It provides a curated library of **427 skills**, **109 agents**, **17 hooks**, and **28 rules** that you selectively deploy into any project. Instead of shipping everything to every project (wasting tokens and degrading performance), you pick a **profile** that matches your stack and only the relevant tools get installed.
+Arcane is a configuration harness for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). It provides a curated library of **437 skills**, **115 agents**, **17 hooks**, and **33 rules** that you selectively deploy into any project. Instead of shipping everything to every project (wasting tokens and degrading performance), you pick a **profile** that matches your stack and only the relevant tools get installed.
 
 ## Table of Contents
 
@@ -37,7 +37,7 @@ Arcane is a configuration harness for [Claude Code](https://docs.anthropic.com/e
 No installation needed — Arcane runs via `npx`:
 
 ```bash
-npx claude-code-arcane install backend-ts+agile
+npx claude-code-arcane install backend-typescript+agile
 ```
 
 That's it. `npx` downloads and runs the latest version automatically.
@@ -49,7 +49,7 @@ That's it. `npx` downloads and runs the latest version automatically.
 cd ~/projects/my-app
 
 # 2. Install a profile
-npx claude-code-arcane install backend-ts+agile
+npx claude-code-arcane install backend-typescript+agile
 
 # 3. Open Claude Code
 claude
@@ -69,10 +69,10 @@ Your project now has skills, agents, hooks, rules, and permissions tailored for 
 npx claude-code-arcane install
 
 # Install a specific profile
-npx claude-code-arcane install backend-ts
+npx claude-code-arcane install backend-typescript
 
 # Combine profiles with +
-npx claude-code-arcane install backend-ts+agile+testing
+npx claude-code-arcane install backend-typescript+agile+testing
 
 # Install to a specific directory (default: current dir)
 npx claude-code-arcane install unity-dev --target ~/projects/my-game
@@ -146,9 +146,25 @@ Shows installed profiles, skill count, rules, agents, installation date, and wor
 ```bash
 npx claude-code-arcane update
 
+# Only this repo, instead of every registered installation
+npx claude-code-arcane update --here
+
+# Preview
+npx claude-code-arcane update --dry-run
+
 # Quiet mode (for hooks — fails silently)
 npx claude-code-arcane update --quiet
 ```
+
+**What it will and will not touch.** Arcane only updates or removes content its own
+manifest records having installed. A skill or agent you wrote by hand in `.claude/`
+is reported as `Left alone (not installed by Arcane)` and never modified — including
+under `--force`, which only exists to overwrite *Arcane's* files that you edited
+locally. Files you edited that Arcane does own are skipped as `customized`.
+
+When a skill really does leave the profile, it is moved to `.claude/.arcane-trash/`
+rather than deleted, so a wrong call is recoverable. The trash sits outside
+`.claude/skills/`, so a removed skill stops loading immediately.
 
 ### `npx claude-code-arcane clean` — Remove Arcane from a project
 
@@ -162,7 +178,7 @@ Removes `.claude/` and `.claude.bak/` from the current directory. Requires `--fo
 
 ```bash
 # Create worktree + install Arcane in one step
-npx claude-code-arcane worktree feat/new-api --profile backend-ts+agile
+npx claude-code-arcane worktree feat/new-api --profile backend-typescript+agile
 
 # Inherits profile from current installation
 npx claude-code-arcane worktree feat/new-api
@@ -203,15 +219,17 @@ All profiles are equal — pick any combination that fits your work. They are gr
 
 | Category | Profiles |
 |----------|----------|
-| **Backend** | `backend-ts`, `backend-go`, `backend-dotnet`, `backend-nestjs`, `backend-nextjs` |
-| **Frontend & Design** | `frontend`, `design` |
-| **Mobile** | `mobile`, `flutter`, `android-native`, `ios-native` |
-| **Gamedev** | `unity-dev`, `unity-design`, `unreal-dev`, `visual-novel`, `audio` |
+| **Backend** | `backend-typescript`, `backend-go`, `backend-dotnet`, `backend-nestjs`, `backend-nextjs` |
+| **Frontend & Design** | `frontend-react-vite`, `design` |
+| **Mobile** | `mobile-react-native`, `mobile-flutter`, `mobile-android-kotlin`, `mobile-ios-swift` |
+| **Gamedev** | `unity-dev`, `unity-design`, `unreal-dev`, `visual-novel`, `audio`, `meshy`, `blender` |
 | **Platform & Quality** | `infra`, `database`, `security`, `testing`, `ai` |
 | **Project Management** | `agile`, `jira`, `clickup`, `integrations` |
 | **Business** | `business`, `clevel`, `finance`, `marketing`, `ecommerce`, `regulatory` |
 | **Personal** | `second-brain`, `job-hunt`, `freelance` |
 | **Utilities** | `docs`, `self-improving`, `statusline` |
+
+Older names still install and update: `backend-ts`, `frontend`, `mobile`, `flutter`, `ios-native` and `android-native` resolve to `backend-typescript`, `frontend-react-vite`, `mobile-react-native`, `mobile-flutter`, `mobile-ios-swift` and `mobile-android-kotlin`.
 
 ### Core (always included)
 
@@ -239,7 +257,7 @@ npx claude-code-arcane install <profile>[+<profile>][+<profile>...]
 
 1. **Always explicit** — there is no "full" or "all" profile. You choose what you need.
 2. **Core is automatic** — the 21 universal skills and all hooks are always included.
-3. **All profiles combine freely** — `unity-dev+unity-design`, `backend-go+frontend`, or `backend-ts+agile+testing`; there is no required "base".
+3. **All profiles combine freely** — `unity-dev+unity-design`, `backend-go+frontend-react-vite`, or `backend-typescript+agile+testing`; there is no required "base".
 4. **Deduplication is automatic** — overlapping skills across profiles are installed once.
 5. **Replace, not merge** — installing a new profile replaces the previous one entirely (with backup).
 
@@ -253,7 +271,7 @@ After the initial install, you can incrementally add or remove skills and profil
 
 ```bash
 # Start with a profile
-npx claude-code-arcane install backend-ts
+npx claude-code-arcane install backend-typescript
 
 # Later, add testing and security
 npx claude-code-arcane add +testing +security
@@ -276,7 +294,7 @@ npx claude-code-arcane remove docker-setup
 
 # Start over completely
 npx claude-code-arcane clean --force
-npx claude-code-arcane install backend-ts+agile
+npx claude-code-arcane install backend-typescript+agile
 ```
 
 ---
@@ -289,7 +307,7 @@ Work on multiple features in parallel using git worktrees, each with its own Arc
 
 ```bash
 # Create worktree + install Arcane in one step
-npx claude-code-arcane worktree feat/new-api --profile backend-ts+agile
+npx claude-code-arcane worktree feat/new-api --profile backend-typescript+agile
 
 # Inherits profile from current installation
 npx claude-code-arcane worktree feat/new-api
@@ -352,25 +370,25 @@ npx claude-code-arcane install unity-dev+unity-design+agile+clickup
 npx claude-code-arcane install backend-go+infra+agile+jira
 
 # Full-stack monorepo
-npx claude-code-arcane install backend-ts+frontend+testing+database
+npx claude-code-arcane install backend-typescript+frontend-react-vite+testing+database
 
 # Mobile app with CI/CD
-npx claude-code-arcane install mobile+agile+clickup+testing
+npx claude-code-arcane install mobile-react-native+agile+clickup+testing
 
 # Secure backend with docs
-npx claude-code-arcane install backend-ts+security+docs+database
+npx claude-code-arcane install backend-typescript+security+docs+database
 
 # AI/ML project with data pipelines
 npx claude-code-arcane install backend-go+ai+infra
 
 # SaaS with full marketing stack
-npx claude-code-arcane install backend-ts+marketing+business+finance
+npx claude-code-arcane install backend-typescript+marketing+business+finance
 
 # Regulated medical device
-npx claude-code-arcane install backend-ts+regulatory+security+testing
+npx claude-code-arcane install backend-typescript+regulatory+security+testing
 
 # With status bar
-npx claude-code-arcane install backend-ts+agile+statusline
+npx claude-code-arcane install backend-typescript+agile+statusline
 ```
 
 ---
@@ -392,6 +410,31 @@ my-project/.claude/
 └── docs/                  # General documentation
 ```
 
+### Qué agentes instala un profile
+
+La lista `agents:` de un profile acepta dos formas:
+
+```yaml
+agents:
+  - game                        # la división entera: 32 agentes
+  - quality/security-architect  # solo ese agente
+```
+
+La forma por división es la original y sigue siendo el default. La granular
+existe porque **las divisiones son temáticas, no funcionales**: `qa-lead`,
+`ux-designer` y `performance-analyst` viven en `game/` y los quieren profiles
+que no tienen nada de gamedev. Antes la única manera de alcanzar uno era
+instalar los 30 — justo el peso que los profiles existen para evitar.
+
+Reglas:
+
+- Si un profile ya trae la división entera, una entrada granular de esa misma
+  división es un no-op, no una segunda copia.
+- Al desinstalar, una entrada granular borra solo su archivo, y se lleva el
+  directorio de la división únicamente si queda vacío.
+- Si otro profile activo declara la división completa, esa gana: la entrada
+  granular no borra nada, porque rompería al otro profile.
+
 ### settings.json
 
 Generated automatically with merged permissions from all selected profiles. Includes:
@@ -409,8 +452,8 @@ Every installation creates `.claude/arcane-manifest.json`:
 {
   "arcane_version": "1.0.0",
   "cli": "npm",
-  "profile_command": "backend-ts+agile",
-  "profiles": ["core", "backend-ts", "agile"],
+  "profile_command": "backend-typescript+agile",
+  "profiles": ["core", "backend-typescript", "agile"],
   "installed_at": "2026-05-25T15:30:00Z",
   "total_skills": 56,
   "total_rules": 6,
@@ -482,7 +525,7 @@ mv ~/projects/my-game/.claude.bak ~/projects/my-game/.claude
 
 ### Can I combine multiple stack profiles?
 
-Yes. `backend-go+frontend` gives you both Go backend and React frontend skills. Duplicate skills are automatically deduplicated.
+Yes. `backend-go+frontend-react-vite` gives you both Go backend and React frontend skills. Duplicate skills are automatically deduplicated.
 
 ### Does the profile persist between Claude Code sessions?
 
@@ -515,7 +558,7 @@ Yes, and it's recommended. This way everyone on the team gets the same Claude Co
 
 ### How many tokens does a profile consume?
 
-Each skill adds ~30-100 tokens to the system prompt. A typical stack profile (20-30 skills) adds ~1-2k tokens. The core profile adds ~500 tokens. Compare that to loading all 427 skills, which is why selective deploy matters.
+Each skill adds ~30-100 tokens to the system prompt. A typical stack profile (20-30 skills) adds ~1-2k tokens. The core profile adds ~500 tokens. Compare that to loading all 437 skills, which is why selective deploy matters.
 
 ### Why replace instead of merge on install?
 

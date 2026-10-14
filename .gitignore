@@ -56,3 +56,4 @@ production/session-state/*.log
 # ── Explicitly versioned ────────────────────────────────────────
 # Listed for the next person reading this file, not because git needs it:
 #   *.uproject, Config/, Content/, Source/, Plugins/*/Source/, docs/
+.claude/.arcane-trash/
