@@ -21,17 +21,17 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
 > cada `BP_Space`, `CurrentSpace` de cada figura). El último reparent los borró.
 
 ### A1 · Turno: el GameMode decide, el GameState guarda
-- [ ] Borrar del GameMode las 5 funciones que solo reenvían al GameState: `GetMissionState`,
+- [x] Borrar del GameMode las 5 funciones que solo reenvían al GameState: `GetMissionState`,
       `GetActiveFigure`, `GetRound`, `GetFiguresLeftThisRound`, `IsFiguresTurn`.
-- [ ] El HUD y el PlayerController leen el GameState directo (`Get Game State` + Cast).
-- [ ] **`BP_GameState_Mission` se queda**: la Clase 3 lo define como "registro central: rondas".
+- [x] El HUD y el PlayerController leen el GameState directo (`Get Game State` + Cast).
+- [x] **`BP_GameState_Mission` se queda**: la Clase 3 lo define como "registro central: rondas".
 
 ### A2 · Dispatchers: de 9 a 3, con bind y unbind
-- [ ] Borrar los 6 que no escucha nadie: `OnPhaseChanged`, `OnFigureMoved`, `OnRoundBegan`,
+- [x] Borrar los 6 que no escucha nadie: `OnPhaseChanged`, `OnFigureMoved`, `OnRoundBegan`,
       `OnHoveredChanged`, `OnSelectionChanged`, `OnSpaceChanged`.
-- [ ] Borrar el loop de `OnOrderRefused` (el controller se escucha a sí mismo) y la función
+- [x] Borrar el loop de `OnOrderRefused` (el controller se escucha a sí mismo) y la función
       `ForwardRefusalToHud`, que nadie llama. El rechazo llama directo a `MissionHud.ShowRefusal`.
-- [ ] Quedan 3, cada uno con emisor y oyente reales:
+- [x] Quedan 3, cada uno con emisor y oyente reales:
 
 | Dispatcher | Emisor → Oyente | Para |
 |---|---|---|
@@ -39,7 +39,7 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
 | `OnMissionEnded` (nuevo) | GameMode → HUD | mostrar la pantalla final (hoy se chequea en cada Tick) |
 | `OnCharacterLost` | `BPC_Ratchet` → GameMode | derrota por trinquete |
 
-- [ ] Bind en `BeginPlay` y **Unbind en `EndPlay`**: la Clase 5 enseña los dos.
+- [x] Bind en `BeginPlay` y **Unbind en `EndPlay`**: la Clase 5 enseña los dos.
 
 ### A3 · `E_TurnPhase` (13 valores) → `E_MissionState` (3)
 - [x] Nuevo enum `Playing / Won / Lost`. Borrar `EnterPhase` y `E_TurnPhase`.
@@ -53,29 +53,29 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
       su dispatcher y los `GetComponentByClass` + Cast del GameMode.
 
 ### A5 · Ubicar las figuras una sola vez
-- [ ] Solo `BP_Space.RefreshOccupantPlacement` ubica, con la fórmula
+- [x] Solo `BP_Space.RefreshOccupantPlacement` ubica, con la fórmula
       `Anchor + (i - (n-1)/2) * Spacing` en un eje.
-- [ ] Borrar `GetFigurePlacement`, `GetOccupantLocation` y la grilla de ~40 nodos de `GetSlotLocation`.
-- [ ] Por ahora sigue siendo teletransporte. Caminar con `Move To` entra con la Clase 6.
+- [x] Borrar `GetFigurePlacement`, `GetOccupantLocation` y la grilla de ~40 nodos de `GetSlotLocation`.
+- [x] Por ahora sigue siendo teletransporte. Caminar con `Move To` entra con la Clase 6.
 
 ### A6 · Cámara
-- [ ] Input directo (offset al actor, yaw y largo del brazo clampeado) + `Enable Camera Lag` y
+- [x] Input directo (offset al actor, yaw y largo del brazo clampeado) + `Enable Camera Lag` y
       `Enable Camera Rotation Lag` en el SpringArm.
-- [ ] Borrar las 6 variables Pending/Target/Current y `ConsumePan`, `ConsumeOrbit`, `ApplyToCamera`.
+- [x] Borrar las 6 variables Pending/Target/Current y `ConsumePan`, `ConsumeOrbit`, `ApplyToCamera`.
 
 ### A7 · Limpieza menor
-- [ ] `IsSet` (copiado en 3 BPs) → `IsValid` directo.
-- [ ] Pasar a variables locales: `PartySnapshot`, `Reach`, `Valid`, `Left`, `Tally`, `Best`,
+- [x] `IsSet` (copiado en 3 BPs) → `IsValid` directo.
+- [x] Pasar a variables locales: `PartySnapshot`, `Reach`, `Valid`, `Left`, `Tally`, `Best`,
       `Crossed`, `OldPosition`, `NewPosition`.
-- [ ] Borrar `GetFiguresLeftCount`; se usa `Length` de `GetFiguresLeftThisRound`.
-- [ ] Borrar `GetSelectableName` de `BPI_Selectable` y de sus 2 implementaciones.
-- [ ] Borrar `E_OrderMode`. **Confirmar antes con el compañero**, porque entró en el último merge.
-- [ ] Borrar los eventos vacíos `EventTick`/`BeginOverlap` (6 BPs).
+- [x] Borrar `GetFiguresLeftCount`; se usa `Length` de `GetFiguresLeftThisRound`.
+- [x] Borrar `GetSelectableName` de `BPI_Selectable` y de sus 2 implementaciones.
+- [x] Borrar `E_OrderMode`: no lo referenciaba nada.
+- [x] Borrar los eventos vacíos `EventTick`/`BeginOverlap` (6 BPs).
 - [x] Fix Up Redirectors (en 5.8: *Update Redirector References*): `Core/BP_Character`, `Placeables/BP_Space`.
-- [ ] `TraceSelectableUnderCursor`: un solo trace por canal y `Draw Debug Type = None`.
-- [ ] `BPC_Ratchet`: queda `Position` + `AddToll` + `IsLost` + `OnCharacterLost`. Se borran
+- [x] `TraceSelectableUnderCursor`: un solo trace por canal y `Draw Debug Type = None`.
+- [x] `BPC_Ratchet`: queda `Position` + `AddToll` + `IsLost` + `OnCharacterLost`. Se borran
       `ThresholdsCrossed`, `OnRatchetAdvanced` y `OnThresholdCrossed` hasta que un umbral tenga efecto.
-- [ ] **No se borran** `BP_PlayerState_Mission` ni `BP_GameInstance`: se usan en la Parte B.
+- [x] **No se borran** `BP_PlayerState_Mission` ni `BP_GameInstance`: se usan en la Parte B.
 
 ### A8 · C++
 - [x] Se mantiene `UGraphSubsystem` ("Implementación con C++" está en el programa).
@@ -85,7 +85,7 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
 - [x] `GetNearest` y `GetShortestPath` se quedan: los va a usar la IA enemiga (B · Clase 3).
 
 ### A9 · Documentación
-- [ ] Marcar `design/architecture/` como histórica: describe clases de C++ que ya no existen y su
+- [x] Marcar `design/architecture/` como histórica: describe clases de C++ que ya no existen y su
       regla 2 ("nunca Cast") contradice el estilo actual.
 
 ---
@@ -127,9 +127,9 @@ por override, interfaz, UserWidget + Add to Viewport + Input Mode Game and UI.
 - [ ] **Abstracción:** `Generate Abstract Class` en `BP_Character`.
 - [ ] **Encapsulamiento:** `Health`, `MaxHealth`, `AttackDamage` y `CurrentSpace` como `Private`,
       con `Get`/`Set`. `Instance Editable` donde se tunea por instancia.
-- [ ] **Polimorfismo:** sacar los Cast a `BP_Enemy` de `CheckVictory` y del Reckoning; se usa
+- [x] **Polimorfismo:** sacar los Cast a `BP_Enemy` de `CheckVictory` y del Reckoning; se usa
       `IsHostile` sobre `BP_Character`.
-- [ ] **Dispatchers:** bind y unbind (A2).
+- [x] **Dispatchers:** bind y unbind (A2).
 - [ ] **Niveles:** `Open Level (by Name)` para Menú → `L_Mission_01` → `L_Mission_02`.
 - [ ] **Level Blueprint:** verificar que `L_Mission_01` no tenga lógica general.
 
@@ -167,4 +167,3 @@ y golpe, Anim Notify (daño en el frame del golpe, pasos), y que las figuras **c
 - Los Modifiers y Triggers actuales del IMC.
 - El Level Blueprint de `L_Mission_01`.
 - La resolución de las texturas `T_*`.
-- `E_OrderMode`, con el compañero.
