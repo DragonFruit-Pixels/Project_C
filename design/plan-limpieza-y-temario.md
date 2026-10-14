@@ -42,12 +42,14 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
 - [ ] Bind en `BeginPlay` y **Unbind en `EndPlay`**: la Clase 5 enseña los dos.
 
 ### A3 · `E_TurnPhase` (13 valores) → `E_MissionState` (3)
-- [ ] Nuevo enum `Playing / Won / Lost`. Borrar `EnterPhase` y `E_TurnPhase`.
-- [ ] `ActionsRemaining = ActionsPerTurn` va dentro de `EndTurn`.
-- [ ] El HUD deja de mostrar la línea "FASE".
+- [x] Nuevo enum `Playing / Won / Lost`. Borrar `EnterPhase` y `E_TurnPhase`.
+      La variable `MissionState` vive en el **GameState** (lo guarda) y la escribe `EndMission`
+      del GameMode (lo decide). Se fue también `MissionWon`, que repetía el dato.
+- [x] `ActionsRemaining = ActionsPerTurn` va dentro de `EndTurn`.
+- [x] El HUD deja de mostrar la línea "FASE" (se borró `TxtPhase`).
 
 ### A4 · `BPC_Occupancy` → variable en `BP_Character`
-- [ ] `CurrentSpace` + `SetSpace` en `BP_Character`. Se van el componente, `PreviousSpace`,
+- [x] `CurrentSpace` + `SetSpace` en `BP_Character`. Se van el componente, `PreviousSpace`,
       su dispatcher y los `GetComponentByClass` + Cast del GameMode.
 
 ### A5 · Ubicar las figuras una sola vez
@@ -69,7 +71,7 @@ Cada paso deja el juego andando. Se compila todo, se prueba en PIE y se hace un 
 - [ ] Borrar `GetSelectableName` de `BPI_Selectable` y de sus 2 implementaciones.
 - [ ] Borrar `E_OrderMode`. **Confirmar antes con el compañero**, porque entró en el último merge.
 - [ ] Borrar los eventos vacíos `EventTick`/`BeginOverlap` (6 BPs).
-- [ ] Fix Up Redirectors: `Core/BP_Character`, `Placeables/BP_Space`.
+- [x] Fix Up Redirectors (en 5.8: *Update Redirector References*): `Core/BP_Character`, `Placeables/BP_Space`.
 - [ ] `TraceSelectableUnderCursor`: un solo trace por canal y `Draw Debug Type = None`.
 - [ ] `BPC_Ratchet`: queda `Position` + `AddToll` + `IsLost` + `OnCharacterLost`. Se borran
       `ThresholdsCrossed`, `OnRatchetAdvanced` y `OnThresholdCrossed` hasta que un umbral tenga efecto.
