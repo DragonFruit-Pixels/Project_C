@@ -105,8 +105,9 @@ por override, interfaz, UserWidget + Add to Viewport + Input Mode Game and UI.
       porque `Binaries/` no se sube.
 
 ### Clase 3 · Gameplay Framework + Físicas
-- [ ] **PlayerState:** escribir `EnemiesKilled`, `SpacesMoved` y `CharactersLost` desde el
-      GameMode, y mostrarlos en la pantalla final.
+- [x] **PlayerState:** el GameMode escribe `EnemiesKilled`, `SpacesMoved` y `CharactersLost`
+      (`NotifyDeath`, `AddSpacesMoved`). Se borraron `TollTaken` y `RerollsSpent`, que no tenían mecánica.
+- [ ] Mostrarlos en la pantalla final (va con la UI, pospuesta).
 - [ ] **GameInstance:** guardar el nivel actual y la progresión para pasar de `L_Mission_01` a `L_Mission_02`.
 - [ ] **AIController:** `BP_AIC_Enemy`, asignado en `BP_Enemy` con `Auto Possess AI`. Decide a
       qué casilla va el enemigo (`GetNearest` hacia el personaje más cercano).
