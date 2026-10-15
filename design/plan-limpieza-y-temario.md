@@ -100,13 +100,14 @@ por override, interfaz, UserWidget + Add to Viewport + Input Mode Game and UI.
 ### Clase 1 · Git
 - [ ] Vigilar la cuota de LFS de GitHub (10 GB de almacenamiento y 10 GB/mes de descarga):
       `assets/3d` pesa 239 MB y cada clon la gasta.
-- [ ] README con los pasos para un compañero nuevo: instalar LFS **antes** de clonar
+- [x] README con los pasos para un compañero nuevo: instalar LFS **antes** de clonar
       (`git lfs install`), checkout de `develop`, y Visual Studio con C++ para compilar el módulo,
       porque `Binaries/` no se sube.
 
 ### Clase 3 · Gameplay Framework + Físicas
-- [ ] **PlayerState:** escribir `EnemiesKilled`, `SpacesMoved` y `CharactersLost` desde el
-      GameMode, y mostrarlos en la pantalla final.
+- [x] **PlayerState:** el GameMode escribe `EnemiesKilled`, `SpacesMoved` y `CharactersLost`
+      (`NotifyDeath`, `AddSpacesMoved`). Se borraron `TollTaken` y `RerollsSpent`, que no tenían mecánica.
+- [ ] Mostrarlos en la pantalla final (va con la UI, pospuesta).
 - [ ] **GameInstance:** guardar el nivel actual y la progresión para pasar de `L_Mission_01` a `L_Mission_02`.
 - [ ] **AIController:** `BP_AIC_Enemy`, asignado en `BP_Enemy` con `Auto Possess AI`. Decide a
       qué casilla va el enemigo (`GetNearest` hacia el personaje más cercano).
@@ -116,22 +117,22 @@ por override, interfaz, UserWidget + Add to Viewport + Input Mode Game and UI.
       Material. Candidato: los dados (decisión abierta A-09).
 
 ### Clase 4 · Inputs, Raycast y Posesión
-- [ ] Usar Modifiers en los IA de cámara (por ejemplo `Negate` o `Swizzle` en el pan, `Scalar` en el zoom).
+- [x] Modifiers en el IMC: `Swizzle` en W/S y `Negate` en S/A/Q (ya estaban).
 - [ ] Posesión de IA: la cubre el AIController de la Clase 3.
 
 ### Clase 4 · Materiales
-- [ ] `M_ScrapBlade` y `M_ValveMaul` → Material Instances de un padre compartido.
-- [ ] Revisar la resolución de las texturas de Meshy: ninguna de 4K (`Maximum Texture Size` o LOD group).
+- [x] `M_ScrapBlade` y `M_ValveMaul` → `MI_ScrapBlade` y `MI_ValveMaul`, hijos de `M_Character`.
+- [x] Texturas de Meshy: todas las fuentes son de 2048, ninguna de 4K.
 
 ### Clase 5 · Diseño de clases y comunicación
-- [ ] **Abstracción:** `Generate Abstract Class` en `BP_Character`.
-- [ ] **Encapsulamiento:** `Health`, `MaxHealth`, `AttackDamage` y `CurrentSpace` como `Private`,
+- [x] **Abstracción:** `Generate Abstract Class` en `BP_Character`.
+- [x] **Encapsulamiento:** `Health`, `MaxHealth`, `AttackDamage` y `CurrentSpace` como `Private`,
       con `Get`/`Set`. `Instance Editable` donde se tunea por instancia.
 - [x] **Polimorfismo:** sacar los Cast a `BP_Enemy` de `CheckVictory` y del Reckoning; se usa
       `IsHostile` sobre `BP_Character`.
 - [x] **Dispatchers:** bind y unbind (A2).
 - [ ] **Niveles:** `Open Level (by Name)` para Menú → `L_Mission_01` → `L_Mission_02`.
-- [ ] **Level Blueprint:** verificar que `L_Mission_01` no tenga lógica general.
+- [x] **Level Blueprint:** `L_Mission_01` no tiene lógica (se borraron los dos eventos vacíos).
 
 ### Clase 7 · UI y Sonidos
 - [ ] `WBP_MainMenu`: Jugar y Salir (opcional: Controles). `Set Input Mode UI Only` + `Show Mouse Cursor`.
@@ -151,6 +152,18 @@ y golpe, Anim Notify (daño en el frame del golpe, pasos), y que las figuras **c
 
 ---
 
+## Pospuesto (decisión del 2026-10-14)
+
+Queda para después, a pedido: **toda la UI** (menú, pausa, pantalla final, objetivo, animación
+del cartel, nombres visibles) y lo que espera una decisión de diseño:
+
+- **Física:** qué objeto la usa (candidato: los dados).
+- **Interactuables con overlap:** cuáles son los dos.
+- **`L_Mission_02`:** qué cambia respecto de la Misión 1 (y con ella `Open Level` y el GameInstance).
+- **Sonido:** hacen falta archivos de audio; recién ahí las Sound Classes y los Cues tienen uso.
+- **`BP_AIC_Enemy`:** el GDD mueve a los enemigos con cartas del `Pressure Deck`, que no existe
+  todavía. Falta decidir cuándo se mueven en esta versión.
+
 ## Orden de ejecución
 
 1. **A1 → A2 → A3**: se tocan entre sí y son lo que más simplifica.
@@ -165,5 +178,4 @@ y golpe, Anim Notify (daño en el frame del golpe, pasos), y que las figuras **c
 
 - El cuerpo de los eventos de input (`IA_Select`, `IA_Cancel`, `IA_EndTurn`): el DSL los muestra vacíos.
 - Los Modifiers y Triggers actuales del IMC.
-- El Level Blueprint de `L_Mission_01`.
 - La resolución de las texturas `T_*`.
