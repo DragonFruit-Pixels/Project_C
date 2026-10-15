@@ -2,8 +2,10 @@
 
 An Unreal Engine 5.8 game project in early development by [DragonFruit Pixels](https://github.com/DragonFruit-Pixels).
 
-The concept is still being defined — there is no gameplay yet. What exists today is the
-technical foundation: source control, asset conventions, and project documentation.
+A turn-based board game in the style of *Death May Die*: pick a character, move it across
+the board's spaces and fight the enemies that share its space. The rules live in
+[`design/gdd/`](design/gdd/README.md); what is built and what is left is tracked in
+[`design/plan-limpieza-y-temario.md`](design/plan-limpieza-y-temario.md).
 
 ## Requirements
 
@@ -22,7 +24,11 @@ instead of real content:
 ```bash
 git lfs install
 git clone https://github.com/DragonFruit-Pixels/Project_C.git
+cd Project_C
+git checkout develop
 ```
+
+Work happens on `develop`: branch off it and open the pull request back into it.
 
 Already cloned without LFS? Recover with:
 
@@ -62,4 +68,5 @@ production/ Session and production state
 
 ## Status
 
-Pre-production. No release, no builds, no packaged target yet.
+Playable prototype of the first mission (`L_Mission_01`): selection, movement, combat,
+turns and rounds, victory and defeat. No menu, sound or packaged build yet.
