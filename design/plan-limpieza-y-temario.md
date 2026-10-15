@@ -124,14 +124,14 @@ por override, interfaz, UserWidget + Add to Viewport + Input Mode Game and UI.
 - [ ] Revisar la resolución de las texturas de Meshy: ninguna de 4K (`Maximum Texture Size` o LOD group).
 
 ### Clase 5 · Diseño de clases y comunicación
-- [ ] **Abstracción:** `Generate Abstract Class` en `BP_Character`.
-- [ ] **Encapsulamiento:** `Health`, `MaxHealth`, `AttackDamage` y `CurrentSpace` como `Private`,
+- [x] **Abstracción:** `Generate Abstract Class` en `BP_Character`.
+- [x] **Encapsulamiento:** `Health`, `MaxHealth`, `AttackDamage` y `CurrentSpace` como `Private`,
       con `Get`/`Set`. `Instance Editable` donde se tunea por instancia.
 - [x] **Polimorfismo:** sacar los Cast a `BP_Enemy` de `CheckVictory` y del Reckoning; se usa
       `IsHostile` sobre `BP_Character`.
 - [x] **Dispatchers:** bind y unbind (A2).
 - [ ] **Niveles:** `Open Level (by Name)` para Menú → `L_Mission_01` → `L_Mission_02`.
-- [ ] **Level Blueprint:** verificar que `L_Mission_01` no tenga lógica general.
+- [x] **Level Blueprint:** `L_Mission_01` no tiene lógica (se borraron los dos eventos vacíos).
 
 ### Clase 7 · UI y Sonidos
 - [ ] `WBP_MainMenu`: Jugar y Salir (opcional: Controles). `Set Input Mode UI Only` + `Show Mouse Cursor`.
@@ -165,5 +165,4 @@ y golpe, Anim Notify (daño en el frame del golpe, pasos), y que las figuras **c
 
 - El cuerpo de los eventos de input (`IA_Select`, `IA_Cancel`, `IA_EndTurn`): el DSL los muestra vacíos.
 - Los Modifiers y Triggers actuales del IMC.
-- El Level Blueprint de `L_Mission_01`.
 - La resolución de las texturas `T_*`.
