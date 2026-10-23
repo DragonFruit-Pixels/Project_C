@@ -36,3 +36,6 @@ production/session-state/*.log
 # ── Explicitly versioned ────────────────────────────────────────
 # Listed for the next person reading this file, not because git needs it:
 #   *.uproject, Config/, Content/, Source/, Plugins/*/Source/, docs/
+
+# Arcane / Claude Code config: installed per machine with `arcane install`, not versioned
+.claude/
