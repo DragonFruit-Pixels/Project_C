@@ -72,9 +72,47 @@ Cada clase del framework de Unreal tiene un rol claro. Las reglas no están mezc
 1. Cada `BP_Space`, en su **BeginPlay**, se registra en el grafo con `RegisterSpace`, pasando sus `Neighbours` y `Blocked Towards`.
 2. Cada figura (`BP_Character`), en su **BeginPlay**, busca la casilla que tiene debajo con `FindStartSpace`, arranca con la vida al máximo (`Health = MaxHealth`) y llama a `OnSpawned`.
 3. En `BP_Player`, el evento `OnSpawned` llama a `RegisterFigure` del GameState: así el héroe entra en `Party` y participa de las rondas. Al desaparecer, `OnDespawned` llama a `UnregisterFigure`.
-4. El **BeginPlay** de `BP_GameMode` cierra el grafo con `SealGraph`.
+4. El **BeginPlay** de `BP_GameMode` cierra el grafo con `SealGraph` y llama a `EndTurn`. Como todavía no hay figura activa, eso solo deja `ActionsRemaining` en `ActionsPerTurn` (3).
 5. El **BeginPlay** de `BP_PlayerController` agrega el contexto de input (`Add Mapping Context`) y se suscribe al GameState con `BindToTurnChanges`.
 6. El HUD, en su **Construct**, guarda referencias tipadas al GameMode, al GameState y al PlayerController con `ResolveRefs` y se suscribe a `OnGameEnded`.
+
+### Una ronda de principio a fin
+Este es el recorrido completo desde que apretás Play hasta que empieza la segunda ronda, con 4 héroes: A, B, C y D. La tabla muestra cómo cambia el estado de la partida en cada paso.
+
+| Momento | `Round` | `Retired` | `ActiveFigure` | `ActionsRemaining` | HUD: "quedan" |
+|---|---|---|---|---|---|
+| Después de Play | 0 | vacío | nadie | 3 | 4 |
+| Elegís a A | 1 | vacío | A | 3 | 4 |
+| A gasta sus acciones | 1 | vacío | A | 3 → 2 → 1 → 0 | 4 |
+| Termina el turno de A | 1 | A | nadie | 3 | 3 |
+| Juegan B y C | 1 | A, B, C | nadie | 3 | 1 |
+| Termina el turno de D | **2** | vacío | nadie | 3 | 4 |
+
+**1. Play.** Se ejecuta lo de "Cómo arranca la partida": las casillas arman el grafo, cada figura se ubica en su casilla y los 4 héroes entran en `Party`. El estado de la partida (`E_GameState`) queda en "en juego". Todavía no hay ronda: `Round` vale 0.
+
+**2. Elegís un héroe (A).** Click → `HandleSelect` → `ClickActor` → `TrySelect` → `SelectActor` → `TryActivateFigure` (GameMode):
+- Como `Round` es 0, llama a `BeginRound`, que lo pasa a **1**. Esto pasa una sola vez, con la primera figura de la partida.
+- `SetActiveFigure` (GameState) acepta a A porque está en `Party`, no está en `Retired` y no hay otro héroe activo. Dispara `OnActiveFigureChanged`, y el PlayerController recalcula destinos y resaltados.
+
+**3. A usa sus 3 acciones.** Cada acción pasa por `SpendAction`, que resta 1 a `ActionsRemaining`.
+- **Moverse:** `TryMoveFigure` → `SetSpace`. En el mapa, A sale de su casilla (`RemoveOccupant`) y entra en la nueva (`AddOccupant`). Las dos casillas reacomodan en fila a los que quedan (`RefreshOccupantPlacement`). `AddSpacesMoved` suma las casillas recorridas en el PlayerState.
+- **Atacar:** `TryAttack` → `ApplyDamage` en el enemigo. Si muere, puede terminar la partida (paso 7).
+- Mientras A es la figura activa, ningún otro héroe se puede elegir: aparece "Termina el turno de A primero (Espacio)".
+
+**4. Termina el turno de A.** Pasa solo cuando `ActionsRemaining` llega a 0 (`EndTurnIfOutOfActions`) o cuando apretás Espacio (`HandleEndTurn`). En los dos casos se ejecuta `EndTurn`:
+1. `ResolveReckoning`: los enemigos vivos que están en la casilla de A le pegan. Si A muere, es DERROTA y la ronda se corta acá.
+2. `AdvanceTurn` → `RetireActiveFigure`: A pasa a `Retired` y `ActiveFigure` queda vacía. `GetFiguresLeftThisRound` devuelve 3 (B, C y D), así que no empieza una ronda nueva.
+3. `ActionsRemaining` vuelve a 3 para el próximo héroe.
+
+A queda parado donde terminó. Si intentás elegirlo de nuevo, `CanActThisRound` da falso porque está en `Retired`, y aparece "Esa figura no puede actuar esta ronda".
+
+**5. Juegan B, C y D.** Cada uno repite los pasos 2 a 4, en el orden que vos elijas. El contador "quedan" del HUD baja de a uno.
+
+**6. Termina el turno de D: empieza la ronda 2.** En `AdvanceTurn`, `GetFiguresLeftThisRound` devuelve una lista vacía. Entonces llama a `BeginRound`, que vacía `Retired` y suma 1 a `Round`. Los 4 héroes vuelven a estar disponibles, cada uno donde quedó en el mapa.
+
+Los enemigos no tienen turno propio: no se mueven y solo hacen daño en el Reckoning del paso 4.
+
+**7. Cómo se corta una ronda.** En cualquier momento, si muere un héroe, `NotifyDeath` llama a `EndGame(false)` (DERROTA). Si muere el último enemigo, `CheckVictory` llama a `EndGame(true)` (VICTORIA). `EndGame` cambia `E_GameState`, y desde ese momento `SpendAction` y `EndTurn` ya no hacen nada. `OnGameEnded` le avisa al HUD, que muestra la pantalla final.
 
 ### Figuras: herencia y una interfaz común
 Todas las figuras salen de una misma base:
