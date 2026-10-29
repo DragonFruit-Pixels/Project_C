@@ -1,4 +1,4 @@
-# Project_C — El juego y cómo está hecho
+# Project_C — Trabajo Práctico
 
 Project_C es un juego de tablero táctico por turnos para un jugador, inspirado en *Cthulhu: Death May Die*. Controlás un grupo de 4 héroes que se mueven por un tablero de casillas y pelean contra enemigos. Cada decisión cuenta: hay pocas acciones por turno, poca vida y el enemigo castiga a quien se queda mal parado.
 
@@ -42,6 +42,7 @@ Seleccionar un héroe no muestra nada en el tablero. Las casillas se iluminan re
 
 ### HUD
 La interfaz muestra todo lo necesario para decidir sin tener que recordar nada:
+
 - abajo a la izquierda, un panel en tres bloques:
   - **partida:** ronda actual y cuántos héroes faltan jugar;
   - **figura activa:** héroe activo, acciones que le quedan, figura seleccionada y si estás apuntando, y su **vida** en verde. La vida sigue a la vista después de terminar el turno, así ves el daño del Reckoning;
@@ -91,15 +92,18 @@ Este es el recorrido completo desde que apretás Play hasta que empieza la segun
 **1. Play.** Se ejecuta lo de "Cómo arranca la partida": las casillas arman el grafo, cada figura se ubica en su casilla y los 4 héroes entran en `Party`. El estado de la partida (`E_GameState`) queda en "en juego". Todavía no hay ronda: `Round` vale 0.
 
 **2. Elegís un héroe (A).** Click → `HandleSelect` → `ClickActor` → `TrySelect` → `SelectActor` → `TryActivateFigure` (GameMode):
+
 - Como `Round` es 0, llama a `BeginRound`, que lo pasa a **1**. Esto pasa una sola vez, con la primera figura de la partida.
 - `SetActiveFigure` (GameState) acepta a A porque está en `Party`, no está en `Retired` y no hay otro héroe activo. Dispara `OnActiveFigureChanged`, y el PlayerController recalcula destinos y resaltados.
 
 **3. A usa sus 3 acciones.** Cada acción pasa por `SpendAction`, que resta 1 a `ActionsRemaining`.
+
 - **Moverse:** `TryMoveFigure` → `SetSpace`. En el mapa, A sale de su casilla (`RemoveOccupant`) y entra en la nueva (`AddOccupant`). Las dos casillas reacomodan en fila a los que quedan (`RefreshOccupantPlacement`). `AddSpacesMoved` suma las casillas recorridas en el PlayerState.
 - **Atacar:** `TryAttack` → `ApplyDamage` en el enemigo. Si muere, puede terminar la partida (paso 7).
 - Mientras A es la figura activa, ningún otro héroe se puede elegir: aparece "Termina el turno de A primero (Espacio)".
 
 **4. Termina el turno de A.** Pasa solo cuando `ActionsRemaining` llega a 0 (`EndTurnIfOutOfActions`) o cuando apretás Espacio (`HandleEndTurn`). En los dos casos se ejecuta `EndTurn`:
+
 1. `ResolveReckoning`: los enemigos vivos que están en la casilla de A le pegan. Si A muere, es DERROTA y la ronda se corta acá.
 2. `AdvanceTurn` → `RetireActiveFigure`: A pasa a `Retired` y `ActiveFigure` queda vacía. `GetFiguresLeftThisRound` devuelve 3 (B, C y D), así que no empieza una ronda nueva.
 3. `ActionsRemaining` vuelve a 3 para el próximo héroe.
@@ -124,6 +128,7 @@ Todas las figuras salen de una misma base:
 `IsHostile` es la forma en que todo el juego distingue bandos: el ataque, el Reckoning y la muerte preguntan `IsHostile` en vez de castear a `BP_Enemy`.
 
 **`BPI_Selectable`** es la interfaz que implementan las figuras y las casillas. Define dos funciones:
+
 - `CanBeSelected`: ¿se puede elegir?
 - `SetHighlight`: cómo resaltarse, según el enum `E_SelectionHighlight` (nada, destino posible, bajo el mouse, seleccionado).
 
@@ -156,17 +161,20 @@ Todas siguen el mismo patrón: el PlayerController **pide** y el GameMode **vali
 `SelectActor` (PlayerController) → `TryActivateFigure` (GameMode) → `SetActiveFigure` (GameState). El GameState solo acepta si no hay otro héroe activo y si `CanActThisRound` da verdadero: el héroe está en `Party`, no está en `Retired` y `CanBeSelected` da verdadero. Si acepta, dispara `OnActiveFigureChanged`. Si no, aparece "Termina el turno de X primero (Espacio)". En el primer turno, `TryActivateFigure` llama a `BeginRound` para arrancar la Ronda 1.
 
 **Moverse**
+
 1. Botón **MOVERSE** (`OnClicked(BtnMove)` en el HUD) → `BeginMoving`: activa `Moving` y llama a `RefreshLegalDestinations`, que le pide al GameMode `GetLegalDestinations`.
 2. Click en una casilla → `TryGiveMoveOrder`. Si la casilla no está en `LegalDestinations`, aparece "Fuera de alcance".
 3. `TryMoveFigure` (GameMode) → `CanMoveFigure` → `SpendAction` → `AddSpacesMoved` (estadística) → `SetSpace` → `EndTurnIfOutOfActions`.
 
 **Atacar**
+
 1. Botón **ATACAR** (`OnClicked(BtnAttack)`) → `BeginAiming`: activa `Aiming`.
 2. Click en un enemigo → `TryGiveAttackOrder`: castea a `BP_Character` y verifica `IsHostile`.
 3. `TryAttack` (GameMode) verifica que el objetivo esté vivo, que sean de bandos distintos (`IsHostile` diferente) y que compartan casilla (`GetCurrentSpace` igual). Después: `SpendAction` → `ApplyDamage` en el objetivo con el `AttackDamage` del atacante → `EndTurnIfOutOfActions`.
 
 **Terminar turno**
 `IA_EndTurn` (Espacio) → `HandleEndTurn` → `EndTurn` (GameMode), o automáticamente desde `EndTurnIfOutOfActions` cuando `ActionsRemaining` llega a 0. `EndTurn` hace, en orden:
+
 1. `ResolveReckoning`: toma la casilla del héroe activo, recorre sus `Occupants` con un **For Each** y cada ocupante con `IsHostile` y vida mayor a 0 le hace `ApplyDamage` con su `AttackDamage`.
 2. `AdvanceTurn`: `RetireActiveFigure` pasa al héroe a `Retired` y libera `ActiveFigure`. Si `GetFiguresLeftThisRound` queda vacío, `BeginRound` vacía `Retired` y suma 1 a `Round`.
 3. Repone `ActionsRemaining` con `ActionsPerTurn`.
@@ -190,6 +198,7 @@ Todas siguen el mismo patrón: el PlayerController **pide** y el GameMode **vali
 
 ### Comunicación entre Blueprints
 Se usan las tres formas que enseña la cursada, cada una donde corresponde:
+
 - **Interfaz** (`BPI_Selectable`): para tratar distinto a figuras y casillas sin casts. La usan `TrySelect`, `CanActThisRound`, `TraceSelectableUnderCursor` y `RefreshHighlights`.
 - **Event Dispatchers**: para avisar sin conocer al que escucha.
   - `OnActiveFigureChanged` (GameState): lo dispara `SetActiveFigure`. Lo escucha el PlayerController (`BindToTurnChanges` → `HadleActiveFigureChanged`), que recalcula destinos y resaltados.
