@@ -27,21 +27,25 @@ Que el orden sea libre podría hacer el juego demasiado fácil. Lo que lo equili
 | Acción | Cómo se hace | Costo |
 |---|---|---|
 | **Moverse** | Seleccionar un héroe → botón **MOVERSE** → se iluminan las casillas alcanzables → click en una | 1 acción |
-| **Atacar** | Seleccionar un héroe → botón **ATACAR** → click en un enemigo | 1 acción |
+| **Atacar** | Seleccionar un héroe → botón **ATACAR** → click en un enemigo que esté en la misma casilla | 1 acción |
 | **Terminar turno** | Tecla **Espacio** | — |
 | **Cancelar** | Input de cancelar: suelta la selección | — |
 
 Seleccionar un héroe no muestra nada en el tablero. Las casillas se iluminan recién al tocar **MOVERSE**, así no se confunde "estoy mirando a este héroe" con "voy a moverlo". Un click en una casilla sin haber tocado Moverse no hace nada y no te hace perder la selección.
 
 ### Vida, daño y fin de partida
-- Los héroes tienen **2** de vida y los enemigos **3**. Cada ataque resta el daño del atacante.
-- Una figura que llega a 0 muere: sale del tablero y ya no puede actuar ni ser elegida. Un héroe muerto no cuenta para cerrar la ronda, así que la ronda no se traba esperándolo.
+- Los héroes tienen **2** de vida y los enemigos **3**. Cada ataque resta el daño del atacante (1 en héroes y enemigos).
+- El enemigo no devuelve el golpe cuando lo atacás: solo hace daño en el Reckoning, al terminar el turno.
+- Una figura que llega a 0 muere: sale del tablero y ya no puede actuar ni ser elegida.
 - **Victoria:** no queda ningún enemigo vivo.
-- **Derrota:** se pierden los héroes.
+- **Derrota:** muere cualquiera de los héroes.
 
 ### HUD
 La interfaz muestra todo lo necesario para decidir sin tener que recordar nada:
-- abajo a la izquierda: **ronda** actual y **cuántos héroes faltan jugar**, **héroe activo** y **acciones** que le quedan, **figura seleccionada** y si estás apuntando, **vida** del héroe activo y **vida del enemigo** que tenés bajo el mouse.
+- abajo a la izquierda, un panel en tres bloques:
+  - **partida:** ronda actual y cuántos héroes faltan jugar;
+  - **figura activa:** héroe activo, acciones que le quedan, figura seleccionada y si estás apuntando, y su **vida** en verde. La vida sigue a la vista después de terminar el turno, así ves el daño del Reckoning;
+  - **objetivo:** la **vida del enemigo** que tenés bajo el mouse, en rojo.
 - abajo a la derecha: los botones **MOVERSE** y **ATACAR**.
 - al centro: un cartel cuando una acción no se puede hacer, por ejemplo "Fuera de alcance" o "No quedan acciones este turno".
 
@@ -66,7 +70,7 @@ Cada clase del framework de Unreal tiene un rol claro. Las reglas no están mezc
 Todas las figuras salen de una misma base:
 
 - **`BP_Character`** tiene lo común: vida, daño de ataque, la casilla en la que está, cómo se resalta y qué pasa al morir.
-  - **`BP_Player`**: los héroes. Al aparecer se registra en el GameState para entrar en las rondas. Cada héroe concreto (`BP_Wraith`, `BP_Bulwark`, `BP_Hunter`, `BP_Ram`) hereda de esta clase y cambia sus valores y su modelo. Lleva el componente `BPC_Ratchet`, un track de desgaste del personaje.
+  - **`BP_Player`**: los héroes. Al aparecer se registra en el GameState para entrar en las rondas. Cada héroe concreto (`BP_Wraith`, `BP_Bulwark`, `BP_Hunter`, `BP_Ram`) hereda de esta clase y cambia sus valores y su modelo.
   - **`BP_Enemy`**: los enemigos. Heredan todo de `BP_Character`, pero no se pueden seleccionar.
 
 **`BPI_Selectable`** es la interfaz que implementan las figuras y las casillas. Define dos funciones: `CanBeSelected` (¿se puede elegir?) y `SetHighlight` (cómo resaltarse). Gracias a la interfaz, el PlayerController resalta y selecciona cualquier cosa del tablero sin saber si es un héroe, un enemigo o una casilla, y cada clase decide su propia respuesta. Un héroe se puede elegir si está vivo; un enemigo nunca.
@@ -98,7 +102,6 @@ Se usan las tres formas que enseña la cursada, cada una donde corresponde:
 - **Event Dispatchers**: para avisar sin conocer al que escucha.
   - `OnActiveFigureChanged`: el GameState avisa que cambió el héroe activo.
   - `OnGameEnded`: el GameMode avisa al HUD que terminó la partida y muestra la pantalla final.
-  - `OnCharacterLost`: el Ratchet le avisa a su héroe.
 
   Cada suscripción se hace al aparecer y se deshace al desaparecer.
 - **Referencias tipadas**: los casts a `BP_GameMode`, `BP_GameState` y `BP_Character` están encapsulados en getters (`GetGameMode`, `GetGameState`). El resto del código no repite el cast.
