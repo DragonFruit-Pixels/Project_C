@@ -9,7 +9,7 @@ Está hecho en **Unreal Engine 5.8**, casi todo en Blueprints. Hay un módulo C+
 ## 1. Mecánicas y jugabilidad
 
 ### El tablero
-El mapa no es una grilla libre: es un **grafo de casillas**. Cada casilla conoce a sus vecinas y también hacia qué lados el paso está bloqueado, por ejemplo por una pared. Moverse "una casilla" significa ir a una vecina. La distancia entre dos casillas es la cantidad de saltos entre vecinas, no la distancia en el mundo.
+El mapa no es una grilla libre: es un **grafo de casillas**. Cada casilla conoce a sus vecinas. Moverse "una casilla" significa ir a una vecina. La distancia entre dos casillas es la cantidad de saltos entre vecinas, no la distancia en el mundo.
 
 Varias figuras pueden compartir la misma casilla. Cuando pasa, se acomodan en fila dentro de ella para que se vean todas y se puedan clickear.
 
@@ -21,15 +21,12 @@ La partida avanza por **rondas**. En cada ronda, los 4 héroes juegan una vez ca
 - **Reckoning:** al terminar cada turno, los enemigos que están en la misma casilla que el héroe que acaba de jugar lo atacan. Quedarse al lado de un enemigo tiene costo.
 - Cuando jugaron los 4, el contador pasa a la ronda siguiente y todos vuelven a estar disponibles. La partida arranca en la **Ronda 1**.
 
-Que el orden sea libre podría hacer el juego demasiado fácil. Lo que lo equilibra es que en cada turno pasan cosas que no podés anticipar: elegir quién juega ahora es elegir quién se expone.
-
 ### Acciones
 | Acción | Cómo se hace | Costo |
 |---|---|---|
 | **Moverse** | Seleccionar un héroe → botón **MOVERSE** → se iluminan las casillas alcanzables → click en una | 1 acción |
 | **Atacar** | Seleccionar un héroe → botón **ATACAR** → click en un enemigo que esté en la misma casilla | 1 acción |
 | **Terminar turno** | Tecla **Espacio** | — |
-| **Cancelar** | Input de cancelar: suelta la selección | — |
 
 Seleccionar un héroe no muestra nada en el tablero. Las casillas se iluminan recién al tocar **MOVERSE**, así no se confunde "estoy mirando a este héroe" con "voy a moverlo". Un click en una casilla sin haber tocado Moverse no hace nada y no te hace perder la selección.
 
@@ -70,7 +67,7 @@ Cada clase del framework de Unreal tiene un rol claro. Las reglas no están mezc
 | `BP_GameInstance` | Reservado para datos que tengan que sobrevivir entre niveles. | — |
 
 ### Cómo arranca la partida
-1. Cada `BP_Space`, en su **BeginPlay**, se registra en el grafo con `RegisterSpace`, pasando sus `Neighbours` y `Blocked Towards`.
+1. Cada `BP_Space`, en su **BeginPlay**, se registra en el grafo con `RegisterSpace`, pasando sus `Neighbours`.
 2. Cada figura (`BP_Character`), en su **BeginPlay**, busca la casilla que tiene debajo con `FindStartSpace`, arranca con la vida al máximo (`Health = MaxHealth`) y llama a `OnSpawned`.
 3. En `BP_Player`, el evento `OnSpawned` llama a `RegisterFigure` del GameState: así el héroe entra en `Party` y participa de las rondas. Al desaparecer, `OnDespawned` llama a `UnregisterFigure`.
 4. El **BeginPlay** de `BP_GameMode` cierra el grafo con `SealGraph` y llama a `EndTurn`. Como todavía no hay figura activa, eso solo deja `ActionsRemaining` en `ActionsPerTurn` (3).
@@ -135,7 +132,7 @@ Todas las figuras salen de una misma base:
 Gracias a la interfaz, el PlayerController resalta y selecciona cualquier cosa del tablero sin saber si es un héroe, un enemigo o una casilla, y cada clase decide su propia respuesta. Un héroe se puede elegir si está vivo; un enemigo nunca. En `BP_Character` y en `BP_Space`, el evento `SetHighlight` llama a su propio `ApplyHighlight`.
 
 ### El tablero: casillas y un grafo en C++
-- **`BP_Space`** es cada casilla. Tiene sus vecinas (`Neighbours`), los lados bloqueados (`Blocked Towards`) y la lista de figuras paradas encima (`Occupants`). Con `AddOccupant` y `RemoveOccupant` cambia esa lista. `RefreshOccupantPlacement` los reparte en fila usando `GetSlotLocation` y `Slot Spacing`.
+- **`BP_Space`** es cada casilla. Tiene sus vecinas (`Neighbours`) y la lista de figuras paradas encima (`Occupants`). Con `AddOccupant` y `RemoveOccupant` cambia esa lista. `RefreshOccupantPlacement` los reparte en fila usando `GetSlotLocation` y `Slot Spacing`.
 - **`UGraphSubsystem`** (C++, un *World Subsystem*, en `Source/ProjectC/Public/Map/GraphSubsystem.h`) guarda el grafo completo. Las casillas se registran con `RegisterSpace`. `SealGraph` valida que las conexiones sean coherentes. Después responde las preguntas del juego:
   - `GetReachable(casilla, N)`: casillas a N pasos o menos. La usa `GetLegalDestinations` del GameMode, con `SpacesPerMove`, para saber a dónde se puede mover el héroe activo.
   - `GetShortestPath`, `GetDistance` y `GetNearest`: caminos y distancias entre casillas.
