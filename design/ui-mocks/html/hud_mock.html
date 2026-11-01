@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>HUD mock D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Cinzel:wght@700&display=block" rel="stylesheet">
+<style>
+:root{
+  --green:#9eff38; --red:#f2382e; --bone:#eddec2; --dark:26,9,9; --muted:#94786b;
+  --blood:#1f0808; --desc:#c9bdb0; --edge:#0d0303;
+  --panel-bg:rgba(var(--dark),.66); --card-bg:rgba(var(--dark),.88);
+  --r-big:16px; --r-small:4px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#111 url(escena.jpg) center/cover;font-family:'Barlow Condensed',sans-serif;color:var(--bone);position:relative}
+.abs{position:absolute}
+.panel{background:var(--panel-bg);border:1px solid rgba(158,255,56,.35);border-radius:var(--r-big) var(--r-small);box-shadow:0 8px 20px rgba(64,0,0,.42),inset 0 0 18px rgba(153,26,20,.25)}
+.cinzel{font-family:'Cinzel',serif;font-weight:700}
+.label{font-weight:600;font-size:15px;letter-spacing:.12em;text-transform:uppercase}
+.pips{display:flex;gap:3px;align-items:center}
+.pips .n{margin-left:8px;font-size:14px;font-weight:600;color:var(--desc)}
+.pip{width:28px;height:8px;border-radius:4px;outline:1px solid var(--edge)}
+.pip.g{background:var(--green);box-shadow:0 0 6px rgba(158,255,56,.8)}
+.pip.r{background:var(--red);box-shadow:0 0 6px rgba(242,56,46,.8)}
+.pip.w{background:#fff;box-shadow:0 0 8px #fff}
+.pip.e{background:rgba(31,8,8,.9);outline-color:rgba(148,120,107,.5)}
+.tag{display:inline-flex;align-items:center;height:22px;font-weight:600;font-size:13px;letter-spacing:.1em;padding:0 8px;border-radius:3px;border:1px solid}
+
+/* roster */
+#roster{left:32px;top:32px;width:390px;padding:20px}
+#roster h3{color:var(--green);font-size:16px;letter-spacing:.14em;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:14px;padding:8px 10px;border-radius:var(--r-big) var(--r-small);margin-bottom:6px}
+.row.active{background:rgba(158,255,56,.12);border:1px solid rgba(158,255,56,.6)}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1.5px solid rgba(237,222,194,.35);font-family:'Cinzel';font-weight:700;font-size:20px;background:rgba(31,8,8,.8)}
+.row.active .av{border-color:var(--green)}
+.row .nm{flex:1}
+.row .nm b{display:block;font-family:'Cinzel';font-size:19px;letter-spacing:.08em;margin-bottom:6px}
+.row.spent{opacity:.4}
+.t-desp{background:var(--green);color:var(--blood);border-color:var(--green)}
+.t-lat{color:rgba(237,222,194,.6);border-color:rgba(237,222,194,.4)}
+.t-ago{color:var(--muted);border-color:rgba(148,120,107,.5)}
+
+/* ronda */
+#ronda{right:32px;top:32px;padding:14px 32px;text-align:center}
+#ronda b{font-size:30px;letter-spacing:.08em;display:block}
+#ronda span{color:var(--green);font-size:16px;font-weight:500}
+
+/* presa */
+#presa{right:32px;top:150px;width:370px;padding:22px 24px;border-color:rgba(200,50,58,.6)}
+#presa .label{color:var(--red)}
+#presa .cinzel{font-size:32px;margin:8px 0 10px}
+.dmg{display:flex;align-items:center;gap:10px;margin:14px 0 12px;font-size:16px}
+.dmg .k{color:var(--muted);font-weight:600;letter-spacing:.1em}
+.dmg .v{color:var(--red);font-family:'Cinzel';font-size:24px}
+.dmg .q{font-family:'Cinzel';font-size:20px}
+.t-alc{color:var(--green);border-color:var(--green)}
+
+/* unidad activa */
+#unidad{left:32px;bottom:32px;width:320px;padding:22px 24px}
+#unidad .label{color:var(--green)}
+#unidad .cinzel{font-size:44px;line-height:1.1;margin:6px 0 2px}
+#unidad .sub{color:var(--desc);font-size:16px;font-weight:500}
+.stats{display:flex;gap:36px;margin-top:16px;align-items:flex-start}
+.stat .k{font-weight:600;font-size:13px;letter-spacing:.12em;color:var(--muted);margin-bottom:8px;display:block}
+.stat .v{font-family:'Cinzel';font-size:22px;line-height:1}
+
+/* overhead */
+.ring{border-radius:50%;border:2px solid}
+.ring.ok{border-color:var(--green);box-shadow:0 0 14px rgba(158,255,56,.6)}
+.ring.foe{border-color:var(--red);box-shadow:0 0 14px rgba(242,56,46,.6)}
+
+/* barra */
+#bar{left:50%;bottom:24px;transform:translateX(-50%);display:flex;gap:14px;align-items:center}
+.ap{height:96px;background:rgba(var(--dark),.92);padding:0 18px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px}
+.ap .label{font-size:13px}
+.dots{display:flex;gap:8px}
+.dot{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(158,255,56,.6)}
+.dot.on{background:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(158,255,56,.8)}
+.ap small{color:var(--muted);font-size:14px;font-weight:500}
+.slot{width:96px;height:96px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:var(--r-big) var(--r-small);background:rgba(var(--dark),.92);border:1.5px solid rgba(158,255,56,.5);box-shadow:0 8px 20px rgba(64,0,0,.42)}
+.slot svg{width:34px;height:34px}
+.slot .nm{font-weight:600;font-size:14px;letter-spacing:.08em}
+.key{position:absolute;left:6px;top:6px;font-weight:600;font-size:12px;line-height:1;padding:3px 5px;border-radius:var(--r-small);background:var(--blood);color:var(--green);border:1px solid rgba(158,255,56,.7)}
+.slot.sel{background:linear-gradient(rgba(158,255,56,.18),rgba(158,255,56,.18)),rgba(var(--dark),.94);border:2px solid var(--green);box-shadow:0 0 18px rgba(158,255,56,.35)}
+.slot.sel .nm{color:var(--green)}
+.slot.lock{opacity:.45;border-color:transparent;gap:3px}
+.slot.lock svg.ic{width:26px;height:26px}
+.slot .why{font-size:11px;font-weight:500;color:var(--bone);opacity:.7;letter-spacing:.06em}
+.slot.lock .key{border-color:transparent;background:none;padding:0}
+.slot.lock .nm{color:var(--muted)}
+.slot.end{background:rgba(237,222,194,.95);border-color:var(--bone)}
+.slot.end .nm{color:var(--blood)}
+.sep{width:2px;height:70px;background:rgba(148,120,107,.4)}
+
+/* tarjeta */
+#card{border:1.5px solid var(--green);box-shadow:0 0 16px rgba(158,255,56,.25),0 8px 20px rgba(64,0,0,.42);width:400px;padding:20px 24px 22px;background:var(--card-bg);backdrop-filter:blur(8px)}
+#card .head{display:flex;justify-content:space-between;align-items:center}
+#card .head .cinzel{font-size:28px}
+.cost{color:var(--green);border-color:rgba(158,255,56,.6);background:rgba(158,255,56,.15)}
+#card p{color:var(--desc);font-size:17px;font-weight:500;margin:12px 0}
+.data{display:flex;gap:28px}
+.data .k{display:block;color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.1em}
+.data .v{font-weight:600;font-size:22px}
+.div{height:1px;background:rgba(158,255,56,.25);margin:14px 0}
+.efx-t{color:var(--green);font-weight:600;font-size:13px;letter-spacing:.12em;margin-bottom:10px}
+.efx{margin-bottom:12px}
+.efx .top{display:flex;justify-content:space-between;font-size:16px;font-weight:500;margin-bottom:5px}
+.efx .top b{font-weight:600;color:var(--green);font-size:16px}
+.roll{display:flex;justify-content:space-between;align-items:baseline}
+.roll .hit{font-weight:600;font-size:14px;letter-spacing:.1em;color:var(--muted)}
+.roll .hit b{color:var(--green);font-size:26px;margin-left:6px}
+.faces{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.face{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:3px;background:rgba(var(--dark),.6);font-size:14px;font-weight:600;letter-spacing:.05em}
+.face span{flex:1;white-space:nowrap;font-size:13px;letter-spacing:.02em}
+.face b{color:var(--bone)}
+.face i{width:10px;height:10px;border-radius:2px}
+.fh{background:var(--green);box-shadow:0 0 5px rgba(158,255,56,.8)}
+.ft{background:var(--red)}
+.fm{border:1.5px solid var(--muted)}
+.face.miss{color:var(--muted)}
+.odds{color:var(--muted);font-size:14px;font-weight:500;margin-top:8px}
+.odds b{color:var(--bone)}
+.track{height:5px;border-radius:3px;background:var(--blood)}
+.track i{display:block;height:100%;border-radius:3px}
+
+/* variantes */
+.v2 #card{position:absolute;left:calc(50% + 316px);bottom:24px}
+.v2 #bar{transform:translateX(calc(-50% - 210px))}
+.v3 #card{position:absolute;left:50%;transform:translateX(-50%);bottom:136px;width:760px;display:grid;grid-template-columns:1fr 1px 1fr;column-gap:28px}
+.v3 #card .div.mid{width:1px;height:auto;margin:0}
+.v3 #card .col{min-width:0}
+.v4 #card,.v5 #card,.v6 #card{position:absolute;right:32px;top:416px;width:370px}
+.v4-unused{position:absolute;right:32px;top:416px;width:370px}
+.v4 #presa{border-bottom-left-radius:var(--r-small)}
+.x{display:none}
+.v7 #card,.v7 #bar,.v8 #card,.v8 #bar{display:none}
+.v7 #xbar,.v8 #confirm,.v8 .aim{display:flex}
+#xbar{left:50%;bottom:24px;transform:translateX(-50%);gap:6px;align-items:flex-end;padding:10px 14px 8px;background:rgba(var(--dark),.85);border:1px solid rgba(158,255,56,.35);border-radius:var(--r-big) var(--r-small)}
+.xi{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px}
+.xi .ico{width:56px;height:56px;display:grid;place-items:center;background:rgba(31,8,8,.9);border:1.5px solid rgba(158,255,56,.5);border-radius:10px 3px}
+.xi .ico svg{width:28px;height:28px}
+.xi small{font-weight:600;font-size:12px;letter-spacing:.06em;color:var(--desc)}
+.xi .n{font-weight:600;font-size:12px;color:var(--green)}
+.xi.sel .ico{background:rgba(158,255,56,.2);border:2px solid var(--green);box-shadow:0 0 14px rgba(158,255,56,.45)}
+.xi.sel small{color:var(--green)}
+.xi.lock{opacity:.45}
+.xi.lock .ico{border-color:rgba(148,120,107,.5)}
+.xi.end .ico{background:var(--bone);border-color:var(--bone)}
+.xsep{width:2px;height:56px;background:rgba(148,120,107,.4);margin:0 6px 22px}
+.xap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-right:10px;padding-bottom:4px}
+.xap small{font-weight:600;font-size:12px;letter-spacing:.1em;color:var(--muted)}
+#confirm{left:50%;bottom:24px;transform:translateX(-50%);width:860px;flex-direction:column;align-items:center;padding:30px 28px 12px;background:rgba(var(--dark),.95);backdrop-filter:blur(8px);border:1.5px solid rgba(158,255,56,.55);border-radius:var(--r-big) var(--r-small);box-shadow:0 0 16px rgba(158,255,56,.18),0 8px 20px rgba(64,0,0,.42)}
+.ban{position:absolute;top:-22px;left:0;right:0;display:flex;align-items:center;gap:14px;padding:0 24px}
+.ban .hatch{flex:1;height:10px;background:repeating-linear-gradient(-45deg,rgba(158,255,56,.45) 0 3px,transparent 3px 8px)}
+.ban .t{font-family:'Cinzel';font-weight:700;font-size:28px;letter-spacing:.1em;padding:4px 30px;background:rgba(var(--dark),.97);border:1.5px solid var(--green);clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%)}
+#confirm p{color:var(--desc);font-size:17px;font-weight:500;margin:4px 0 10px}
+.odds3{width:100%;display:grid;grid-template-columns:200px 1fr 200px;align-items:start;gap:18px}
+.odds3 .k{display:block;font-weight:600;font-size:13px;letter-spacing:.12em;color:var(--muted)}
+.odds3 .big{font-weight:600;font-size:34px;line-height:1}
+.odds3 .r{text-align:right}
+.fbar{display:flex;height:8px;border-radius:2px;overflow:hidden;gap:2px}
+.fbar i{height:100%}
+.fbar .h{background:var(--green)}
+.fbar .ht{background:linear-gradient(90deg,var(--green) 50%,var(--red) 50%)}
+.fbar .t{background:var(--red)}
+.fbar .m{background:rgba(148,120,107,.45)}
+.flegend{display:flex;gap:2px;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+.dmgc{text-align:center;font-weight:600;font-size:15px;letter-spacing:.1em;color:var(--muted);margin-top:6px}
+.dmgc b{font-size:28px;color:var(--green);margin-left:8px;letter-spacing:0}
+.crow{display:flex;gap:6px;margin-top:10px;align-items:flex-end}
+.crow .xi{width:56px}
+.crow .xi .ico{width:46px;height:46px}
+.crow .xi .ico svg{width:24px;height:24px}
+.kk{font-family:'Barlow Condensed';font-size:12px;letter-spacing:.1em;color:var(--green);border:1px solid rgba(158,255,56,.7);border-radius:var(--r-small);padding:1px 5px;margin-left:12px;vertical-align:middle}
+.fire{position:absolute;right:-1.5px;top:30px;bottom:30px;width:150px;transform:translateX(100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bone);color:var(--blood);border-radius:0 var(--r-big) var(--r-small) 0;font-weight:600;letter-spacing:.08em}
+.fire b{font-family:'Cinzel';font-size:19px}
+.fire small{font-size:12px}
+.brk{margin-top:8px;font-size:14px;font-weight:600}
+.brk .ln{display:flex;justify-content:space-between;padding:3px 0;letter-spacing:.06em}
+.brk .ln b{color:var(--green)}
+.brk .ln.neg b{color:var(--red)}
+.brk .hd{color:var(--muted);font-size:13px;letter-spacing:.12em;border-bottom:1px solid rgba(158,255,56,.25);padding-bottom:6px;margin-bottom:4px}
+.aim{position:absolute;align-items:center;gap:6px;font-weight:600;font-size:22px;color:var(--red);text-shadow:0 0 6px #000}
+.aim .ret{width:40px;height:40px;border:2px solid var(--red);border-radius:50%;position:relative;box-shadow:0 0 10px rgba(242,56,46,.6)}
+.aim .ret:before,.aim .ret:after{content:"";position:absolute;background:var(--red)}
+.aim .ret:before{left:50%;top:-8px;bottom:-8px;width:2px;margin-left:-1px}
+.aim .ret:after{top:50%;left:-8px;right:-8px;height:2px;margin-top:-1px}
+#tag{right:32px;bottom:8px;color:rgba(237,222,194,.5);font-size:13px;letter-spacing:.1em}
+</style>
+</head>
+<body>
+<div class="abs ring ok" style="left:900px;top:905px;width:110px;height:40px"></div>
+<div class="abs ring foe" style="left:903px;top:118px;width:110px;height:44px"></div>
+<div class="abs pips" style="left:938px;top:554px"><i class="pip g"></i><i class="pip g"></i></div>
+<div class="abs pips" style="left:935px;top:658px"><i class="pip g"></i><i class="pip e"></i></div>
+<div class="abs pips" style="left:928px;top:806px"><i class="pip g"></i><i class="pip g"></i></div>
+<div class="abs pips" style="left:931px;top:949px"><i class="pip g"></i><i class="pip g"></i></div>
+<div class="abs pips" style="left:915px;top:12px"><i class="pip r"></i><i class="pip r"></i><i class="pip w"></i></div>
+<div class="abs pips" style="left:1242px;top:12px"><i class="pip r"></i><i class="pip r"></i><i class="pip r"></i></div>
+
+<div id="roster" class="abs panel">
+  <h3 class="cinzel">LA CAMADA</h3>
+  <div class="row active"><div class="av">H</div><div class="nm"><b>HUNTER</b><div class="pips"><i class="pip g"></i><i class="pip g"></i><span class="n">2/2</span></div></div><span class="tag t-desp">DESPIERTO</span></div>
+  <div class="row"><div class="av">B</div><div class="nm"><b>BULWARK</b><div class="pips"><i class="pip g"></i><i class="pip g"></i><span class="n">2/2</span></div></div><span class="tag t-lat">LATENTE</span></div>
+  <div class="row"><div class="av">R</div><div class="nm"><b>RAM</b><div class="pips"><i class="pip g"></i><i class="pip e"></i><span class="n">1/2</span></div></div><span class="tag t-lat">LATENTE</span></div>
+  <div class="row spent"><div class="av">W</div><div class="nm"><b>WRAITH</b><div class="pips"><i class="pip e"></i><i class="pip e"></i><span class="n">0/2</span></div></div><span class="tag t-ago">AGOTADO</span></div>
+</div>
+
+<div id="ronda" class="abs panel"><b class="cinzel">RONDA I</b><span>Tres criaturas aguardan</span></div>
+
+<div id="presa" class="abs panel">
+  <div class="label">PRESA</div>
+  <div class="cinzel">COCINERO</div>
+  <div class="pips"><i class="pip r"></i><i class="pip r"></i><i class="pip w"></i><span class="n">3/3</span></div>
+  <div class="dmg"><span class="k">MORDIDA</span><span class="v">−1</span><span>→</span><span class="q">LE QUEDAN 2</span></div>
+  <span class="tag t-alc">AL ALCANCE</span>
+</div>
+
+<div id="unidad" class="abs panel">
+  <div class="label">HUÉSPED ACTIVO</div>
+  <div class="cinzel">HUNTER</div>
+  <div class="sub">Cazador · ballesta de hueso</div>
+  <div class="stats">
+    <div class="stat"><span class="k">VIDA</span><div class="pips"><i class="pip g"></i><i class="pip g"></i><span class="n">2/2</span></div></div>
+    <div class="stat"><span class="k">DAÑO</span><span class="v">1</span></div>
+  </div>
+</div>
+
+<div id="bar" class="abs">
+  <div class="ap panel"><span class="label">ACCIONES</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div><small>2 / 3</small></div>
+  <div class="slot"><span class="key">1</span><svg viewBox="0 0 40 40" fill="none"><path d="M9 10l10 10-10 10M21 10l10 10-10 10" stroke="#9eff38" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nm">MOVER</span></div>
+  <div class="slot sel"><span class="key">2</span><svg viewBox="0 0 40 40" fill="none"><path d="M8 33C12 24 17 15 27 6M15 35C19 26 24 18 33 10M23 36C26 30 30 24 36 19" stroke="#9eff38" stroke-width="3.5" stroke-linecap="round"/></svg><span class="nm">ATACAR</span></div>
+  <div class="slot lock"><span class="key"><svg viewBox="0 0 12 14" style="width:14px;height:16px"><rect x="1" y="6" width="10" height="7" rx="1.5" fill="#eddec2"/><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="#eddec2" stroke-width="1.6" fill="none"/></svg></span><svg class="ic" viewBox="0 0 40 40" fill="none"><path d="M20 6C26 14 31 20 31 26a11 11 0 0 1-22 0c0-6 5-12 11-20z" stroke="#94786b" stroke-width="3" stroke-linejoin="round"/><path d="M20 20v12M14 26h12" stroke="#94786b" stroke-width="3" stroke-linecap="round"/></svg><span class="nm">CURAR</span><span class="why">AÚN NO DISPONIBLE</span></div>
+  <div class="sep"></div>
+  <div class="slot end"><span class="key">ESPACIO</span><svg viewBox="0 0 40 40" fill="none"><path d="M12 6h16M12 34h16M14 6c0 9 12 9 12 14s-12 5-12 14M26 6c0 9-12 9-12 14s12 5 12 14" stroke="#1f0808" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nm">TERMINAR</span></div>
+</div>
+
+<div id="card" class="panel">
+  <div class="col">
+    <div class="head"><span class="cinzel">ATACAR</span><span class="tag cost">1 ACCIÓN</span></div>
+    <p>Disparo de la ballesta de hueso contra una presa en alcance.</p>
+    <div class="data"><div><span class="k">DAÑO</span><span class="v">1</span></div><div><span class="k">ALCANCE</span><span class="v">3 casillas</span></div></div>
+  </div>
+  <div class="div mid"></div>
+  <div class="col">
+    <div class="roll"><span class="efx-t">TIRADA · 3 DADOS</span><span class="hit">IMPACTO <b>88%</b></span></div>
+    <div class="faces">
+      <div class="face"><i class="fh"></i><span>ACIERTO</span><b>33%</b></div>
+      <div class="face"><i class="fh"></i><i class="ft"></i><span>ACIERTO + TOLL</span><b>17%</b></div>
+      <div class="face"><i class="ft"></i><span>TOLL</span><b>17%</b></div>
+      <div class="face miss"><i class="fm"></i><span>FALLO</span><b>33%</b></div>
+    </div>
+    <div class="odds">% por dado · ningún acierto en 3: <b>13%</b></div>
+    <div class="div"></div>
+    <div class="efx-t">EFECTOS POSIBLES</div>
+    <div class="efx"><div class="top"><span>Sangrado · 1 de daño al inicio de su turno</span><b>25%</b></div><div class="track"><i style="width:25%;background:var(--green);box-shadow:0 0 6px rgba(158,255,56,.8)"></i></div></div>
+    <div class="efx"><div class="top"><span>Derribo · pierde su próxima acción</span><b>10%</b></div><div class="track"><i style="width:10%;background:var(--green);box-shadow:0 0 6px rgba(158,255,56,.8)"></i></div></div>
+  </div>
+</div>
+<div id="xbar" class="abs x">
+  <div class="xap"><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div><small>ACCIONES 2/3</small></div>
+  <div class="xrow" style="display:flex;gap:6px;align-items:flex-end"></div>
+</div>
+<div class="aim x" style="left:1012px;top:104px"><span class="ret"></span><span>88%</span></div>
+<div id="confirm" class="abs x">
+  <div class="ban"><span class="hatch"></span><span class="t">&#187; ATACAR &#171;<small class="kk">ENTER</small></span><span class="hatch"></span></div>
+  <p>Disparo de la ballesta de hueso contra el Cocinero.</p>
+  <div class="odds3">
+    <div><span class="k">IMPACTO</span><span class="big" style="color:var(--green)">88%</span>
+      <div class="brk"><div class="ln"><span>DADOS</span><b>3</b></div><div class="ln"><span>ACIERTO POR DADO</span><b>50%</b></div><div class="ln"><span>ALCANCE</span><b>2 / 3</b></div></div></div>
+    <div style="padding-top:10px">
+      <div class="fbar"><i class="h" style="width:33%"></i><i class="ht" style="width:17%"></i><i class="t" style="width:17%"></i><i class="m" style="width:33%"></i></div>
+      <div class="flegend"><span style="width:33%">ACIERTO</span><span style="width:17%">AC.+TOLL</span><span style="width:17%">TOLL</span><span style="width:33%">FALLO</span></div>
+      <div class="dmgc">DAÑO<b>0 – 3</b></div>
+    </div>
+    <div class="r"><span class="k">TOLL</span><span class="big" style="color:var(--red)">70%</span>
+      <div class="brk"><div class="ln neg"><span>TOLL POR DADO</span><b>33%</b></div><div class="ln"><span>FALLO TOTAL</span><b style="color:var(--bone)">13%</b></div></div></div>
+  </div>
+  <div class="crow"></div>
+</div>
+<div id="tag" class="abs"></div>
+<script>
+const v=new URLSearchParams(location.search).get('v')||'2';
+document.body.classList.add('v'+v);
+document.getElementById('tag').textContent={2:'D2 — TARJETA A LA DERECHA',3:'D3 — FRANJA SOBRE LA BARRA',4:'D4 — TARJETA JUNTO A LA PRESA',5:'D5 — D4 + SEGUNDA CRÍTICA',6:'D6 — D5 + TIRADA DE DADOS',7:'D7 — REPOSO',8:'D8 — CONFIRMAR ATAQUE'}[v];
+if(v!=='3')document.querySelector('#card .div.mid').className='div';
+const icons=[...document.querySelectorAll('#bar .slot')].map((s,i)=>{const d=document.createElement('div');d.className='xi'+(s.classList.contains('sel')&&v==='8'?' sel':'')+(s.classList.contains('lock')?' lock':'')+(s.classList.contains('end')?' end':'');const svg=s.querySelector('svg.ic')||s.querySelectorAll(':scope>svg')[0];d.innerHTML='<div class="ico">'+svg.outerHTML+'</div><small>'+s.querySelector('.nm').textContent+'</small><span class="n">'+(s.classList.contains('end')?'ESP':i+1)+'</span>';return d});
+const row=document.querySelector(v==='8'?'#confirm .crow':'#xbar .xrow');
+icons.forEach((d,i)=>{if(i===3){const sp=document.createElement('div');sp.className='xsep';row.appendChild(sp)}row.appendChild(d)});
+</script>
+</body>
+</html>
