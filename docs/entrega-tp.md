@@ -119,7 +119,7 @@ Los enemigos no tienen turno propio: no se mueven y solo hacen daño en el Recko
 Todas las figuras salen de una misma base:
 
 - **`BP_Character`** tiene lo común: vida (`Health`, `MaxHealth`), daño (`AttackDamage`), la casilla en la que está (`CurrentSpace`), cómo se resalta (`ApplyHighlight`) y qué pasa al morir (`Die`).
-  - **`BP_Player`**: los héroes. Al aparecer se registran en el GameState (`OnSpawned` → `RegisterFigure`). Cada héroe concreto (`BP_Wraith`, `BP_Bulwark`, `BP_Hunter`, `BP_Ram`) hereda de esta clase y cambia sus valores y su modelo.
+  - **`BP_Player`**: los héroes. Al aparecer se registran en el GameState (`OnSpawned` → `RegisterFigure`). Cada héroe concreto (`BP_Shiv`, `BP_Brace`, `BP_Spike`, `BP_Maul`) hereda de esta clase y cambia sus valores, su modelo y su `UnitName`, el nombre que muestra el HUD.
   - **`BP_Enemy`**: los enemigos. Sobrescriben `IsHostile` para devolver `true`, `GetBaseColour` para tener otro color y `CanBeSelected` para devolver `false`.
 
 `IsHostile` es la forma en que todo el juego distingue bandos: el ataque, el Reckoning y la muerte preguntan `IsHostile` en vez de castear a `BP_Enemy`.
