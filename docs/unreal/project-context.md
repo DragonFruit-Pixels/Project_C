@@ -94,6 +94,20 @@ Content/
     Sebastian/         sandbox; nothing here may be depended on
 ```
 
+### Unit data (`DT_Units`)
+
+Every per-unit number lives in one Data Table, `Data/DT_Units` (row struct `Data/F_UnitStats`):
+health, actions per turn, spaces per move, dice per roll, Ratchet max and thresholds. Art
+(animations, weapon mesh) stays on each Blueprint, because it is bound to that mesh's skeleton.
+
+- **Row name = the Blueprint's suffix**, PascalCase: `BP_Shiv` → `Shiv`, `BP_Enemy` → `Cook`.
+- **No row name is ever typed.** `BP_Character.UnitRow` is a Data Table Row Handle whose table is
+  fixed on the parent; each child Blueprint picks its row from the dropdown.
+- `BP_Character.LoadStats` reads the row on BeginPlay. A missing row prints
+  `Unit row not found: <name>` in red, so a renamed row fails on the first Play, not silently.
+- Renaming a row means re-picking it in that Blueprint's `UnitRow`. Adding a column means adding
+  it to `F_UnitStats` and copying it in `LoadStats`.
+
 Full prefix tables live in `/ue-naming-conventions`. Recorded here is only what this project
 decided or does differently.
 
