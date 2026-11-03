@@ -84,7 +84,8 @@ Content/
     Core/              base GameMode, GameState, PlayerController, Character
     Characters/        one folder per character, with its own Meshes/Materials/Animations
     Placeables/        designer-tunable actors
-    Maps/              every level, without exception
+    Levels/            every playable level (.umap)
+    Map/               what the levels are built from: BP_Space, M_Space, MI_Floor_*
     MaterialLibrary/   master materials, functions, shared utility textures
       Debug/           strippable before shipping
     Input/             IA_, IMC_
@@ -142,9 +143,7 @@ Nothing is in use — there is no gameplay code or content yet.
 
 - **Target types built**: none yet — never packaged
 - **Configurations used**: Development Editor only
-- **Game Default Map**: `/Engine/Maps/Templates/OpenWorld` — ⚠️ **this points at an *engine*
-  map, not a project map.** It is the template default and the classic cause of a black or
-  broken packaged build. Fix it in Project Settings once the first project map exists
+- **Game Default Map**: `/Game/Project_C/Levels/Level`
 - **Packaging**: not configured
 - **CI**: none
 - **Platform SDKs installed**: Windows only
