@@ -39,3 +39,4 @@ production/session-state/*.log
 
 # Arcane / Claude Code config: installed per machine with `arcane install`, not versioned
 .claude/
+Content/Project_C/Audio/*.wav
