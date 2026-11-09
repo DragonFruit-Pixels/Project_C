@@ -130,8 +130,26 @@ ChitinGrowth vino de Meshy con 1e-7 m de alto (falla del auto-size) y se reescal
   85 % en la Batch. Luz cálida en la Planta, celeste en la Gallery y verde en el Lab y la Batch.
   Corre de nuevo sin duplicar: primero borra los actores `Fill_`, `Det_` y `Light_`.
 
-Textura: pendiente. Plan: `meshy_retexture` con un mismo prompt de estilo para los que queden
-(10 créditos c/u) o materiales del kit en UE para los simples.
+### Texturas y materiales
+
+- **Props y relleno:** `meshy_retexture` (meshy-6, PBR, sin luz horneada, 10 créditos c/u) con un
+  prompt por asset sobre una base común: pintado estilizado, paleta apagada, bloques de color
+  legibles, sin texto. `assets/3d/texnorm.py` reescala cada GLB texturizado a la medida del FBX
+  anterior, pisa ese FBX (ahora con UVs) y saca los mapas a 1K en `assets/3d/textures/`
+  (`T_<asset>_BC`, `_N`, `_RM` con roughness en G y metallic en B, y `_E` solo para Console,
+  LabBench, CoreVat, Fungus y SpecimenJar). Meshy pone emisión espuria en casi todo; por eso la lista.
+- **`assets/3d/tex_import.py`** importa en UE: borra el mesh viejo, importa el nuevo con el mismo
+  nombre, reapunta los actores `Prop_` y `Fill_` del nivel, importa las texturas a `Map/Textures/` y
+  crea `MI_<asset>` hijo de `M_Prop` en `Map/Materials/`. Necesita el cliente MCP del scratchpad
+  (`at.py`) en `PYTHONPATH`.
+- **ChitinGrowth** se regeneró (su mesh original estaba colapsado y Meshy no lo pudo texturizar).
+- **Salas:** el merge las dejó con un solo slot, así que `M_Room` separa por máscara: normal hacia
+  arriba y altura < 20 cm es piso, normal hacia arriba más alto es tope de pared (`TopColor`), el
+  resto es pared. Texturas tileables de Meshy text-to-image (`assets/3d/kit/textures/`), piso a 4 m
+  y pared a 2 m. `MI_Room_Plant` para Staff, Dock, Oficinas y Lift; `MI_Room_Sump` (venas, limo y
+  quitina) para Gallery, Lab y Batch.
+- **Detalles del kit:** `M_KitSolid` (color, roughness, metallic, emisivo) con `MI_Kit_Trim`,
+  `MI_Kit_Pipe`, `MI_Kit_Glow` y `MI_Kit_Hatch`. Las paredes y pisos sueltos del kit usan `MI_Room_Plant`.
 
 ## Abierto
 
