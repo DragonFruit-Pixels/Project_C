@@ -151,6 +151,22 @@ ChitinGrowth vino de Meshy con 1e-7 m de alto (falla del auto-size) y se reescal
 - **Detalles del kit:** `M_KitSolid` (color, roughness, metallic, emisivo) con `MI_Kit_Trim`,
   `MI_Kit_Pipe`, `MI_Kit_Glow` y `MI_Kit_Hatch`. Las paredes y pisos sueltos del kit usan `MI_Room_Plant`.
 
+### Fondo (diorama) y cámara
+
+El mapa vive en `Levels/Laboratorio` (`Levels/Level` es el prototipo viejo). El fondo mezcla dos
+conceptos: maqueta recortada del suelo y oscuridad con niebla.
+
+- **Bases de roca:** `SM_Dio_Base_Plant` (Planta + Lift) y `SM_Dio_Base_Sump`, generadas por
+  `assets/3d/kit/diorama.py` con el contorno exacto de las celdas, 4,5 m de roca con borde de abajo
+  irregular. Tope a z = -10 cm, debajo del piso.
+- **`assets/3d/kit/diorama_place.py`** arma todo en el nivel abierto (borra antes los actores `Dio_`):
+  bases, caños y raíces en los bordes, 16 siluetas oscuras (pilares `SM_Dio_Pillar`, tanques y caños
+  verticales con `MI_Dio_Silhouette`) lejos y hundidas en la niebla, 8 luces sin sombra bajo las
+  bases (ámbar en Planta, verde en Sumidero) que tiñen la niebla volumétrica, y la
+  `ExponentialHeightFog` oscura con caída fuerte para que la niebla quede abajo.
+- **Cámara (`BP_CameraPawn`):** FOV 35° (era 90°), brazo 4800 por defecto, 1900 a 9000 de zoom,
+  paso 500, sin colisión del brazo (la roca y los pilares lo acortaban). Vale también para Prototype.
+
 ## Abierto
 
 - Las 3 Drains quedaron en el Sumidero: la Planta es tranquila al principio y la presión crece al
