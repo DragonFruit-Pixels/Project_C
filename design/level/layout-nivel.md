@@ -114,6 +114,22 @@ Meshy text-to-3D, `meshy-t2` smart topology, 1000 a 4000 tris, **sin textura** (
 Reescalados en Blender después de Meshy: Safe ×0.5, CoreVat ×3, FermentVat ×1.5, Valves ×1.7.
 ChitinGrowth vino de Meshy con 1e-7 m de alto (falla del auto-size) y se reescaló desde el GLB.
 
+### Relleno, detalles y luz
+
+- **16 props de relleno** en `Map/Fill/` (`SM_Fill_*`): 10 industriales (cajas, bidones, balde,
+  herramientas, carretel, bolsas, escombros, garrafas, matafuego, cajón) y 6 del Growth (huevos,
+  charco de biomasa, frasco con espécimen, hongos, tentáculos, costra). Tamaños fijados por
+  `assets/3d/fill/normalize.py`.
+- **7 detalles del kit** en `Map/Kit/` (`SM_Det_*`), generados por `assets/3d/kit/details.py`:
+  caños de pared (con y sin hueco de puerta), rejilla, tablero, lámpara de pared, lámpara de pie
+  y rejilla de piso. Mismo pivote que la pared, así que van con el transform de la pared.
+- **`assets/3d/fill/scatter.py`** reparte todo por celda: caños en algunas paredes, una lámpara
+  con su PointLight, un tablero o rejilla, y de 3 a 7 objetos de relleno contra las paredes. Deja
+  libres el centro de la casilla, las puertas y los props principales. La proporción de Growth
+  sube al bajar: 0 % en Staff y Oficinas, 10 % en el Dock, 45 % en la Gallery, 60 % en el Lab y
+  85 % en la Batch. Luz cálida en la Planta, celeste en la Gallery y verde en el Lab y la Batch.
+  Corre de nuevo sin duplicar: primero borra los actores `Fill_`, `Det_` y `Light_`.
+
 Textura: pendiente. Plan: `meshy_retexture` con un mismo prompt de estilo para los que queden
 (10 créditos c/u) o materiales del kit en UE para los simples.
 
