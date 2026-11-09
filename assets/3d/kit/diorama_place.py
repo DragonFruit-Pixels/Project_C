@@ -4,6 +4,7 @@ from at import call, S, M
 AS = "editor_toolset.toolsets.asset.AssetTools"
 O = "editor_toolset.toolsets.object.ObjectTools"
 MI = "editor_toolset.toolsets.material_instance.MaterialInstanceTools"
+TT = "editor_toolset.toolsets.texture.TextureTools"
 ROOT = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 KIT, MAT = "/Game/Project_C/Map/Kit", "/Game/Project_C/Map/Materials"
 U = 800
@@ -29,6 +30,37 @@ def mi(name, color, rough, metal):
     call(MI, "set_scalar_parameter", instance=inst, name="Roughness", value=rough)
     call(MI, "set_scalar_parameter", instance=inst, name="Metallic", value=metal)
     return p
+
+
+def rock_mi():
+    tex = "/Game/Project_C/Map/Textures"
+    props = {"N": {"CompressionSettings": "TC_Normalmap", "SRGB": False}, "RM": {"CompressionSettings": "TC_Masks", "SRGB": False}}
+    p = f"{MAT}/MI_Dio_Rock"
+    if call(AS, "exists", path=p) is True:
+        assert call(AS, "delete", path=p) is True, p
+    inst = call(MI, "create", folder_path=MAT, asset_name="MI_Dio_Rock", parent=ref(f"{MAT}/M_Prop"))
+    saved = [p]
+    for suffix, param in (("BC", "BaseColor"), ("N", "Normal"), ("RM", "RM")):
+        t = f"{tex}/T_Dio_Rock_{suffix}"
+        if call(AS, "exists", path=t) is True:
+            assert call(AS, "delete", path=t) is True, t
+        r = call(TT, "import_file", folder_path=tex, asset_name=f"T_Dio_Rock_{suffix}", source_file=f"{ROOT}/textures/T_Dio_Rock_{suffix}.jpg")
+        assert isinstance(r, list) and r, (suffix, r)
+        if suffix in props:
+            assert call(O, "set_properties", instance=ref(t), values=json.dumps(props[suffix])) is True
+        call(MI, "set_texture_parameter", instance=inst, name=param, value=ref(t))
+        saved.append(t)
+    return p, saved
+
+
+def fogvol(label, loc, scale, emissive, albedo=(0.02, 0.02, 0.025), radial=0.15, height=0.0):
+    a = call(S, "add_to_scene_from_class", actor_type={"refPath": "/Script/Engine.LocalFogVolume"}, name=label,
+             xform={"location": dict(zip("xyz", loc)), "scale": dict(zip("xyz", scale))}, parent=None, snap_to_ground=False)
+    ok = call(O, "set_properties", instance={"refPath": a["refPath"] + ".LocalFogVolumeComponent"}, values=json.dumps({
+        "RadialFogExtinction": radial, "HeightFogExtinction": height,
+        "FogEmissive": dict(zip("rgba", (*emissive, 1))), "FogAlbedo": dict(zip("rgba", (*albedo, 1)))}))
+    assert ok is True, (label, ok)
+    call(S, "set_actor_folder", actor=a, folder_path="Diorama")
 
 
 def import_meshes(rock):
@@ -82,19 +114,22 @@ def edges(section, cells):
         for e, ((dx, dy), yaw) in EDGE.items():
             nr, nc = r + NEIGHBOR[e][0], c + NEIGHBOR[e][1]
             if (nr, nc) not in owned:
-                yield e, cx + dx * U / 2, cy + dy * U / 2, yaw + 180
+                yield (dx, dy), cx + dx * U / 2, cy + dy * U / 2, yaw + 180
 
 
 def run():
-    rock = mi("MI_Dio_Rock", (0.16, 0.13, 0.11, 1), 0.95, 0.0)
+    rock, saved = rock_mi()
     dark = mi("MI_Dio_Silhouette", (0.012, 0.012, 0.014, 1), 0.9, 0.2)
-    saved = import_meshes(rock) + [rock, dark]
+    saved += import_meshes(rock) + [dark]
     assert call(AS, "save_assets", asset_paths=saved) is True
     cleanup()
 
     for section, cells in SECTIONS.items():
         place(f"{KIT}/SM_Dio_Base_{section}", f"Dio_Base_{section}", (0, 0, 0))
-        for i, (e, x, y, yaw) in enumerate(edges(section, cells)):
+        fill = (1.0, 0.65, 0.4) if section == "Plant" else (0.55, 0.85, 0.5)
+        for i, ((dx, dy), x, y, yaw) in enumerate(edges(section, cells)):
+            if i % 2 == 0:
+                light(f"Dio_Fill_{section}{i}", (x + dx * 350, y + dy * 350, -220), fill, 22, 900, 0.5)
             roll = rng.random()
             if roll < 0.45:
                 place(f"{KIT}/SM_Det_Pipes", f"Dio_Pipes_{section}{i}", (x, y, -170 - rng.choice([0, 90])), (0, yaw, 0))
@@ -123,13 +158,24 @@ def run():
     for i, (x, y) in enumerate([(1500, 6800), (1500, 9600), (-400, 12600), (-1700, 12600)]):
         light(f"Dio_HaloPlant{i}", (x, y, -1400), (1.0, 0.55, 0.2), 60, 3000, 5)
     for i, (x, y) in enumerate([(-2000, 6400), (-2000, 8200), (-2400, 9600), (-1600, 7300)]):
-        light(f"Dio_HaloSump{i}", (x, y, -1600), (0.35, 1.0, 0.3), 40, 2600, 5)
+        light(f"Dio_HaloSump{i}", (x, y, -1600), (0.45, 0.9, 0.4), 22, 2600, 4)
+
+    for i, y in enumerate(range(6200, 11400, 1700)):
+        fogvol(f"Dio_FogAmber{i}", (1000, y, -250), (11, 11, 6), (0.9, 0.4, 0.1))
+    for i, x in enumerate(range(-2400, 0, 800)):
+        fogvol(f"Dio_FogAmberLift{i}", (x, 12000, -250), (9, 9, 6), (0.8, 0.35, 0.08))
+    for i, y in enumerate(range(6400, 10400, 1600)):
+        fogvol(f"Dio_FogGreenGap{i}", (-800, y, -300), (8, 9, 5), (0.3, 0.8, 0.22), radial=0.2)
+    for i, y in enumerate(range(6000, 10600, 1500)):
+        fogvol(f"Dio_FogGreenLow{i}", (-3300, y, -700), (12, 12, 6), (0.1, 0.32, 0.08), radial=0.12)
+    for i, (x, y) in enumerate([(-5500, 5000), (-5500, 9000), (-5500, 13000), (3000, 4500), (3000, 12500), (-1200, 3000), (-1200, 14000)]):
+        fogvol(f"Dio_FogMurk{i}", (x, y, -400), (30, 30, 14), (0.01, 0.015, 0.02), radial=0.06)
 
     fog = call(S, "add_to_scene_from_class", actor_type={"refPath": "/Script/Engine.ExponentialHeightFog"}, name="Dio_Fog",
                xform={"location": {"x": -1200, "y": 8400, "z": -600}}, parent=None, snap_to_ground=False)
     ok = call(O, "set_properties", instance={"refPath": fog["refPath"] + ".HeightFogComponent0"}, values=json.dumps({
         "FogDensity": 0.035, "FogHeightFalloff": 0.35, "FogInscatteringLuminance": {"r": 0.0015, "g": 0.002, "b": 0.003, "a": 1},
-        "bEnableVolumetricFog": True, "VolumetricFogScatteringDistribution": 0.5, "VolumetricFogExtinctionScale": 1.0}))
+        "bEnableVolumetricFog": True, "VolumetricFogDistance": 20000, "VolumetricFogScatteringDistribution": 0.5, "VolumetricFogExtinctionScale": 1.0}))
     assert ok is True, ok
     call(S, "set_actor_folder", actor=fog, folder_path="Diorama")
     print("PLACED", len(call(S, "find_actors", name="Dio_", tag="", collision_channels=[]) or []))

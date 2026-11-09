@@ -164,6 +164,12 @@ conceptos: maqueta recortada del suelo y oscuridad con niebla.
   verticales con `MI_Dio_Silhouette`) lejos y hundidas en la niebla, 8 luces sin sombra bajo las
   bases (ámbar en Planta, verde en Sumidero) que tiñen la niebla volumétrica, y la
   `ExponentialHeightFog` oscura con caída fuerte para que la niebla quede abajo.
+- **Roca:** `MI_Dio_Rock` (hijo de `M_Prop`) con `T_Dio_Rock_*`, generadas por
+  `assets/3d/kit/rock_tex.py` (ruido FFT tileable, estratos y grietas). Las bases llevan UV de caja
+  a 4 m. Luces bajas sin sombra pegadas a los bordes iluminan el corte.
+- **Bancos de niebla:** `LocalFogVolume` con emisivo de color (ámbar detrás de Planta y Lift, verde
+  en el hueco y bajo el Sumidero) y bruma oscura alrededor. Necesitan `VolumetricFogDistance` 20000
+  en la niebla global: con el default (6000) la cámara nueva queda fuera y no se ven.
 - **Cámara (`BP_CameraPawn`):** FOV 35° (era 90°), brazo 4800 por defecto, 1900 a 9000 de zoom,
   paso 500, sin colisión del brazo (la roca y los pilares lo acortaban). Vale también para Prototype.
 

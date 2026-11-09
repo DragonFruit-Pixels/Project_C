@@ -19,7 +19,21 @@ def reset():
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
 
+def box_uv(obj, tile=4.0):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    uv = bm.loops.layers.uv.new("UVMap")
+    for f in bm.faces:
+        ax = max(range(3), key=lambda i: abs(f.normal[i]))
+        a, b = [i for i in range(3) if i != ax]
+        for l in f.loops:
+            l[uv].uv = (l.vert.co[a] / tile, l.vert.co[b] / tile)
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
 def export(obj, name):
+    box_uv(obj)
     obj.data.materials.clear()
     obj.data.materials.append(bpy.data.materials.new("M_Dio_Rock"))
     bpy.ops.object.select_all(action="DESELECT")
