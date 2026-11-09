@@ -88,14 +88,3 @@ for name, cells in SECTIONS.items():
     rockify(obj, TOP, 0.55, 0.45, 1 if "Plant" in name else 2)
     assert abs(max(v.co.z for v in obj.data.vertices) - TOP) < 0.01, name + " top drifted"
     export(obj, name)
-
-reset()
-bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=2.0, depth=30.0, location=(0, 0, 15.0))
-obj = bpy.context.object
-bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-remesh(obj, 0.4, 0.2)
-rockify(obj, None, 0.9, 0.35, 3)
-for v in obj.data.vertices:
-    v.co.x *= 1.0 + 0.25 * math.sin(v.co.z * 0.4)
-    v.co.y *= 1.0 + 0.25 * math.cos(v.co.z * 0.3)
-export(obj, "SM_Dio_Pillar")

@@ -7,7 +7,11 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 TEXDIR = os.path.join(ROOT, "textures")
 REFS = [("props", "SM_Prop_"), ("fill", "SM_Fill_")]
 RES = 1024
+HIRES = {"CutPlant", "CutSump"}
 RESHAPED = {"ChitinGrowth"}
+NEW = {"CutPlant": ("w", 8.4), "CutSump": ("w", 8.4),
+       "RuinFacade": ("h", 30.0), "RuinPillars": ("h", 14.0), "PipeGantry": ("h", 32.0),
+       "Islet": ("w", 14.0), "RootSpire": ("h", 30.0), "Tanks": ("h", 18.0)}
 EMISSIVE = {"Console", "LabBench", "CoreVat", "Fungus", "SpecimenJar"}
 
 
@@ -27,6 +31,8 @@ def meshes():
 
 
 def ref_for(name):
+    if name in NEW:
+        return os.path.join(ROOT, "kit", "SM_Dio_" + name + ".fbx"), "SM_Dio_"
     for folder, prefix in REFS:
         path = os.path.join(ROOT, folder, prefix + name + ".fbx")
         if os.path.exists(path):
@@ -80,10 +86,11 @@ done = []
 for f in sorted(f for f in os.listdir(SRC) if f.endswith(".glb")):
     name = f[:-4]
     ref, prefix = ref_for(name)
-    reset()
-    bpy.ops.import_scene.fbx(filepath=ref)
-    rlo, rhi = bounds(meshes())
-    rd = rhi - rlo
+    if name not in NEW:
+        reset()
+        bpy.ops.import_scene.fbx(filepath=ref)
+        rlo, rhi = bounds(meshes())
+        rd = rhi - rlo
 
     reset()
     bpy.ops.import_scene.gltf(filepath=os.path.join(SRC, f))
@@ -97,7 +104,12 @@ for f in sorted(f for f in os.listdir(SRC) if f.endswith(".glb")):
     lo, hi = bounds(ms)
     d = hi - lo
     assert max(d) > 0, name + " has no geometry"
-    k = rd.z / d.z if name in RESHAPED else max(rd) / max(d)
+    if name in NEW:
+        axis, size = NEW[name]
+        k = size / (d.z if axis == "h" else max(d.x, d.y))
+        rd = d * k
+    else:
+        k = rd.z / d.z if name in RESHAPED else max(rd) / max(d)
     pivot = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))
     for o in ms:
         o.data.transform(Matrix.Scale(k, 4) @ Matrix.Translation(-pivot))
@@ -108,6 +120,7 @@ for f in sorted(f for f in os.listdir(SRC) if f.endswith(".glb")):
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.export_scene.fbx(filepath=ref, use_selection=True, apply_unit_scale=True,
                              mesh_smooth_type="FACE", object_types={"MESH"}, path_mode="STRIP")
+    RES = 2048 if name in HIRES else 1024
     maps = textures(name)
     print("MAPS", name, prefix, ",".join(f"{k}={v}" for k, v in maps.items()))
     done.append(os.path.join(SRC, f))

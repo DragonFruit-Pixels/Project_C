@@ -11,7 +11,8 @@ MASTER = {"refPath": "/Game/Project_C/Map/Materials/M_Prop.M_Prop"}
 MATDIR, TEXOUT = "/Game/Project_C/Map/Materials", "/Game/Project_C/Map/Textures"
 KINDS = {"BC": ("BaseColor", {}), "N": ("Normal", {"CompressionSettings": "TC_Normalmap", "SRGB": False}),
          "RM": ("RM", {"CompressionSettings": "TC_Masks", "SRGB": False}), "E": ("Emissive", {})}
-TARGETS = [("props", "SM_Prop_", "/Game/Project_C/Map/Props"), ("fill", "SM_Fill_", "/Game/Project_C/Map/Fill")]
+TARGETS = [("props", "SM_Prop_", "/Game/Project_C/Map/Props"), ("fill", "SM_Fill_", "/Game/Project_C/Map/Fill"),
+           ("kit", "SM_Dio_", "/Game/Project_C/Map/Kit")]
 
 
 def ref(path):
@@ -30,6 +31,8 @@ def users():
     out = {}
     for prefix in ("Prop_", "Fill_"):
         for a in call(S, "find_actors", name=prefix, tag="", collision_channels=[]) or []:
+            if "StaticMeshActor" not in a["refPath"]:
+                continue
             comp = {"refPath": a["refPath"] + ".StaticMeshComponent0"}
             mesh = json.loads(call(O, "get_properties", instance=comp, properties=["StaticMesh"]))["StaticMesh"]
             out.setdefault(mesh["refPath"], []).append(comp)
@@ -56,6 +59,8 @@ def run(name, placed):
         if not os.path.exists(src):
             continue
         tpath = f"{TEXOUT}/T_{name}_{suffix}"
+        if call(AS, "exists", path=tpath) is True:
+            assert call(AS, "delete", path=tpath) is True, (name, suffix, "delete failed")
         t = call(TT, "import_file", folder_path=TEXOUT, asset_name=f"T_{name}_{suffix}", source_file=src.replace("\\", "/"))
         assert isinstance(t, list) and t, (name, suffix, t)
         if props:

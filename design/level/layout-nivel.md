@@ -160,18 +160,46 @@ conceptos: maqueta recortada del suelo y oscuridad con niebla.
   `assets/3d/kit/diorama.py` con el contorno exacto de las celdas, 4,5 m de roca con borde de abajo
   irregular. Tope a z = -10 cm, debajo del piso.
 - **`assets/3d/kit/diorama_place.py`** arma todo en el nivel abierto (borra antes los actores `Dio_`):
-  bases, caños y raíces en los bordes, 16 siluetas oscuras (pilares `SM_Dio_Pillar`, tanques y caños
-  verticales con `MI_Dio_Silhouette`) lejos y hundidas en la niebla, 8 luces sin sombra bajo las
-  bases (ámbar en Planta, verde en Sumidero) que tiñen la niebla volumétrica, y la
-  `ExponentialHeightFog` oscura con caída fuerte para que la niebla quede abajo.
+  bases, paneles de corte, cuatro piezas 3D de fondo, el cuenco pintado, luces y niebla.
 - **Roca:** `MI_Dio_Rock` (hijo de `M_Prop`) con `T_Dio_Rock_*`, generadas por
   `assets/3d/kit/rock_tex.py` (ruido FFT tileable, estratos y grietas). Las bases llevan UV de caja
   a 4 m. Luces bajas sin sombra pegadas a los bordes iluminan el corte.
-- **Bancos de niebla:** `LocalFogVolume` con emisivo de color (ámbar detrás de Planta y Lift, verde
-  en el hueco y bajo el Sumidero) y bruma oscura alrededor. Necesitan `VolumetricFogDistance` 20000
-  en la niebla global: con el default (6000) la cámara nueva queda fuera y no se ven.
-- **Cámara (`BP_CameraPawn`):** FOV 35° (era 90°), brazo 4800 por defecto, 1900 a 9000 de zoom,
-  paso 500, sin colisión del brazo (la roca y los pilares lo acortaban). Vale también para Prototype.
+- **Roca (textura):** `T_Dio_Rock_*` salen de una imagen de Nano Banana (`textures/rock_cliff_src.png`)
+  recortada y hecha tileable por `rock_tex.py`.
+- **Cortes (Meshy):** recortes del concepto pasados por Nano Banana (imagen limpia del asset) y
+  después por image-to-3D. Cada borde exterior lleva un panel de 8,4 m: `SM_Dio_CutPlant` (caños y
+  raíces) en toda la Planta, y en el Sumidero alternado con `SM_Dio_CutSump` (raíces), espejados uno
+  sí y uno no. Sus texturas van a 2K (`HIRES` en `texnorm.py`): a 1K se veían borrosas en 8,4 m.
+  Una luz cálida baja por borde los ilumina. Tamaños en `texnorm.py` (`NEW`).
+- **Fondo pintado (360°):** `SM_Dio_Backdrop` es un cuenco de 200 m de radio (`backdrop.py`) que
+  rodea el mapa, con `M_Backdrop` (unlit) y `T_Backdrop`: cuatro pinturas de Nano Banana del abismo
+  (`textures/backdrop_src_*.png`) unidas sin costura por `backdrop_tex.py`. Girado 45° para que los
+  caños colgantes con resplandor ámbar queden detrás de la Planta.
+- **Anillo 3D (360°):** 28 piezas repartidas alrededor del mapa, alternando cerca (18 a 30 m del
+  borde) y lejos (35 a 60 m), con el tope entre 15 y 2 m por debajo del piso para que no tapen el
+  mapa desde ningún ángulo de la cámara: `SM_Dio_RuinFacade`, `SM_Dio_Islet` (roca flotante con
+  máquinas), `SM_Dio_RootSpire`, `SM_Dio_Tanks`, `SM_Dio_RuinPillars` y `SM_Dio_PipeGantry`.
+- **Bancos de niebla:** pocas tarjetas grandes (`/Engine/BasicShapes/Plane` con `M_FogCard`:
+  aditivo, unlit, `DepthFade`, textura de humo de Nano Banana suavizada y con caída radial, también
+  de `backdrop_tex.py`): tres ámbar detrás de Planta y Lift y cinco verdes en el hueco entre
+  secciones. Aditivas para que brillen y nunca ensucien; sin sombra.
+  Se descartaron los `LocalFogVolume`: `r.LocalFogVolume.MaxDensityIntoVolumetricFog` (0,01) los
+  deja casi invisibles con la niebla volumétrica activa y la captura del editor no los dibuja.
+- **Luz:** luna direccional fría (`Dio_Moon`, 0,4) y luz de cielo con hemisferio inferior teal
+  (`Dio_Sky`, captura estática: la de tiempo real pide SkyAtmosphere y muestra un aviso) para que las piezas tengan forma; ninguna de las dos ilumina la niebla. Las luces de
+  sala (`assets/3d/kit/lighting.py`) mezclan su color con blanco: 90 % del color en Planta, 60 % en
+  el Sumidero. La `ExponentialHeightFog` es fina (0,006): más densa tapaba el fondo con un velo
+  teal.
+- **Color:** `assets/3d/kit/post.py` pone en el `PostProcessVolume` una LUT (`T_GradeLUT`) que
+  calcula `grade_lut.py` igualando la media y el desvío de color (Lab) de una captura con los del
+  concepto, más viñeta 0,55 y bloom 0,8.
+- **Validación:** captura del nivel al lado del concepto (`concept_mix`) con el mismo encuadre
+  (brazo 105 m, pitch -52), y desde 4 ángulos de órbita para que el entorno cierre a 360°.
+- **Cámara (`BP_CameraPawn`):** FOV 60° e inclinación -45°: con FOV 35° la escena se veía plana,
+  sin profundidad. Brazo 2600 por defecto, 1000 a 6500 de zoom (a 6500 entra el mapa entero), paso
+  300, sin colisión del brazo (la roca y los pilares lo acortaban). Vale también para Prototype.
+  El paneo (WASD) usa la rotación de mundo del brazo, así no depende de cómo aparece el pawn.
+  Laboratorio tiene un `PlayerStart` mirando a +X (el encuadre del concepto).
 
 ## Abierto
 
