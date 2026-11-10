@@ -15,15 +15,12 @@ la partida; abajo el **Sumidero**, donde están el objetivo y el jefe (GDD: supe
 ```
         c0        c1        c2        c3        c4        c5        c6
 r0  [Lockers ][ Decon  ][======= Loading Dock (START) ======][Control ][ Office ]   PLANTA
-r1                 :                                                   [  Lift  ]
+r1                                                                     [  Lift  ]
 r2  [ Batch Chamber    ][Cook lab][Cold st.][Vat room]                 [  Lift  ]   SUMIDERO
 r3  [   (OBJETIVO)     ]          [========== Pipe Gallery ==========][  Lift  ]
-                   :
-             chute: Decon -> Cold store
 ```
 
-La fila r1 es roca: separa las dos secciones. La única conexión física entre ellas es el Lift;
-el chute es un pasaje tipo túnel (arista especial del GDD).
+La fila r1 es roca: separa las dos secciones. La única conexión entre ellas es el Lift.
 
 ## Espacios
 
@@ -31,39 +28,38 @@ el chute es un pasaje tipo túnel (arista especial del GDD).
 |---|---|---|---|---|---|---|
 | 1 | Dock | Loading Dock | 3×1 | Decon, Control | **Inicio**. Entrada desde afuera por el borde de arriba | pallets, barriles químicos, montacargas |
 | 2 | Staff | Lockers | 1×1 | Decon | Callejón sin salida: búsqueda de Salvage | lockers, banco, trajes hazmat |
-| 3 | Staff | Decon | 1×1 | Lockers, Dock, Cold store (chute) | Atajo al sumidero | duchas, rejilla, escotilla del chute |
+| 3 | Staff | Decon | 1×1 | Lockers, Dock | Paso a Lockers | duchas, rejilla |
 | 4 | Oficinas | Control | 1×1 | Dock, Office | Paso | consolas, monitores, silla |
 | 5 | Oficinas | Office | 1×1 | Control, Lift | Paso al ascensor | escritorio, archivero, caja fuerte |
 | 6 | Lift | Freight Lift | 1×3 | Office, Pipe Gallery | Bajada principal. **No se bloquea** | plataforma de jaula, rieles, cadenas |
 | 7 | Gallery | Pipe Gallery | 3×1 | Lift, Cold store, Vat room | **Drain verde** | caños gruesos, válvulas, pasarela de rejilla |
 | 8 | Lab | Vat room | 1×1 | Gallery, Cold store | **Drain amarillo** | cubas de fermentación con masa orgánica |
-| 9 | Lab | Cold store | 1×1 | Gallery, Cook lab, Vat room, Decon (chute) | Nudo del sumidero | racks, bolsas colgadas, salida del chute |
+| 9 | Lab | Cold store | 1×1 | Gallery, Cook lab, Vat room | Nudo del sumidero | racks, bolsas colgadas |
 | 10 | Lab | Cook lab | 1×1 | Cold store, Batch Chamber | Única entrada al objetivo | mesadas, vidriería, mecheros |
 | 11 | Batch | Batch Chamber | 2×2 | Cook lab | **Objetivo, arena del jefe, Drain rojo** | cuba central, crecimientos de quitina |
 
-Puertas: 11 normales + 1 chute = 12 aristas.
+11 puertas = 11 aristas, todas entre salas que comparten pared.
 
 ## Distancias desde el inicio
 
 | | Decon | Control | Lockers | Office | Cold | Lift | Gallery | Cook | Vat | Batch |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Con chute | 1 | 1 | 2 | 2 | 2 | 3 | 3 | 3 | 3 | **4** |
-| Chute bloqueado | 1 | 1 | 2 | 2 | 5 | 3 | 4 | 6 | 5 | **7** |
+| Movimientos | 1 | 1 | 2 | 2 | 5 | 3 | 4 | 6 | 5 | **7** |
 
-El chute es la decisión del mapa: llegás al objetivo en 4 en vez de 7, pero es bloqueable. Si la
-misión lo cierra, toca dar la vuelta por el Lift.
+Había un chute Decon → Cold store que acortaba el objetivo a 4, pero cruzaba la roca sin nada que
+lo mostrara y se sacó. Para bajar hay que pasar por el Lift.
 
 ## Chequeo contra los invariantes F8 del GDD
 
 1. Simetría y 2. sin bucles: todas las aristas son de ida y vuelta.
-3. Grado entre 1 y 6: el máximo es Cold store con 4.
+3. Grado entre 1 y 6: el máximo es 3 (Cold store y Pipe Gallery).
 4. Salas de 1 a 3 espacios: Dock 1, Staff 2, Oficinas 2, Lift 1, Gallery 1, Lab 3, Batch 1.
 5. 3 Drains en espacios distintos: Gallery, Vat room y Batch Chamber, todos a distancia ≥ 3 del inicio
    (el mínimo de 3 es la propuesta del GDD, no está en el manual).
 6. Conectividad: todo espacio es alcanzable.
 7. Objetivo siempre alcanzable: **Cook lab ↔ Batch Chamber y el Lift no pueden ser bloqueables.**
-   Con esas dos aristas libres, cerrar el chute nunca deja el objetivo afuera.
-8. Tokens de túnel: el chute es un solo par.
+   Son el único camino al objetivo.
+8. Tokens de túnel: ninguno.
 
 ## Kit modular y salas en UE
 
@@ -206,7 +202,7 @@ conceptos: maqueta recortada del suelo y oscuridad con niebla.
 
 `assets/3d/kit/units_place.py` arma el tablero de Laboratorio, en la carpeta `Board` del outliner:
 
-- **Casillas:** 11 `BP_Space` (`Space_<espacio>`), una por espacio, con las 12 conexiones del plano
+- **Casillas:** 11 `BP_Space` (`Space_<espacio>`), una por espacio, con las 11 conexiones del plano
   en `Neighbours`. Cada una está donde no choca con los props (las cubas de Vat room y Batch
   Chamber ocupan el centro) y rotada 90°: así el tile de 816 × 646 entra en la celda y la fila de
   ocupantes corre a lo ancho de la sala.

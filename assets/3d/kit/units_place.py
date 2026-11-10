@@ -15,7 +15,7 @@ SPACE_YAW = 90
 SPACES = {"Dock": (0, 7850), "Lockers": (0, 6050), "Decon": (0, 6800), "Control": (-25, 10000),
           "Office": (0, 10800), "Lift": (-1600, 10800), "Gallery": (-2400, 9200), "Vat": (-1775, 9150),
           "Cold": (-1575, 8400), "Cook": (-1600, 7600), "Batch": (-1700, 6250)}
-EDGES = [("Dock", "Decon"), ("Dock", "Control"), ("Lockers", "Decon"), ("Decon", "Cold"), ("Control", "Office"),
+EDGES = [("Dock", "Decon"), ("Dock", "Control"), ("Lockers", "Decon"), ("Control", "Office"),
          ("Office", "Lift"), ("Lift", "Gallery"), ("Gallery", "Cold"), ("Gallery", "Vat"), ("Vat", "Cold"),
          ("Cold", "Cook"), ("Cook", "Batch")]
 HEROES = ("Shiv", "Brace", "Spike", "Maul")
@@ -103,5 +103,5 @@ def run():
     print("BOARD OK", len(spaces), "spaces", len(EDGES), "edges", len(HEROES), "heroes", len(COOKS), "cooks")
 
 
-assert len(EDGES) == 12 and all(a in SPACES and b in SPACES for a, b in EDGES)
+assert len(EDGES) == 11 and all(a in SPACES and b in SPACES for a, b in EDGES)
 run()
