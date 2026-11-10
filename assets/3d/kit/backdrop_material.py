@@ -47,5 +47,6 @@ r = call(M, "import_file", folder_path=KIT, asset_name="SM_Dio_Backdrop", source
 assert isinstance(r, list) and r, r
 for slot in call(M, "get_material_slots", mesh=ref(mesh)):
     assert call(M, "set_material", mesh=ref(mesh), slot_name=slot, material=ref(f"{MAT}/M_Backdrop")) is True
+assert call(M, "remove_collisions", mesh=ref(mesh)) is True
 assert call(AS, "save_assets", asset_paths=[f"{TEX}/T_Backdrop", f"{MAT}/M_Backdrop", mesh]) is True
 print("BACKDROP OK")

@@ -174,7 +174,8 @@ conceptos: maqueta recortada del suelo y oscuridad con niebla.
 - **Fondo pintado (360°):** `SM_Dio_Backdrop` es un cuenco de 200 m de radio (`backdrop.py`) que
   rodea el mapa, con `M_Backdrop` (unlit) y `T_Backdrop`: cuatro pinturas de Nano Banana del abismo
   (`textures/backdrop_src_*.png`) unidas sin costura por `backdrop_tex.py`. Girado 45° para que los
-  caños colgantes con resplandor ámbar queden detrás de la Planta.
+  caños colgantes con resplandor ámbar queden detrás de la Planta. Sin colisión: el hull convexo
+  automático encerraba todo el mapa y en PIE subía a las unidades hasta su tope (z 2000).
 - **Anillo 3D (360°):** 28 piezas repartidas alrededor del mapa, alternando cerca (18 a 30 m del
   borde) y lejos (35 a 60 m), con el tope entre 15 y 2 m por debajo del piso para que no tapen el
   mapa desde ningún ángulo de la cámara: `SM_Dio_RuinFacade`, `SM_Dio_Islet` (roca flotante con
