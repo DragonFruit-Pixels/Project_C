@@ -201,6 +201,24 @@ conceptos: maqueta recortada del suelo y oscuridad con niebla.
   El paneo (WASD) usa la rotación de mundo del brazo, así no depende de cómo aparece el pawn.
   Laboratorio tiene un `PlayerStart` mirando a +X (el encuadre del concepto).
 
+## Tablero y unidades
+
+`assets/3d/kit/units_place.py` arma el tablero de Laboratorio, en la carpeta `Board` del outliner:
+
+- **Casillas:** 11 `BP_Space` (`Space_<espacio>`), una por espacio, con las 12 conexiones del plano
+  en `Neighbours`. Cada una está donde no choca con los props (las cubas de Vat room y Batch
+  Chamber ocupan el centro) y rotada 90°: así el tile de 816 × 646 entra en la celda y la fila de
+  ocupantes corre a lo ancho de la sala.
+- **Tile:** usa `M_SpaceOverlay`, translúcido y sin sombra. En reposo no se ve (el piso es el del
+  diorama) y con `ApplyHighlight` se tiñe con los mismos parámetros que `M_Space`. El click no
+  depende de que se vea: el trace es por el canal de objetos `Space`.
+- **Unidades:** Shiv, Brace, Spike y Maul en el Loading Dock, que es el inicio. 3 Cooks en el
+  Sumidero: Cold store, Pipe Gallery y Batch Chamber. Así la Planta está tranquila al empezar y
+  el peligro está abajo. Cada unidad toma su fila de `DT_Units` del default de su clase y engancha
+  su casilla al empezar la partida (`FindStartSpace`, a menos de 300).
+- En las salas de varias celdas (Dock, Lift, Gallery, Batch) el tile cubre una sola celda: solo
+  esa se puede clickear.
+
 ## Abierto
 
 - Las 3 Drains quedaron en el Sumidero: la Planta es tranquila al principio y la presión crece al
