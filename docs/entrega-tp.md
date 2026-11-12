@@ -18,7 +18,7 @@ La partida avanza por **rondas**. En cada ronda, los 4 héroes juegan una vez ca
 
 - **El orden lo elegís vos.** Al empezar un turno elegís cualquier héroe que todavía no haya jugado en la ronda. No hay un orden fijo como en el juego de mesa. Ese orden ("sentido horario") tiene sentido en una mesa con varios jugadores, pero en un juego de un jugador no aporta nada.
 - **Cada turno tiene 3 acciones.** El turno termina cuando se gastan o cuando pasás con **Espacio**.
-- **Reckoning:** al terminar cada turno, los enemigos que están en la misma casilla que el héroe que acaba de jugar lo atacan. Quedarse al lado de un enemigo tiene costo.
+- **Reckoning:** al terminar cada turno, los enemigos que están en la misma casilla que el héroe que acaba de jugar lo atacan, de a uno y cada uno con su propia tirada. Con dos enemigos en la casilla son dos tiradas. Quedarse al lado de un enemigo tiene costo.
 - Cuando jugaron los 4, el contador pasa a la ronda siguiente y todos vuelven a estar disponibles. La partida arranca en la **Ronda 1**.
 
 ### Acciones
@@ -31,11 +31,12 @@ La partida avanza por **rondas**. En cada ronda, los 4 héroes juegan una vez ca
 Seleccionar un héroe no muestra nada en el tablero. Las casillas se iluminan recién al tocar **MOVERSE**, así no se confunde "estoy mirando a este héroe" con "voy a moverlo". Un click en una casilla sin haber tocado Moverse no hace nada y no te hace perder la selección.
 
 ### Vida, daño y fin de partida
-- Los héroes tienen **2** de vida y los enemigos **3**. Cada ataque resta el daño del atacante (1 en héroes y enemigos).
+- Los héroes tienen **2** de vida y los enemigos **3**.
+- Cada ataque es una **tirada de dados**: el atacante tira tantos dados como su `DicePerRoll` (los héroes suman sus dados bonus) y cada acierto resta 1 de vida. Cada cara `Toll` sube 1 el `Ratchet` del héroe que está en la pelea, ataque él o lo ataquen.
 - El enemigo no devuelve el golpe cuando lo atacás: solo hace daño en el Reckoning, al terminar el turno.
 - Una figura que llega a 0 muere: sale del tablero y ya no puede actuar ni ser elegida.
 - **Victoria:** no queda ningún enemigo vivo.
-- **Derrota:** muere cualquiera de los héroes.
+- **Derrota:** mueren todos los héroes.
 
 ### HUD
 La interfaz muestra todo lo necesario para decidir sin tener que recordar nada:
@@ -58,7 +59,7 @@ Cada clase del framework de Unreal tiene un rol claro. Las reglas no están mezc
 
 | Clase | Qué hace | Funciones principales |
 |---|---|---|
-| `BP_GameMode` | **Las reglas.** Decide si una figura puede actuar, gasta acciones, valida y ejecuta movimientos y ataques, resuelve el Reckoning, cierra turnos y rondas y detecta victoria o derrota. | `TryActivateFigure`, `SpendAction`, `TryMoveFigure`, `TryAttack`, `EndTurn`, `ResolveReckoning`, `AdvanceTurn`, `NotifyDeath`, `CheckVictory`, `EndGame` |
+| `BP_GameMode` | **Las reglas.** Decide si una figura puede actuar, gasta acciones, valida y ejecuta movimientos y ataques, resuelve el Reckoning, cierra turnos y rondas y detecta victoria o derrota. | `TryActivateFigure`, `SpendAction`, `TryMoveFigure`, `TryAttack`, `EndTurn`, `BuildReckoningQueue`, `ReckonStep`, `RollDice`, `AdvanceTurn`, `NotifyDeath`, `CheckVictory`, `EndGame` |
 | `BP_GameState` | **El estado compartido de la partida.** `Round`, `Party` (los héroes registrados), `Retired` (los que ya jugaron esta ronda), `ActiveFigure` y el estado de la partida (`E_GameState`: en juego, victoria o derrota). | `RegisterFigure`, `SetActiveFigure`, `CanActThisRound`, `GetFiguresLeftThisRound`, `RetireActiveFigure`, `BeginRound` |
 | `BP_PlayerState` | **Estadísticas del jugador:** `EnemiesKilled`, `CharactersLost` y casillas recorridas. Las escribe el GameMode. | — |
 | `BP_PlayerController` | **El input y la selección.** Detecta qué hay bajo el mouse, maneja la selección, los resaltados y los modos Moverse y Apuntar, y le pide al GameMode que ejecute las órdenes. No aplica reglas: pregunta. | `HandleSelect`, `TraceSelectableUnderCursor`, `ClickActor`, `SelectActor`, `TryGiveMoveOrder`, `TryGiveAttackOrder`, `BeginMoving`, `BeginAiming`, `HandleEndTurn`, `RefreshHighlights` |
@@ -101,7 +102,7 @@ Este es el recorrido completo desde que apretás Play hasta que empieza la segun
 
 **4. Termina el turno de A.** Pasa solo cuando `ActionsRemaining` llega a 0 (`EndTurnIfOutOfActions`) o cuando apretás Espacio (`HandleEndTurn`). En los dos casos se ejecuta `EndTurn`:
 
-1. `ResolveReckoning`: los enemigos vivos que están en la casilla de A le pegan. Si A muere, es DERROTA y la ronda se corta acá.
+1. **Reckoning:** los enemigos vivos que están en la casilla de A le pegan, uno por vez. Si A muere, los que faltaban no atacan. Si A era el último héroe vivo, es DERROTA y la ronda se corta acá.
 2. `AdvanceTurn` → `RetireActiveFigure`: A pasa a `Retired` y `ActiveFigure` queda vacía. `GetFiguresLeftThisRound` devuelve 3 (B, C y D), así que no empieza una ronda nueva.
 3. `ActionsRemaining` vuelve a 3 para el próximo héroe.
 
@@ -113,7 +114,7 @@ A queda parado donde terminó. Si intentás elegirlo de nuevo, `CanActThisRound`
 
 Los enemigos no tienen turno propio: no se mueven y solo hacen daño en el Reckoning del paso 4.
 
-**7. Cómo se corta una ronda.** En cualquier momento, si muere un héroe, `NotifyDeath` llama a `EndGame(false)` (DERROTA). Si muere el último enemigo, `CheckVictory` llama a `EndGame(true)` (VICTORIA). `EndGame` cambia `E_GameState`, y desde ese momento `SpendAction` y `EndTurn` ya no hacen nada. `OnGameEnded` le avisa al HUD, que muestra la pantalla final.
+**7. Cómo se corta una ronda.** En cualquier momento, si muere el último héroe, `NotifyDeath` llama a `EndGame(false)` (DERROTA). Si muere el último enemigo, `CheckVictory` llama a `EndGame(true)` (VICTORIA). `EndGame` cambia `E_GameState`, y desde ese momento `SpendAction` y `EndTurn` ya no hacen nada. `OnGameEnded` le avisa al HUD, que muestra la pantalla final.
 
 ### Figuras: herencia y una interfaz común
 Todas las figuras salen de una misma base:
@@ -167,14 +168,16 @@ Todas siguen el mismo patrón: el PlayerController **pide** y el GameMode **vali
 
 1. Botón **ATACAR** (`OnClicked(BtnAttack)`) → `BeginAiming`: activa `Aiming`.
 2. Click en un enemigo → `TryGiveAttackOrder`: castea a `BP_Character` y verifica `IsHostile`.
-3. `TryAttack` (GameMode) verifica que el objetivo esté vivo, que sean de bandos distintos (`IsHostile` diferente) y que compartan casilla (`GetCurrentSpace` igual). Después: `SpendAction` → `ApplyDamage` en el objetivo con el `AttackDamage` del atacante → `EndTurnIfOutOfActions`.
+3. `TryAttack` (GameMode) verifica que el objetivo esté vivo, que sean de bandos distintos (`IsHostile` diferente) y que compartan casilla (`GetCurrentSpace` igual). Después: `SpendAction` → `PlayAttack` → `RollDice` con el `DicePerRoll` del atacante y sus `BonusDice` → `ApplyDamage` en el objetivo por los aciertos (`RollHits`) → `AddToll` en el héroe por los `RollTolls` → `EndTurnIfOutOfActions`.
 
 **Terminar turno**
 `IA_EndTurn` (Espacio) → `HandleEndTurn` → `EndTurn` (GameMode), o automáticamente desde `EndTurnIfOutOfActions` cuando `ActionsRemaining` llega a 0. `EndTurn` hace, en orden:
 
-1. `ResolveReckoning`: toma la casilla del héroe activo, recorre sus `Occupants` con un **For Each** y cada ocupante con `IsHostile` y vida mayor a 0 le hace `ApplyDamage` con su `AttackDamage`.
-2. `AdvanceTurn`: `RetireActiveFigure` pasa al héroe a `Retired` y libera `ActiveFigure`. Si `GetFiguresLeftThisRound` queda vacío, `BeginRound` vacía `Retired` y suma 1 a `Round`.
-3. Repone `ActionsRemaining` con `ActionsPerTurn`.
+1. `BuildReckoningQueue`: toma la casilla del héroe activo, recorre sus `Occupants` con un **For Each** y encola en `ReckoningQueue` a cada ocupante con `IsHostile` y vida mayor a 0. Activa `Resolving`.
+2. Mientras `Resolving` está activo, el **Tick** del GameMode descuenta `ReckonTimer` y, al llegar a 0, llama a `ReckonStep`. Cada paso saca un enemigo de la cola y hace `PlayAttack` → `RollDice` con su `DicePerRoll` → `ApplyDamage` al héroe por los aciertos → `AddToll` por los Toll, y espera `ReckoningDelay` hasta el siguiente. Así cada golpe se ve por separado. Si el héroe todavía está caminando, el paso espera 0.2 s; si muere, la cola se corta.
+3. Con la cola vacía, `ReckonStep` apaga `Resolving` y sigue con el resto del cierre.
+4. `AdvanceTurn`: `RetireActiveFigure` pasa al héroe a `Retired` y libera `ActiveFigure`. Si `GetFiguresLeftThisRound` queda vacío, `BeginRound` vacía `Retired` y suma 1 a `Round`.
+5. Repone `ActionsRemaining` con `ActionsPerTurn`.
 
 `SpendAction` y `EndTurn` no hacen nada si la partida ya terminó (`E_GameState` distinto de "en juego").
 
@@ -183,7 +186,7 @@ Todas siguen el mismo patrón: el PlayerController **pide** y el GameMode **vali
 - `Die` le avisa al GameMode con `NotifyDeath` y después hace `Destroy Actor`. Al destruirse, el **EndPlay** de la figura la saca de su casilla (`SetSpace` con casilla vacía) y llama a `OnDespawned`.
 - `NotifyDeath` (GameMode) pregunta `IsHostile`:
   - **enemigo:** suma 1 a `EnemiesKilled` en el PlayerState y llama a `CheckVictory`, que recorre las figuras con `Get All Actors Of Class` y, si no queda ningún hostil vivo, llama a `EndGame(true)`;
-  - **héroe:** suma 1 a `CharactersLost` y llama a `EndGame(false)`.
+  - **héroe:** suma 1 a `CharactersLost` y, si `AnyHeroAlive` da falso, llama a `EndGame(false)`.
 - `EndGame` guarda victoria o derrota en `E_GameState` del GameState y dispara `OnGameEnded`. El HUD lo escucha y `ShowEnding` muestra **VICTORIA** o **DERROTA** con el panel en verde o en rojo.
 
 ### HUD
