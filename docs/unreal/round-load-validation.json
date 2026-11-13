@@ -1,0 +1,140 @@
+{
+  "Passed": true,
+  "Issues": [],
+  "MapName": "/Game/Project_C/Levels/Laboratorio",
+  "NextRound": 2,
+  "Figures": [
+    {
+      "FigureId": "LAB:BP_Brace_C_5",
+      "Health": 2,
+      "SpaceId": "LAB:BP_Space_C_61",
+      "SeatIndex": 1,
+      "MaxHealth": 4,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 1,
+      "BonusDice": 0
+    },
+    {
+      "FigureId": "LAB:BP_Cook_C_2",
+      "Health": 3,
+      "SpaceId": "LAB:BP_Space_C_65",
+      "SeatIndex": 0,
+      "MaxHealth": 3,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 0,
+      "BonusDice": 0
+    },
+    {
+      "FigureId": "LAB:BP_Cook_C_0",
+      "Health": 3,
+      "SpaceId": "LAB:BP_Space_C_63",
+      "SeatIndex": 0,
+      "MaxHealth": 3,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 0,
+      "BonusDice": 0
+    },
+    {
+      "FigureId": "LAB:BP_Cook_C_1",
+      "Health": 3,
+      "SpaceId": "LAB:BP_Space_C_61",
+      "SeatIndex": 0,
+      "MaxHealth": 3,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 0,
+      "BonusDice": 0
+    },
+    {
+      "FigureId": "LAB:BP_Maul_C_5",
+      "Health": 4,
+      "SpaceId": "LAB:BP_Space_C_58",
+      "SeatIndex": 0,
+      "MaxHealth": 4,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 0,
+      "BonusDice": 0
+    },
+    {
+      "FigureId": "LAB:BP_Shiv_C_5",
+      "Health": 4,
+      "SpaceId": "LAB:BP_Space_C_60",
+      "SeatIndex": 0,
+      "MaxHealth": 4,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 0,
+      "BonusDice": 0
+    },
+    {
+      "FigureId": "LAB:BP_Spike_C_5",
+      "Health": 4,
+      "SpaceId": "LAB:BP_Space_C_57",
+      "SeatIndex": 0,
+      "MaxHealth": 4,
+      "ActionsPerTurn": 3,
+      "SpacesPerMove": 3,
+      "DicePerRoll": 3,
+      "Ratchet": 0,
+      "BonusDice": 0
+    }
+  ],
+  "PartyCount": 4,
+  "RetiredCount": 0,
+  "ActiveFigure": "None",
+  "GameMode": {
+    "saveRequested": false,
+    "actionsRemaining": 0,
+    "resolving": false,
+    "chasePhase": false,
+    "loadSpaceMap": {},
+    "loadFigureMap": {}
+  },
+  "PlayerState": {
+    "enemiesKilled": 0,
+    "charactersLost": 0,
+    "spacesMoved": 9
+  },
+  "SaveSHA256": "A8AF2C47D4800C59C05A7E963AA9F83BDE4642926ED8E141A91E529C5EEB1BAE",
+  "SpecificTests": {
+    "RemovedHeroAndEnemy": {
+      "Source": "in-memory copy of the real SaveGame",
+      "FigureCount": 5,
+      "PartyCount": 3,
+      "EnemiesKilled": 1,
+      "CharactersLost": 1,
+      "EnemyControllers": 2,
+      "Passed": true
+    },
+    "MissingEnemyRecord": {
+      "Source": "in-memory copy with TEST:DYNAMIC_COOK",
+      "FigureCount": 8,
+      "Health": 2,
+      "SpaceId": "LAB:BP_Space_C_55",
+      "SeatIndex": 0,
+      "AIController": "BP_EnemyAIController_C_3",
+      "BrainComponentValid": true,
+      "RepeatedLoadWithoutDuplicates": true,
+      "Passed": true
+    },
+    "DuplicateIDsRejectedBeforeTravel": true,
+    "IncompatibleBoardBlockedWithoutSaving": true,
+    "RetryAfterFailurePassed": true,
+    "SafeRestartWithoutSavingPassed": true,
+    "NextRoundActivationActions": 3
+  },
+  "Limitations": [
+    "Death/absent-record and missing-enemy restoration tested using in-memory snapshots; full gameplay kill/spawn -> save -> load sequence not exercised.",
+    "Keyboard chord bindings verified; runtime load function exercised through Unreal console/MCP."
+  ]
+}
