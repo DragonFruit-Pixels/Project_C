@@ -134,3 +134,16 @@ Consultar round-load-validation.json.
 
 Alcance: las pruebas de ausentes y enemigo adicional ejercitan la restauración con copias del SaveGame en memoria. No sustituyen una prueba completa de matar/generar durante juego -> guardar en disco -> cargar, ni validan un generador de oleadas no localizado. La IA se difiere mediante el flujo comprobado de OnPossess; no se persistieron acciones intermedias.
 
+
+## Integración en demo (14/11)
+
+El merge de demo dentro de demo-pao dejó seis assets con marcadores de conflicto en lugar del asset. Las funciones de esta etapa se copiaron nodo por nodo desde 3ba101f sobre las versiones actuales de demo; el texto de cada función quedó igual al original.
+
+Cambios respecto de lo descripto arriba:
+- Se guarda al cerrar cada ronda: AdvanceTurn pone SaveRequested en true antes de SaveRoundCheckpoint. F5 ya no hace falta.
+- Al terminar la restauración, FinishRoundRestore llama SpawnRoundEnemies. El guardado se toma antes de los spawns de la ronda siguiente, así que sin esta llamada esos enemigos no aparecían.
+- El menú principal tiene CONTINUE (el antiguo OPTIONS, que no hacía nada): si existe RoundCheckpoint llama RequestLoadGame.
+- No se portaron las teclas de depuración F5, F6 ni Ctrl + Alt + Shift + L/R. Las funciones Debug_* siguen en BP_PlayerController.
+- Los SaveId de Laboratorio son LAB:<nombre del actor>.
+
+Prueba: cerrar la ronda 1 en Laboratorio, salir, abrir MainMenu y tocar CONTINUE. Resultado: [RoundLoad] EXITO, ronda 2, cuatro héroes en su celda, y se puede activar un héroe.
