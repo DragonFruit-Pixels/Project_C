@@ -170,21 +170,25 @@ r3  [   (OBJETIVO)     ]          [========== Pipe Gallery ==========][  Lift  ]
 | **Enhanced Input** | Contextos `IMC_Game` (`IA_Select`, `IA_Cancel`, `IA_Confirm`, `IA_EndTurn`, `IA_Pause`) e `IMC_Camera` (`IA_CameraPan`, `IA_CameraZoom`, `IA_CameraOrbit`). |
 | **IA con Behaviour Tree** | `BT_Enemy` es el árbol base y maneja el turno del enemigo. Cada tipo de enemigo aporta su subárbol de decisión (`BT_Decide_Broodling`), inyectado en el slot del Gameplay Tag `AI.Decide` con *Run Behavior Dynamic*. Sumar un enemigo nuevo es sumar un subárbol. |
 | **Data Tables** | `DT_Units` define vida, acciones, movimiento, dados y Ratchet de cada unidad. El balance se ajusta sin tocar Blueprints. |
-| **Animación** | `ABP_Character` con State Machine (idle, caminar, atacar, recibir daño, morir) para los héroes. El Broodling y la Abomination tienen sus propias animaciones de idle, caminar, ataque, daño y muerte. |
-| **UI (UMG)** | `WBP_GameHUD`: ronda, héroes que faltan jugar, acciones restantes, vida de la figura activa y del enemigo apuntado, tirada de dados, confirmación de ataque, mensajes de "no se puede", pausa y pantalla final de VICTORY o DEFEAT. Además está el menú principal. |
+| **Animación** | `ABP_Character` con State Machine (idle, caminar, morir) para todas las figuras: héroes, Broodling y Abomination. Cada figura le pasa sus propias animaciones. El ataque y el daño recibido se reproducen como montage en el `DefaultSlot`, sincronizados con el momento del golpe. |
+| **UI (UMG)** | `WBP_GameHUD`: ronda, héroes que faltan jugar, acciones restantes, vida de la figura activa y del enemigo apuntado, tirada de dados, confirmación de ataque, mensajes de "no se puede", pausa y pantalla final de VICTORY o DEFEAT con las estadísticas. Además está el menú principal. |
 | **Comunicación entre Blueprints** | La interfaz `BPI_Selectable` permite seleccionar y resaltar figuras y salas sin casts. Los Event Dispatchers `OnActiveFigureChanged` (GameState) y `OnGameEnded` (GameMode) se suscriben al aparecer y se desuscriben al desaparecer. Las referencias tipadas están encapsuladas en getters. |
 | **Herencia y polimorfismo** | Todas las figuras salen de `BP_Character`. `BP_Player` agrupa a los cuatro héroes; `BP_Enemy` es la base abstracta de `BP_Broodling` y `BP_Boss`. `IsHostile` distingue bandos sin castear. |
-| **C++** | `UGraphSubsystem` (World Subsystem) guarda el grafo de salas y resuelve las salas alcanzables, el camino más corto y las distancias. Es la parte de cálculo pesado y tiene tests automáticos. |
-| **VFX y sonido** | Niagara `NS_Hit` y `NS_Death`. Sonidos de ataque por héroe, pasos, golpe, daño, muerte, Toll, interfaz, ambiente y música. |
-| **Optimización** | Nanite en la escenografía, que concentra el 90 % de los triángulos. Una sola luz con sombra por sala: las luces de relleno no proyectan sombra y tienen radio acotado. Lumen para la iluminación global. |
-| **Save Game** | Guardado y carga por ronda (aporte de Paola, rama `demo-pao`). |
-| **Menú principal** | Inicio de partida y salida (aporte de Gaspar). |
+| **C++** | `UGraphSubsystem` (World Subsystem) guarda el grafo de salas y resuelve las salas alcanzables, el camino más corto y las distancias. Es la parte de cálculo pesado y tiene tests automáticos. `UScalabilitySubsystem` corre el benchmark de hardware en el primer arranque y aplica la calidad gráfica que corresponde. |
+| **VFX y sonido** | Niagara `NS_Hit` y `NS_Death`, más `NS_Spores` y `NS_Drips` en el ambiente. Sonidos de ataque por héroe, pasos, golpe, daño, muerte, Toll, interfaz y ambiente. La música cambia según la ronda (calma, combate, jefe) con fundido. |
+| **Optimización** | Nanite en la escenografía, que concentra el 90 % de los triángulos. Una sola luz con sombra por sala: las luces de relleno no proyectan sombra y tienen radio acotado. Lumen para la iluminación global. Calidad gráfica según el hardware, texturas de tamaño máximo reducido, sin motion blur y el HUD se recalcula 10 veces por segundo en lugar de en cada frame. |
+| **Save Game** | Al cerrar cada ronda se guarda en el slot `RoundCheckpoint`: la ronda, las estadísticas y cada figura con su sala, vida y Ratchet. *Continue* en el menú lo carga: `BP_GameInstance` abre el nivel, el GameMode reconstruye las figuras y valida que todo coincida antes de seguir (aporte de Paola). |
+| **Menú principal** | *Start*, *Continue* (carga el guardado) y *Exit*. En partida, la tecla de pausa detiene el juego (aporte de Gaspar). |
+| **Blueprints legibles** | Los 35 Blueprints tienen comentarios por sección y las funciones largas están partidas en funciones chicas, una por idea. |
+| **Build** | Build de Windows en configuración *Shipping*, con los mapas `MainMenu` y `Laboratorio` en la lista de mapas a empaquetar. |
 
 ## 9. Pulido audiovisual
 
 - **Dados en pantalla** en cada tirada: se ven las caras de acierto, fallo y Toll antes de aplicar el daño.
 - **Impacto de golpe:** un temblor corto de cámara, un *hit-stop* de una fracción de segundo y números de daño flotantes.
 - **Momento de spawn:** la cápsula se abre con VFX y sonido, la cámara va hacia ella y aparece un cartel con la ronda.
+- **Turnos legibles:** banners de turno, una nota al empezar cada ronda, el camino de movimiento punteado y las salas alcanzables resaltadas.
+- **Muerte y selección:** las figuras se disuelven al morir y la figura seleccionada tiene contorno.
 - **Entrada del jefe:** una cinemática hecha con **Sequencer** cuando la Abomination emerge del tanque de Batch.
 
 ## 10. Referencias
