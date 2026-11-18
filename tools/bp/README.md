@@ -14,6 +14,7 @@ Scripts para editar Blueprints desde afuera del editor. Necesitan el editor abie
 | `mkarray.py` | `fill(grafo, nodo, getters)`: completa un Make Array de un solo elemento, porque el DSL crea `MakeArray` con un solo pin. |
 | `gopen.py <BP> <Función>` | Abre la función en el editor, pasando a la pestaña Graph si es un widget, y guarda el ref del panel en `panel.txt` para `gsee.py`. |
 | `prune.py <grafo>` | Solo borra los nodos muertos. |
+| `hug.py <grafo>` | Pega cada nodo puro a la izquierda del pin que alimenta, sin mover nodos con exec. |
 | `surgery.py` | Clase `Graph` para cirugía de nodos: borrar, crear y conectar por nombre de pin. |
 | `gshot.py <BP> <Función> out.png` | Abre una función en el editor y saca una captura. |
 | `gsee.py out.png` | Encuadra el grafo abierto (Home) y captura el panel. |
