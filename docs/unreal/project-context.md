@@ -84,7 +84,8 @@ Content/
     Core/              base GameMode, GameState, PlayerController, Character
     Characters/        one folder per character, with its own Meshes/Materials/Animations
     Placeables/        designer-tunable actors
-    Maps/              every level, without exception
+    Levels/            every playable level (.umap)
+    Map/               what the levels are built from: BP_Space, M_Space, MI_Floor_*
     MaterialLibrary/   master materials, functions, shared utility textures
       Debug/           strippable before shipping
     Input/             IA_, IMC_
@@ -93,6 +94,20 @@ Content/
   Developers/
     Sebastian/         sandbox; nothing here may be depended on
 ```
+
+### Unit data (`DT_Units`)
+
+Every per-unit number lives in one Data Table, `Data/DT_Units` (row struct `Data/F_UnitStats`):
+health, actions per turn, spaces per move, dice per roll, Ratchet max and thresholds. Art
+(animations, weapon mesh) stays on each Blueprint, because it is bound to that mesh's skeleton.
+
+- **Row name = the Blueprint's suffix**, PascalCase: `BP_Shiv` → `Shiv`, `BP_Enemy` → `Cook`.
+- **No row name is ever typed.** `BP_Character.UnitRow` is a Data Table Row Handle whose table is
+  fixed on the parent; each child Blueprint picks its row from the dropdown.
+- `BP_Character.LoadStats` reads the row on BeginPlay. A missing row prints
+  `Unit row not found: <name>` in red, so a renamed row fails on the first Play, not silently.
+- Renaming a row means re-picking it in that Blueprint's `UnitRow`. Adding a column means adding
+  it to `F_UnitStats` and copying it in `LoadStats`.
 
 Full prefix tables live in `/ue-naming-conventions`. Recorded here is only what this project
 decided or does differently.
@@ -128,9 +143,7 @@ Nothing is in use — there is no gameplay code or content yet.
 
 - **Target types built**: none yet — never packaged
 - **Configurations used**: Development Editor only
-- **Game Default Map**: `/Engine/Maps/Templates/OpenWorld` — ⚠️ **this points at an *engine*
-  map, not a project map.** It is the template default and the classic cause of a black or
-  broken packaged build. Fix it in Project Settings once the first project map exists
+- **Game Default Map**: `/Game/Project_C/Levels/Level`
 - **Packaging**: not configured
 - **CI**: none
 - **Platform SDKs installed**: Windows only

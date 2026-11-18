@@ -1,0 +1,118 @@
+﻿{
+    "CheckedAtUtc":  "2026-11-13T03:42:59.7843786Z",
+    "SavePath":  "C:\\Users\\Usuario\\Documents\\GitHub\\Project_C\\Saved\\SaveGames\\RoundCheckpoint.sav",
+    "SHA256":  "06E07E158D56C6CB7C655AFA5A0625198DF6234828713DEE1A5C4BDC53FBDA97",
+    "Metadata":  {
+                     "SaveVersion":  1,
+                     "MapName":  "/Game/Project_C/Levels/Laboratorio",
+                     "NextRound":  2,
+                     "EnemiesKilled":  0,
+                     "CharactersLost":  0,
+                     "SpacesMoved":  1
+                 },
+    "Figures":  [
+                    {
+                        "FigureId":  "LAB:BP_Brace_C_5",
+                        "ClassPath":  "/Game/Project_C/Characters/Player/BP_Brace.BP_Brace_C",
+                        "UnitRowName":  "Brace",
+                        "SpaceId":  "LAB:BP_Space_C_57",
+                        "SeatIndex":  0,
+                        "Health":  4,
+                        "MaxHealth":  4,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    },
+                    {
+                        "FigureId":  "LAB:BP_Cook_C_1",
+                        "ClassPath":  "/Game/Project_C/Characters/Enemies/BP_Cook.BP_Cook_C",
+                        "UnitRowName":  "Cook",
+                        "SpaceId":  "LAB:BP_Space_C_61",
+                        "SeatIndex":  0,
+                        "Health":  3,
+                        "MaxHealth":  3,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    },
+                    {
+                        "FigureId":  "LAB:BP_Cook_C_2",
+                        "ClassPath":  "/Game/Project_C/Characters/Enemies/BP_Cook.BP_Cook_C",
+                        "UnitRowName":  "Cook",
+                        "SpaceId":  "LAB:BP_Space_C_65",
+                        "SeatIndex":  0,
+                        "Health":  3,
+                        "MaxHealth":  3,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    },
+                    {
+                        "FigureId":  "LAB:BP_Cook_C_0",
+                        "ClassPath":  "/Game/Project_C/Characters/Enemies/BP_Cook.BP_Cook_C",
+                        "UnitRowName":  "Cook",
+                        "SpaceId":  "LAB:BP_Space_C_63",
+                        "SeatIndex":  0,
+                        "Health":  3,
+                        "MaxHealth":  3,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    },
+                    {
+                        "FigureId":  "LAB:BP_Maul_C_5",
+                        "ClassPath":  "/Game/Project_C/Characters/Player/BP_Maul.BP_Maul_C",
+                        "UnitRowName":  "Maul",
+                        "SpaceId":  "LAB:BP_Space_C_55",
+                        "SeatIndex":  1,
+                        "Health":  4,
+                        "MaxHealth":  4,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    },
+                    {
+                        "FigureId":  "LAB:BP_Shiv_C_5",
+                        "ClassPath":  "/Game/Project_C/Characters/Player/BP_Shiv.BP_Shiv_C",
+                        "UnitRowName":  "Shiv",
+                        "SpaceId":  "LAB:BP_Space_C_55",
+                        "SeatIndex":  2,
+                        "Health":  4,
+                        "MaxHealth":  4,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    },
+                    {
+                        "FigureId":  "LAB:BP_Spike_C_5",
+                        "ClassPath":  "/Game/Project_C/Characters/Player/BP_Spike.BP_Spike_C",
+                        "UnitRowName":  "Spike",
+                        "SpaceId":  "LAB:BP_Space_C_55",
+                        "SeatIndex":  3,
+                        "Health":  4,
+                        "MaxHealth":  4,
+                        "ActionsPerTurn":  3,
+                        "SpacesPerMove":  3,
+                        "DicePerRoll":  3,
+                        "Ratchet":  0,
+                        "BonusDice":  0
+                    }
+                ],
+    "SpaceIdsChecked":  11,
+    "Passed":  true,
+    "Issues":  [
+
+               ]
+}
