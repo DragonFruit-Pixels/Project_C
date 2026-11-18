@@ -162,7 +162,32 @@ r3  [   (OBJETIVO)     ]          [========== Pipe Gallery ==========][  Lift  ]
 - **Las cápsulas de la ronda 3 están en la planta**, detrás del equipo: castigan al que se queda atrás.
 - **Salas de distinto tamaño.** Los salones largos (Dock, Gallery, Lift) y la arena de Batch reparten a las figuras en todo su espacio. Las salas chicas obligan a amontonarse.
 
-## 8. Implementación en Unreal
+## 8. Controles y flujo de la partida
+
+### Controles
+
+Todo el input pasa por **Enhanced Input**, con dos Input Mapping Context.
+
+| Tecla | Acción | Contexto |
+|---|---|---|
+| Click izquierdo | Elegir héroe, sala de destino u objetivo | `IMC_Game` (`IA_Select`) |
+| Click derecho | Cancelar la acción elegida | `IMC_Game` (`IA_Cancel`) |
+| Enter | Confirmar el ataque | `IMC_Game` (`IA_Confirm`) |
+| Espacio | Terminar el turno | `IMC_Game` (`IA_EndTurn`) |
+| Esc o P | Pausa | `IMC_Game` (`IA_Pause`) |
+| W A S D | Mover la cámara | `IMC_Camera` (`IA_CameraPan`) |
+| Rueda del mouse | Zoom | `IMC_Camera` (`IA_CameraZoom`) |
+| Q y E | Girar la cámara | `IMC_Camera` (`IA_CameraOrbit`) |
+
+### Flujo
+
+1. **Menú principal** (`MainMenu`): *Start* abre el Laboratorio, *Continue* carga la última ronda guardada y *Exit* cierra el juego.
+2. **Partida** (`Laboratorio`): el HUD muestra la ronda, el objetivo, el grupo con la vida de cada héroe, la figura activa con sus acciones y su Ratchet, el enemigo apuntado con su chance de impacto, los dados de cada tirada y los banners de turno.
+3. **Pausa**: Esc o P detienen el juego en cualquier momento.
+4. **Guardado**: al cerrar cada ronda se guarda un checkpoint, que *Continue* retoma.
+5. **Final**: al ganar o perder aparece la pantalla de **VICTORY** o **DEFEAT** con las estadísticas de la partida (enemigos eliminados, héroes perdidos y salas recorridas). Desde ahí se reinicia o se sale al menú.
+
+## 9. Implementación en Unreal
 
 | Requisito | Cómo se resolvió |
 |---|---|
@@ -182,7 +207,7 @@ r3  [   (OBJETIVO)     ]          [========== Pipe Gallery ==========][  Lift  ]
 | **Blueprints legibles** | Los 35 Blueprints tienen comentarios por sección y las funciones largas están partidas en funciones chicas, una por idea. |
 | **Build** | Build de Windows en configuración *Shipping*, con los mapas `MainMenu` y `Laboratorio` en la lista de mapas a empaquetar. |
 
-## 9. Pulido audiovisual
+## 10. Pulido audiovisual
 
 - **Dados en pantalla** en cada tirada: se ven las caras de acierto, fallo y Toll antes de aplicar el daño.
 - **Impacto de golpe:** un temblor corto de cámara, un *hit-stop* de una fracción de segundo y números de daño flotantes.
@@ -191,7 +216,24 @@ r3  [   (OBJETIVO)     ]          [========== Pipe Gallery ==========][  Lift  ]
 - **Muerte y selección:** las figuras se disuelven al morir y la figura seleccionada tiene contorno.
 - **Entrada del jefe:** una cinemática hecha con **Sequencer** cuando la Abomination emerge del tanque de Batch.
 
-## 10. Referencias
+## 11. Criterios de evaluación
+
+| Criterio | Dónde está en el juego |
+|---|---|
+| **Gameplay Framework y gameloop** (3,0) | GameMode con las reglas, GameState con el estado compartido, PlayerState con las estadísticas, PlayerController con el input y un pawn de cámara. Bucle completo: menú → partida → pausa → victoria o derrota. El objetivo está en el HUD desde el inicio. |
+| **Mecánicas, interacción y desafío** (2,0) | Enhanced Input con dos contextos. El desafío son los enemigos con IA, el Reckoning y la persecución. La progresión es por rondas dentro del mismo escenario: la ronda 3 abre spawns detrás del equipo y la ronda 5 trae al jefe. Las rondas 1 y 2 funcionan como zona segura: los enemigos esperan en el sumidero y el jugador aprende a moverse y a planear antes del primer contacto. Se interactúa con el mundo a través de las salas (moverse, quedar bloqueado, atraer enemigos) y de las cápsulas de spawn. |
+| **UI y comunicación al jugador** (1,5) | Menú principal, HUD de estados, pausa, pantalla final con resultado y estadísticas, dados en pantalla, banners de turno, salas alcanzables resaltadas y avisos de "no se puede". |
+| **Estructura del proyecto y buenas prácticas** (1,5) | Una carpeta por rol dentro de `Project_C/`, prefijos de tipo en todos los assets, Blueprints comentados por sección y funciones chicas. Comunicación por interfaz (`BPI_Selectable`), Event Dispatchers y referencias tipadas. Repositorio en GitHub con Git LFS. |
+| **Pulido audiovisual** (1,0) | `ABP_Character` con State Machine, material maestro con flash de daño y disolución, Niagara, sonido por acción, música por ronda y la cinemática del jefe. |
+| **Herramientas avanzadas** (1,0) | Behaviour Tree con subárboles dinámicos y Blackboard, Gameplay Tags, Save Game, Data Tables, Sequencer, C++ (`UGraphSubsystem` con tests y `UScalabilitySubsystem`) y optimización medida. |
+
+## 12. Entrega
+
+- **Repositorio:** https://github.com/DragonFruit-Pixels/Project_C, rama `main`.
+- **Proyecto:** abre con Unreal Engine 5.8. Tiene código C++, así que la primera vez el editor compila el módulo `ProjectC` (hace falta Visual Studio con el workload de C++).
+- **Build:** `Project_C_Shipping.zip`, build de Windows en configuración *Shipping*. Se descomprime y se ejecuta `Project_C.exe`. En el primer arranque mide el hardware y elige la calidad gráfica.
+
+## 13. Referencias
 
 - CMON. *Cthulhu: Death May Die* [juego de mesa]. 2019.
 - Firaxis Games. *XCOM 2* [videojuego]. 2K Games, 2016.
