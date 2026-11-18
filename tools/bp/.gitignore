@@ -1,0 +1,5 @@
+*.sid
+pyout.txt
+plan.json
+__pycache__/
+panel.txt
